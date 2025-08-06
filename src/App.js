@@ -37,8 +37,19 @@ function App() {
       const data = await response.json();
       console.log('API Response:', data);
       
-      if (data.conversations && data.conversations.length > 0) {
-        setConversations(data.conversations);
+      // Handle Lambda response format
+      let parsedData = data;
+      if (data.body) {
+        // Lambda is returning {statusCode, headers, body} format
+        parsedData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
+      }
+      
+      if (parsedData.error) {
+        throw new Error(parsedData.error);
+      }
+      
+      if (parsedData.conversations && parsedData.conversations.length > 0) {
+        setConversations(parsedData.conversations);
       } else {
         throw new Error('No conversations returned from API');
       }
