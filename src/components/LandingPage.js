@@ -17,6 +17,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     maxTokens: 2000,
     reasoningEffort: 'medium',
     customInstructions: '',
+    conversationMode: 'single_ai', // New parameter: 'single_ai' or 'interactive_ai'
     
     // Conversation Structure - All Parameters
     avgTurns: 12,
@@ -179,6 +180,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         model: formData.aiModel,
         temperature: formData.temperature,
         max_tokens: formData.maxTokens,
+        conversation_mode: formData.conversationMode,
         ...(formData.aiModel === 'o3-mini' && { reasoning_effort: formData.reasoningEffort }),
         custom_instructions: formData.customInstructions.trim() || null
       },
@@ -262,6 +264,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         subject: 'mathematics',
         avgTurns: 8, stdTurns: 3, minTurns: 4, maxTurns: 15,
         tutorStudentRatio: 1.5, conversationStarter: 'tutor',
+        aiModel: 'gpt-3.5-turbo', conversationMode: 'single_ai',
         tutorPurposes: { guidance: 0.5, assessment: 0.2, encouragement: 0.2, clarification: 0.1 },
         confusionMean: 2.5, confusionStd: 1.0,
         correctIndependent: 1500, correctAssisted: 400, incorrect: 100
@@ -270,6 +273,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         subject: 'science',
         avgTurns: 15, stdTurns: 6, minTurns: 8, maxTurns: 30,
         tutorStudentRatio: 1.0, conversationStarter: 'tutor',
+        aiModel: 'gpt-4o', conversationMode: 'interactive_ai',
         tutorPurposes: { guidance: 0.3, assessment: 0.4, encouragement: 0.1, clarification: 0.2 },
         confusionMean: 4.0, confusionStd: 1.2,
         correctIndependent: 800, correctAssisted: 600, incorrect: 600
@@ -278,6 +282,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         subject: 'language',
         avgTurns: 12, stdTurns: 4, minTurns: 6, maxTurns: 25,
         tutorStudentRatio: 1.3, conversationStarter: 'tutor',
+        aiModel: 'o3-mini', conversationMode: 'single_ai',
         tutorPurposes: { guidance: 0.45, assessment: 0.25, encouragement: 0.2, clarification: 0.1 },
         confusionMean: 3.2, confusionStd: 1.1,
         correctIndependent: 1200, correctAssisted: 500, incorrect: 300
@@ -310,6 +315,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
           maxTokens: uploadedConfig.ai_settings?.max_tokens || 2000,
           reasoningEffort: uploadedConfig.ai_settings?.reasoning_effort || 'medium',
           customInstructions: uploadedConfig.ai_settings?.custom_instructions || '',
+          conversationMode: uploadedConfig.ai_settings?.conversation_mode || 'single_ai',
           
           // Conversation Structure
           avgTurns: uploadedConfig.conversation_structure?.turns?.mean || 12,
@@ -503,6 +509,72 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
                         ))}
                       </select>
                       <p className="text-xs text-gray-500 mt-1">Lambda uses OPENAI_API_KEY environment variable</p>
+                    </div>
+
+                    {/* Conversation Mode Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Conversation Generation Mode</label>
+                      <div className="space-y-3">
+                        <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                          <input
+                            type="radio"
+                            name="conversationMode"
+                            value="single_ai"
+                            checked={formData.conversationMode === 'single_ai'}
+                            onChange={(e) => handleFormChange('conversationMode', e.target.value)}
+                            className="mt-1 mr-4"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center">
+                              <span className="text-lg mr-2">🎯</span>
+                              <span className="font-semibold text-gray-900">Single AI Mode</span>
+                              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Fast & Controlled</span>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              One AI generates the entire conversation in a single request. Best for predictable, structured conversations with specific vocabulary and concepts.
+                            </div>
+                            <div className="text-xs text-gray-500 mt-2">
+                              ✓ Lower cost • ✓ Faster generation • ✓ Better content control • ✓ Consistent structure
+                            </div>
+                          </div>
+                        </label>
+
+                        <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                          <input
+                            type="radio"
+                            name="conversationMode"
+                            value="interactive_ai"
+                            checked={formData.conversationMode === 'interactive_ai'}
+                            onChange={(e) => handleFormChange('conversationMode', e.target.value)}
+                            className="mt-1 mr-4"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center">
+                              <span className="text-lg mr-2">🤝</span>
+                              <span className="font-semibold text-gray-900">Interactive AI Mode</span>
+                              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Realistic & Dynamic</span>
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              Two separate AIs (tutor and student) have a real conversation turn-by-turn. More realistic interactions with emergent behavior and natural flow.
+                            </div>
+                            <div className="text-xs text-gray-500 mt-2">
+                              ✓ More realistic • ✓ Natural responses • ✓ Emergent learning • ⚠️ Higher cost • ⚠️ Slower generation
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+
+                      {formData.conversationMode === 'interactive_ai' && (
+                        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <div className="flex items-center">
+                            <span className="text-amber-600 mr-2">⚠️</span>
+                            <span className="text-sm font-medium text-amber-800">Interactive Mode Notice</span>
+                          </div>
+                          <div className="text-sm text-amber-700 mt-1">
+                            This mode uses 2x API calls per conversation and takes longer to generate. Cost estimate: ~${(parseFloat(getEstimatedCost()) * 2).toFixed(3)}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
