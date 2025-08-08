@@ -42,7 +42,7 @@ function App() {
     
     for (let i = 0; i < totalWanted; i++) {
       try {
-        console.log(`Generating conversation ${i + 1}/${totalWanted}`);
+        console.log(`Generating conversation ${i + 1}/${totalWanted} using model: ${cfg.ai_settings?.model || 'default'}`);
         setProgress({ current: i + 1, total: totalWanted });
         
         const response = await fetch(`${apiUrl}/generate`, {
@@ -87,6 +87,11 @@ function App() {
         // Add conversations to our collection
         if (parsedData.conversations && Array.isArray(parsedData.conversations) && parsedData.conversations.length > 0) {
           allConversations.push(...parsedData.conversations);
+          
+          // Log AI settings used if available
+          if (parsedData.metadata?.ai_settings_applied) {
+            console.log(`Conversation ${i + 1} AI settings:`, parsedData.metadata.ai_settings_applied);
+          }
         } else {
           console.warn(`Conversation ${i + 1} returned no conversations`);
         }
@@ -114,6 +119,12 @@ function App() {
     try {
       console.log('Starting conversation generation...');
       console.log('Config:', cfg);
+      console.log('AI Settings:', cfg.ai_settings);
+      
+      // Validate AI settings before starting
+      if (!cfg.ai_settings || !cfg.ai_settings.openai_api_key) {
+        throw new Error('AI settings or OpenAI API key is missing from configuration');
+      }
       
       const allConversations = await generateMultipleConversations(cfg);
       
@@ -123,6 +134,7 @@ function App() {
         
         // Log success info
         console.log(`✅ Successfully generated ${allConversations.length} total conversations`);
+        console.log(`Using AI model: ${cfg.ai_settings.model || 'default'}`);
       } else {
         throw new Error('No conversations were generated');
       }
@@ -142,10 +154,14 @@ function App() {
         }
       } else if (err.message.includes('CORS')) {
         userMessage = 'CORS error - the API server may not be configured properly for this domain.';
-      } else if (err.message.includes('OpenAI API key')) {
-        userMessage = 'OpenAI API key is not configured on the server.';
+      } else if (err.message.includes('Invalid or missing OpenAI API key')) {
+        userMessage = 'Your OpenAI API key is invalid or missing. Please check your API key.';
       } else if (err.message.includes('Endpoint request timed out')) {
-        userMessage = 'Request timed out. The API took too long to respond.';
+        userMessage = 'Request timed out. The AI model took too long to respond. Try using a faster model or shorter conversations.';
+      } else if (err.message.includes('insufficient_quota')) {
+        userMessage = 'OpenAI API quota exceeded. Please check your OpenAI account billing.';
+      } else if (err.message.includes('rate_limit_exceeded')) {
+        userMessage = 'OpenAI API rate limit exceeded. Please wait a moment and try again.';
       }
       
       setError(`Failed to generate conversations: ${userMessage}`);
@@ -200,12 +216,17 @@ function App() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">ChatSynth</h1>
               <p className="text-gray-600">Generated Conversations</p>
+              {config?.ai_settings && (
+                <p className="text-sm text-gray-500">
+                  Generated with {config.ai_settings.model} • Temperature: {config.ai_settings.temperature}
+                </p>
+              )}
             </div>
             
             {/* API Status Indicator */}
             <div className="flex items-center space-x-4">
               <button
-                className="px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600 transition-colors"
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                 onClick={() => {
                   setConversations([]);
                   setConfig(null);
@@ -237,6 +258,7 @@ function App() {
             <div className="mt-2 p-2 bg-red-50 rounded text-xs">
               <div>API Endpoint: {apiInfo.url}/generate</div>
               <div>Environment: {apiInfo.environment}</div>
+              <div>AI Model: {config?.ai_settings?.model || 'Unknown'}</div>
               <div>Timestamp: {new Date().toLocaleString()}</div>
             </div>
           </details>
@@ -248,7 +270,7 @@ function App() {
         <div className="mt-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
           <div className="flex items-center mb-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2"></div>
-            <span className="font-medium">Generating conversations with OpenAI...</span>
+            <span className="font-medium">Generating conversations with {config?.ai_settings?.model || 'AI'}...</span>
           </div>
           {progress.total > 0 && (
             <div className="mb-2">
@@ -264,7 +286,7 @@ function App() {
             </div>
           )}
           <div className="text-sm">
-            Using {apiInfo.environment} API • Each conversation takes ~10-15 seconds
+            Using {apiInfo.environment} API • Model: {config?.ai_settings?.model} • ~{config?.ai_settings?.model === 'o3-mini' ? '15-30' : '5-15'} seconds per conversation
           </div>
         </div>
       )}
@@ -273,12 +295,20 @@ function App() {
         <div className="bg-white rounded-lg shadow-sm">
           <div className="p-6 border-b">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">
-                Generated Conversations ({conversations.length})
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Generated Conversations ({conversations.length})
+                </h2>
+                {config?.ai_settings && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    Model: {config.ai_settings.model} • Temperature: {config.ai_settings.temperature} • Max Tokens: {config.ai_settings.max_tokens}
+                    {config.ai_settings.reasoning_effort && ` • Reasoning: ${config.ai_settings.reasoning_effort}`}
+                  </p>
+                )}
+              </div>
               <button
-                className="px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-600 transition-colors shadow-sm"
-                onClick={() => downloadJSON(conversations, `conversations-${Date.now()}.json`)}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors shadow-sm"
+                onClick={() => downloadJSON(conversations, `conversations-${config?.ai_settings?.model || 'ai'}-${Date.now()}.json`)}
               >
                 📥 Download All Conversations
               </button>
@@ -302,7 +332,7 @@ function App() {
         {/* Additional Actions */}
         <div className="mt-6 flex gap-4 justify-center">
           <button
-            className="px-6 py-3 bg-green-500 text-black rounded-lg hover:bg-green-600 transition-colors shadow-sm"
+            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm"
             onClick={() => {
               const conversation = conversations[selectedIndex];
               const text = conversation
@@ -316,7 +346,7 @@ function App() {
           </button>
           
           <button
-            className="px-6 py-3 bg-purple-500 text-black rounded-lg hover:bg-purple-600 transition-colors shadow-sm"
+            className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors shadow-sm"
             onClick={() => {
               // Generate more conversations with the same config
               if (config && !loading) {
@@ -333,7 +363,7 @@ function App() {
         <div className="mt-8 pt-6 border-t text-sm text-gray-500 text-center">
           <div className="flex justify-between items-center">
             <div>
-              ChatSynth v1.0 • Powered by OpenAI o3-mini
+              ChatSynth v2.0 • Powered by {config?.ai_settings?.model || 'OpenAI'}
             </div>
             <div>
               API: {apiInfo.environment}
