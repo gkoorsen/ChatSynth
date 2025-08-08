@@ -24,7 +24,7 @@ function App() {
     }
     
     // Fallback to your AWS API Gateway
-    return 'https://3py567dr52.execute-api.us-east-1.amazonaws.com/prod';
+    return 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod';
   };
 
   const handleGenerate = async (cfg) => {
