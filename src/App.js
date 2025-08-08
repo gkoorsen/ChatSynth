@@ -121,9 +121,12 @@ function App() {
       console.log('Config:', cfg);
       console.log('AI Settings:', cfg.ai_settings);
       
-      // Validate AI settings before starting
-      if (!cfg.ai_settings || !cfg.ai_settings.openai_api_key) {
-        throw new Error('AI settings or OpenAI API key is missing from configuration');
+      // Validate basic configuration structure (no API key validation needed)
+      const requiredFields = ['conversation_structure', 'vocabulary', 'tutor_questions', 'student_utterances'];
+      for (const field of requiredFields) {
+        if (!cfg[field]) {
+          throw new Error(`Missing required configuration field: ${field}`);
+        }
       }
       
       const allConversations = await generateMultipleConversations(cfg);
@@ -134,7 +137,7 @@ function App() {
         
         // Log success info
         console.log(`✅ Successfully generated ${allConversations.length} total conversations`);
-        console.log(`Using AI model: ${cfg.ai_settings.model || 'default'}`);
+        console.log(`Using AI model: ${cfg.ai_settings?.model || 'default'}`);
       } else {
         throw new Error('No conversations were generated');
       }
@@ -154,8 +157,8 @@ function App() {
         }
       } else if (err.message.includes('CORS')) {
         userMessage = 'CORS error - the API server may not be configured properly for this domain.';
-      } else if (err.message.includes('Invalid or missing OpenAI API key')) {
-        userMessage = 'Your OpenAI API key is invalid or missing. Please check your API key.';
+      } else if (err.message.includes('OPENAI_API_KEY environment variable')) {
+        userMessage = 'Lambda function environment variable OPENAI_API_KEY is not configured. Please check AWS Lambda configuration.';
       } else if (err.message.includes('Endpoint request timed out')) {
         userMessage = 'Request timed out. The AI model took too long to respond. Try using a faster model or shorter conversations.';
       } else if (err.message.includes('insufficient_quota')) {
@@ -286,7 +289,7 @@ function App() {
             </div>
           )}
           <div className="text-sm">
-            Using {apiInfo.environment} API • Model: {config?.ai_settings?.model} • ~{config?.ai_settings?.model === 'o3-mini' ? '15-30' : '5-15'} seconds per conversation
+            Using {apiInfo.environment} API • Model: {config?.ai_settings?.model} • Lambda Environment Variables
           </div>
         </div>
       )}
@@ -363,7 +366,7 @@ function App() {
         <div className="mt-8 pt-6 border-t text-sm text-gray-500 text-center">
           <div className="flex justify-between items-center">
             <div>
-              ChatSynth v2.0 • Powered by {config?.ai_settings?.model || 'OpenAI'}
+              ChatSynth v2.0 • Powered by {config?.ai_settings?.model || 'OpenAI'} • Environment Variables
             </div>
             <div>
               API: {apiInfo.environment}
