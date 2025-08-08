@@ -2,8 +2,11 @@
   "name": "ChatSynth",
   "version": "1.0.0",
   "private": true,
+  "description": "",
   "scripts": {
     "start": "react-scripts start",
+    "start:local": "REACT_APP_API_URL=http://localhost:3001 react-scripts start",
+    "start:aws": "REACT_APP_API_URL=https://3py567dr52.execute-api.us-east-1.amazonaws.com/prod react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

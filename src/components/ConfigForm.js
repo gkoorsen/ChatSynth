@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ConfigViewer from './ConfigViewer';
 
 export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, loading }) {
   const defaultConfig = {
@@ -7,6 +8,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
       tutor_student_ratio: 1.18 
     },
     subject: "mathematics", // New field
+    numberOfConversations: 3, // Default to 3 conversations
     vocabulary: { 
       term_frequencies: {
         "concept": 0.15,
@@ -127,6 +129,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
     // Base configuration
     let newConfig = { ...defaultConfig };
     newConfig.subject = subject;
+    newConfig.numberOfConversations = cfg.numberOfConversations || 3;
     
     // Adjust conversation structure based on difficulty
     if (difficulty === 'easy') {
@@ -180,6 +183,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
   const presetConfigs = {
     math_elementary: {
       subject: "mathematics",
+      numberOfConversations: 3,
       conversation_structure: { turns: { mean: 8.0, std: 3.0, min: 4, max: 20 }, tutor_student_ratio: 1.5 },
       vocabulary: { term_frequencies: subjectVocabularies.mathematics.algebra },
       tutor_questions: { purpose_distribution: { "guidance": 0.5, "encouragement": 0.2, "assessment": 0.2, "clarification": 0.1 }},
@@ -187,6 +191,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
     },
     science_physics: {
       subject: "science",
+      numberOfConversations: 3,
       conversation_structure: { turns: { mean: 15.0, std: 6.0, min: 6, max: 40 }, tutor_student_ratio: 1.2 },
       vocabulary: { term_frequencies: subjectVocabularies.science.physics },
       tutor_questions: { purpose_distribution: { "assessment": 0.3, "guidance": 0.4, "clarification": 0.2, "encouragement": 0.1 }},
@@ -194,6 +199,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
     },
     language_grammar: {
       subject: "language",
+      numberOfConversations: 3,
       conversation_structure: { turns: { mean: 10.0, std: 4.0, min: 5, max: 25 }, tutor_student_ratio: 1.4 },
       vocabulary: { term_frequencies: subjectVocabularies.language.grammar },
       tutor_questions: { purpose_distribution: { "guidance": 0.45, "assessment": 0.25, "clarification": 0.2, "encouragement": 0.1 }},
@@ -201,6 +207,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
     },
     history_ancient: {
       subject: "history",
+      numberOfConversations: 3,
       conversation_structure: { turns: { mean: 14.0, std: 5.0, min: 6, max: 35 }, tutor_student_ratio: 1.1 },
       vocabulary: { term_frequencies: subjectVocabularies.history.ancient },
       tutor_questions: { purpose_distribution: { "assessment": 0.35, "guidance": 0.35, "clarification": 0.2, "encouragement": 0.1 }},
@@ -238,33 +245,52 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
         </select>
       </div>
 
+      {/* Number of Conversations */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Number of Conversations to Generate</label>
+        <input
+          type="number"
+          min="1"
+          max="10"
+          className="w-full p-2 border rounded"
+          value={cfg.numberOfConversations || 3}
+          onChange={(e) => setCfg(prev => ({
+            ...prev,
+            numberOfConversations: parseInt(e.target.value) || 3
+          }))}
+        />
+        <p className="text-xs text-gray-600 mt-1">
+          Recommended: 1-5 conversations (more conversations take longer to generate)
+        </p>
+      </div>
+
       {/* Subject-Specific Presets */}
       <div className="mb-4">
         <h3 className="text-lg font-medium mb-2">Subject Presets</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           <button
-            className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+            className="px-3 py-2 bg-blue-600 text-black rounded text-sm hover:bg-blue-700"
             onClick={() => loadPreset('math_elementary')}
             disabled={loading}
           >
             Elementary Math
           </button>
           <button
-            className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+            className="px-3 py-2 bg-green-600 text-black rounded text-sm hover:bg-green-700"
             onClick={() => loadPreset('science_physics')}
             disabled={loading}
           >
             Physics
           </button>
           <button
-            className="px-3 py-2 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
+            className="px-3 py-2 bg-purple-600 text-black rounded text-sm hover:bg-purple-700"
             onClick={() => loadPreset('language_grammar')}
             disabled={loading}
           >
             Grammar/Writing
           </button>
           <button
-            className="px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+            className="px-3 py-2 bg-red-600 text-black rounded text-sm hover:bg-red-700"
             onClick={() => loadPreset('history_ancient')}
             disabled={loading}
           >
@@ -276,7 +302,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
       {/* Custom Configuration Generator */}
       <div className="mb-4">
         <button
-          className="px-4 py-2 bg-indigo-500 text-white rounded"
+          className="px-4 py-2 bg-indigo-500 text-black rounded"
           onClick={() => setShowGenerator(!showGenerator)}
           disabled={loading}
         >
@@ -372,7 +398,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
 
           <div className="mt-4">
             <button
-              className="px-4 py-2 bg-purple-600 text-white rounded"
+              className="px-4 py-2 bg-purple-600 text-black rounded"
               onClick={generateCustomConfig}
               disabled={loading}
             >
@@ -396,26 +422,13 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
 
       {/* Configuration Preview */}
       <div className="mb-4">
-        <h3 className="text-lg font-medium mb-2">Current Configuration Preview</h3>
-        <div className="bg-gray-100 p-3 rounded text-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <strong>Subject:</strong> {cfg.subject || 'mathematics'}
-              <br /><strong>Conversation Length:</strong> {cfg.conversation_structure.turns.mean} turns avg
-              <br /><strong>Range:</strong> {cfg.conversation_structure.turns.min}-{cfg.conversation_structure.turns.max}
-            </div>
-            <div>
-              <strong>Student Confusion:</strong> {cfg.student_utterances.confusion_scores.mean}/5 avg
-              <br /><strong>Vocabulary Terms:</strong> {Object.keys(cfg.vocabulary.term_frequencies || cfg.vocabulary.math_term_frequencies || {}).length} terms
-            </div>
-          </div>
-        </div>
+        <ConfigViewer config={cfg} />
       </div>
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2">
         <button
-          className={`px-4 py-2 text-white rounded ${loading ? 'bg-gray-400' : 'bg-green-600'}`}
+          className={`px-4 py-2 text-black rounded ${loading ? 'bg-gray-400' : 'bg-green-600'}`}
           onClick={() => onSubmit(cfg)}
           disabled={loading}
         >
@@ -423,7 +436,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
         </button>
         
         <button
-          className="px-4 py-2 bg-blue-600 text-white rounded"
+          className="px-4 py-2 bg-blue-600 text-black rounded"
           onClick={() => downloadJSON(cfg, 'config.json')}
           disabled={loading}
         >
@@ -431,7 +444,7 @@ export default function ConfigForm({ initialConfig, onSubmit, onDownloadConfig, 
         </button>
         
         <button
-          className="px-4 py-2 bg-gray-600 text-white rounded"
+          className="px-4 py-2 bg-gray-600 text-black rounded"
           onClick={() => downloadJSON(cfg, `${cfg.subject || 'math'}-config-${Date.now()}.json`)}
           disabled={loading}
         >

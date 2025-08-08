@@ -1,0 +1,30 @@
+# Lambda function testing files
+index.js
+lambda_code.zip
+lambda_function.zip
+test.js
+test-*.js
+run-test.js
+local-server.js
+download_url.txt
+server.log
+*.zip
+
+# Local development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node modules and build files
+node_modules/
+build/
+dist/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db" >> .gitignore
