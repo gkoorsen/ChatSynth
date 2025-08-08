@@ -29,11 +29,13 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     customVocabulary: {},
     usePresetVocabulary: true,
     
-    // Tutor Questions - All Purposes
-    guidanceWeight: 0.4,
-    assessmentWeight: 0.3,
-    encouragementWeight: 0.2,
-    clarificationWeight: 0.1,
+    // Tutor Questions - All Purposes (built-in + custom)
+    tutorPurposes: {
+      guidance: 0.4,
+      assessment: 0.3,
+      encouragement: 0.2,
+      clarification: 0.1
+    },
     
     // Student Utterances - All Parameters
     confusionMean: 3.0,
@@ -108,38 +110,58 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     });
   };
 
+  // Add or update tutor purpose
+  const updateTutorPurpose = (purpose, weight) => {
+    setFormData(prev => ({
+      ...prev,
+      tutorPurposes: {
+        ...prev.tutorPurposes,
+        [purpose]: weight
+      }
+    }));
+  };
+
+  // Remove tutor purpose
+  const removeTutorPurpose = (purpose) => {
+    setFormData(prev => {
+      const newPurposes = { ...prev.tutorPurposes };
+      delete newPurposes[purpose];
+      return {
+        ...prev,
+        tutorPurposes: newPurposes
+      };
+    });
+  };
+
   // Normalize tutor question weights to sum to 1.0
   const normalizeTutorWeights = () => {
-    const { guidanceWeight, assessmentWeight, encouragementWeight, clarificationWeight } = formData;
-    const total = guidanceWeight + assessmentWeight + encouragementWeight + clarificationWeight;
+    const purposes = formData.tutorPurposes;
+    const total = Object.values(purposes).reduce((sum, weight) => sum + weight, 0);
     
     if (total > 0) {
+      const normalizedPurposes = {};
+      Object.keys(purposes).forEach(purpose => {
+        normalizedPurposes[purpose] = purposes[purpose] / total;
+      });
+      
       setFormData(prev => ({
         ...prev,
-        guidanceWeight: guidanceWeight / total,
-        assessmentWeight: assessmentWeight / total,
-        encouragementWeight: encouragementWeight / total,
-        clarificationWeight: clarificationWeight / total
+        tutorPurposes: normalizedPurposes
       }));
     }
   };
 
   const generateConfig = () => {
     // Normalize weights before generating config
-    const { guidanceWeight, assessmentWeight, encouragementWeight, clarificationWeight } = formData;
-    const total = guidanceWeight + assessmentWeight + encouragementWeight + clarificationWeight;
+    const purposes = formData.tutorPurposes;
+    const total = Object.values(purposes).reduce((sum, weight) => sum + weight, 0);
     
-    const normalizedWeights = total > 0 ? {
-      guidance: guidanceWeight / total,
-      assessment: assessmentWeight / total,
-      encouragement: encouragementWeight / total,
-      clarification: clarificationWeight / total
-    } : {
-      guidance: 0.4,
-      assessment: 0.3,
-      encouragement: 0.2,
-      clarification: 0.1
-    };
+    const normalizedWeights = total > 0 ? 
+      Object.keys(purposes).reduce((acc, purpose) => {
+        acc[purpose] = purposes[purpose] / total;
+        return acc;
+      }, {}) : 
+      { guidance: 0.4, assessment: 0.3, encouragement: 0.2, clarification: 0.1 };
 
     // Get vocabulary - either custom or preset
     const vocabulary = formData.usePresetVocabulary 
@@ -239,7 +261,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         subject: 'mathematics',
         avgTurns: 8, stdTurns: 3, minTurns: 4, maxTurns: 15,
         tutorStudentRatio: 1.5,
-        guidanceWeight: 0.5, assessmentWeight: 0.2, encouragementWeight: 0.2, clarificationWeight: 0.1,
+        tutorPurposes: { guidance: 0.5, assessment: 0.2, encouragement: 0.2, clarification: 0.1 },
         confusionMean: 2.5, confusionStd: 1.0,
         correctIndependent: 1500, correctAssisted: 400, incorrect: 100
       },
@@ -247,7 +269,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         subject: 'science',
         avgTurns: 15, stdTurns: 6, minTurns: 8, maxTurns: 30,
         tutorStudentRatio: 1.0,
-        guidanceWeight: 0.3, assessmentWeight: 0.4, encouragementWeight: 0.1, clarificationWeight: 0.2,
+        tutorPurposes: { guidance: 0.3, assessment: 0.4, encouragement: 0.1, clarification: 0.2 },
         confusionMean: 4.0, confusionStd: 1.2,
         correctIndependent: 800, correctAssisted: 600, incorrect: 600
       },
@@ -255,7 +277,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         subject: 'language',
         avgTurns: 12, stdTurns: 4, minTurns: 6, maxTurns: 25,
         tutorStudentRatio: 1.3,
-        guidanceWeight: 0.45, assessmentWeight: 0.25, encouragementWeight: 0.2, clarificationWeight: 0.1,
+        tutorPurposes: { guidance: 0.45, assessment: 0.25, encouragement: 0.2, clarification: 0.1 },
         confusionMean: 3.2, confusionStd: 1.1,
         correctIndependent: 1200, correctAssisted: 500, incorrect: 300
       }
@@ -300,10 +322,9 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
           usePresetVocabulary: false,
           
           // Tutor Questions
-          guidanceWeight: uploadedConfig.tutor_questions?.purpose_distribution?.guidance || 0.4,
-          assessmentWeight: uploadedConfig.tutor_questions?.purpose_distribution?.assessment || 0.3,
-          encouragementWeight: uploadedConfig.tutor_questions?.purpose_distribution?.encouragement || 0.2,
-          clarificationWeight: uploadedConfig.tutor_questions?.purpose_distribution?.clarification || 0.1,
+          tutorPurposes: uploadedConfig.tutor_questions?.purpose_distribution || {
+            guidance: 0.4, assessment: 0.3, encouragement: 0.2, clarification: 0.1
+          },
           
           // Student Utterances
           confusionMean: uploadedConfig.student_utterances?.confusion_scores?.mean || 3.0,
@@ -674,66 +695,125 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
                 {/* Tutor Questions Section */}
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-orange-900 mb-4">Tutor Question Distribution</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Guidance</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={formData.guidanceWeight}
-                        onChange={(e) => handleFormChange('guidanceWeight', parseFloat(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
+                  
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-700">Purpose Types & Weights</h4>
+                    
+                    {/* Dynamic Purpose List */}
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {Object.entries(formData.tutorPurposes).map(([purpose, weight]) => (
+                        <div key={purpose} className="flex items-center space-x-3 bg-white p-3 rounded border">
+                          <input
+                            type="text"
+                            value={purpose}
+                            onChange={(e) => {
+                              const oldPurpose = purpose;
+                              const newPurpose = e.target.value;
+                              if (newPurpose !== oldPurpose && newPurpose.trim()) {
+                                removeTutorPurpose(oldPurpose);
+                                updateTutorPurpose(newPurpose.trim(), weight);
+                              }
+                            }}
+                            className="flex-1 p-2 border rounded text-sm font-medium capitalize"
+                            placeholder="Purpose name"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value={weight}
+                            onChange={(e) => updateTutorPurpose(purpose, parseFloat(e.target.value) || 0)}
+                            className="w-20 p-2 border rounded text-sm"
+                            placeholder="0.4"
+                          />
+                          <span className="text-xs text-gray-500 w-12">
+                            {(weight * 100).toFixed(0)}%
+                          </span>
+                          <button
+                            onClick={() => removeTutorPurpose(purpose)}
+                            className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                            title="Remove purpose"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Assessment</label>
+
+                    {/* Add New Purpose */}
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded border-2 border-dashed border-gray-300">
                       <input
-                        type="number"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={formData.assessmentWeight}
-                        onChange={(e) => handleFormChange('assessmentWeight', parseFloat(e.target.value))}
-                        className="w-full p-2 border rounded"
+                        type="text"
+                        placeholder="New purpose name (e.g., 'motivation', 'scaffolding', 'reflection')"
+                        className="flex-1 p-2 border rounded text-sm"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            const purposeName = e.target.value.trim().toLowerCase();
+                            if (purposeName && !formData.tutorPurposes[purposeName]) {
+                              updateTutorPurpose(purposeName, 0.1);
+                              e.target.value = '';
+                            }
+                          }
+                        }}
                       />
+                      <button
+                        onClick={(e) => {
+                          const input = e.target.parentElement.querySelector('input');
+                          const purposeName = input.value.trim().toLowerCase();
+                          if (purposeName && !formData.tutorPurposes[purposeName]) {
+                            updateTutorPurpose(purposeName, 0.1);
+                            input.value = '';
+                          }
+                        }}
+                        className="px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+                      >
+                        + Add Purpose
+                      </button>
                     </div>
+
+                    {/* Quick Add Common Purposes */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Encouragement</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={formData.encouragementWeight}
-                        onChange={(e) => handleFormChange('encouragementWeight', parseFloat(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">Quick Add Common Purposes:</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'motivation', 'scaffolding', 'reflection', 'verification', 
+                          'elaboration', 'connection', 'application', 'synthesis',
+                          'metacognition', 'feedback', 'probing', 'redirection'
+                        ].filter(purpose => !formData.tutorPurposes[purpose]).map(purpose => (
+                          <button
+                            key={purpose}
+                            onClick={() => updateTutorPurpose(purpose, 0.1)}
+                            className="px-3 py-1 bg-white border border-orange-200 rounded text-sm hover:bg-orange-50 capitalize"
+                          >
+                            + {purpose}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Clarification</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={formData.clarificationWeight}
-                        onChange={(e) => handleFormChange('clarificationWeight', parseFloat(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
+
+                    {/* Weight Summary & Normalization */}
+                    <div className="flex justify-between items-center pt-3 border-t">
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Total Weight: </span>
+                        <span className={`${
+                          Math.abs(Object.values(formData.tutorPurposes).reduce((sum, w) => sum + w, 0) - 1.0) < 0.01
+                            ? 'text-green-600 font-medium' 
+                            : 'text-amber-600 font-medium'
+                        }`}>
+                          {Object.values(formData.tutorPurposes).reduce((sum, w) => sum + w, 0).toFixed(3)}
+                        </span>
+                        <span className="ml-2 text-xs">
+                          ({Object.keys(formData.tutorPurposes).length} purposes)
+                        </span>
+                      </div>
+                      <button
+                        onClick={normalizeTutorWeights}
+                        className="px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+                      >
+                        ⚖️ Normalize to 1.0
+                      </button>
                     </div>
-                  </div>
-                  <div className="mt-2 flex justify-between items-center">
-                    <span className="text-sm text-gray-600">
-                      Total: {(formData.guidanceWeight + formData.assessmentWeight + formData.encouragementWeight + formData.clarificationWeight).toFixed(2)}
-                    </span>
-                    <button
-                      onClick={normalizeTutorWeights}
-                      className="px-3 py-1 bg-orange-500 text-white rounded text-sm"
-                    >
-                      Normalize to 1.0
-                    </button>
                   </div>
                 </div>
 
