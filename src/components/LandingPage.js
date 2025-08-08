@@ -191,7 +191,8 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
           min: formData.minTurns,
           max: formData.maxTurns
         },
-        tutor_student_ratio: formData.tutorStudentRatio
+        tutor_student_ratio: formData.tutorStudentRatio,
+        conversation_starter: formData.conversationStarter
       },
       
       // Complete Vocabulary Configuration
@@ -260,7 +261,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
       basic_math: {
         subject: 'mathematics',
         avgTurns: 8, stdTurns: 3, minTurns: 4, maxTurns: 15,
-        tutorStudentRatio: 1.5,
+        tutorStudentRatio: 1.5, conversationStarter: 'tutor',
         tutorPurposes: { guidance: 0.5, assessment: 0.2, encouragement: 0.2, clarification: 0.1 },
         confusionMean: 2.5, confusionStd: 1.0,
         correctIndependent: 1500, correctAssisted: 400, incorrect: 100
@@ -268,7 +269,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
       advanced_science: {
         subject: 'science',
         avgTurns: 15, stdTurns: 6, minTurns: 8, maxTurns: 30,
-        tutorStudentRatio: 1.0,
+        tutorStudentRatio: 1.0, conversationStarter: 'tutor',
         tutorPurposes: { guidance: 0.3, assessment: 0.4, encouragement: 0.1, clarification: 0.2 },
         confusionMean: 4.0, confusionStd: 1.2,
         correctIndependent: 800, correctAssisted: 600, incorrect: 600
@@ -276,7 +277,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
       writing_practice: {
         subject: 'language',
         avgTurns: 12, stdTurns: 4, minTurns: 6, maxTurns: 25,
-        tutorStudentRatio: 1.3,
+        tutorStudentRatio: 1.3, conversationStarter: 'tutor',
         tutorPurposes: { guidance: 0.45, assessment: 0.25, encouragement: 0.2, clarification: 0.1 },
         confusionMean: 3.2, confusionStd: 1.1,
         correctIndependent: 1200, correctAssisted: 500, incorrect: 300
@@ -316,6 +317,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
           minTurns: uploadedConfig.conversation_structure?.turns?.min || 4,
           maxTurns: uploadedConfig.conversation_structure?.turns?.max || 30,
           tutorStudentRatio: uploadedConfig.conversation_structure?.tutor_student_ratio || 1.2,
+          conversationStarter: uploadedConfig.conversation_structure?.conversation_starter || 'tutor',
           
           // Vocabulary
           customVocabulary: uploadedConfig.vocabulary?.term_frequencies || {},
@@ -566,63 +568,129 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
                 {/* Conversation Structure Section */}
                 <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-green-900 mb-4">Conversation Structure</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Turn Configuration */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Average Turns</label>
-                      <input
-                        type="number"
-                        min="4"
-                        max="50"
-                        value={formData.avgTurns}
-                        onChange={(e) => handleFormChange('avgTurns', parseFloat(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
+                      <h4 className="font-medium text-gray-700 mb-3">Turn Configuration</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Average Turns</label>
+                          <input
+                            type="number"
+                            min="4"
+                            max="50"
+                            value={formData.avgTurns}
+                            onChange={(e) => handleFormChange('avgTurns', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Std Deviation</label>
+                          <input
+                            type="number"
+                            min="0.5"
+                            max="10"
+                            step="0.1"
+                            value={formData.stdTurns}
+                            onChange={(e) => handleFormChange('stdTurns', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Min Turns</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={formData.minTurns}
+                            onChange={(e) => handleFormChange('minTurns', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Max Turns</label>
+                          <input
+                            type="number"
+                            min="10"
+                            max="100"
+                            value={formData.maxTurns}
+                            onChange={(e) => handleFormChange('maxTurns', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Interaction Configuration */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Std Deviation</label>
-                      <input
-                        type="number"
-                        min="0.5"
-                        max="10"
-                        step="0.1"
-                        value={formData.stdTurns}
-                        onChange={(e) => handleFormChange('stdTurns', parseFloat(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Min Turns</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="20"
-                        value={formData.minTurns}
-                        onChange={(e) => handleFormChange('minTurns', parseInt(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Max Turns</label>
-                      <input
-                        type="number"
-                        min="10"
-                        max="100"
-                        value={formData.maxTurns}
-                        onChange={(e) => handleFormChange('maxTurns', parseInt(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Tutor:Student Ratio</label>
-                      <input
-                        type="number"
-                        min="0.1"
-                        max="5.0"
-                        step="0.1"
-                        value={formData.tutorStudentRatio}
-                        onChange={(e) => handleFormChange('tutorStudentRatio', parseFloat(e.target.value))}
-                        className="w-full p-2 border rounded"
-                      />
+                      <h4 className="font-medium text-gray-700 mb-3">Interaction Configuration</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Tutor:Student Ratio</label>
+                          <input
+                            type="number"
+                            min="0.1"
+                            max="5.0"
+                            step="0.1"
+                            value={formData.tutorStudentRatio}
+                            onChange={(e) => handleFormChange('tutorStudentRatio', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formData.tutorStudentRatio > 1 ? 'Tutor talks more' : 
+                             formData.tutorStudentRatio < 1 ? 'Student talks more' : 'Equal participation'}
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Who Starts the Conversation?</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
+                              <input
+                                type="radio"
+                                name="conversationStarter"
+                                value="tutor"
+                                checked={formData.conversationStarter === 'tutor'}
+                                onChange={(e) => handleFormChange('conversationStarter', e.target.value)}
+                                className="mr-3"
+                              />
+                              <div>
+                                <div className="font-medium text-sm">👨‍🏫 Tutor Starts</div>
+                                <div className="text-xs text-gray-600">Traditional approach - tutor initiates with question/topic</div>
+                              </div>
+                            </label>
+                            <label className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
+                              <input
+                                type="radio"
+                                name="conversationStarter"
+                                value="student"
+                                checked={formData.conversationStarter === 'student'}
+                                onChange={(e) => handleFormChange('conversationStarter', e.target.value)}
+                                className="mr-3"
+                              />
+                              <div>
+                                <div className="font-medium text-sm">👨‍🎓 Student Starts</div>
+                                <div className="text-xs text-gray-600">Student-driven approach - student asks question or states problem</div>
+                              </div>
+                            </label>
+                            <label className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
+                              <input
+                                type="radio"
+                                name="conversationStarter"
+                                value="random"
+                                checked={formData.conversationStarter === 'random'}
+                                onChange={(e) => handleFormChange('conversationStarter', e.target.value)}
+                                className="mr-3"
+                              />
+                              <div>
+                                <div className="font-medium text-sm">🎲 Random</div>
+                                <div className="text-xs text-gray-600">Randomly choose who starts each conversation</div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
