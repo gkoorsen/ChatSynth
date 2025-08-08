@@ -1,4 +1,69 @@
-import React, { useState } from 'react';
+{/* Fine-tuning Settings */}
+                <details className="border rounded-lg">
+                  <summary className="p-4 cursor-pointer hover:bg-gray-50 font-medium">
+                    🔧 Fine-tuning Parameters (Optional)
+                  </summary>
+                  <div className="p-4 border-t bg-gray-50 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-gray-700">Conversation Structure</h4>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Average Turns</label>
+                        <input
+                          type="number"
+                          min="4"
+                          max="50"
+                          value={formData.avgTurns}
+                          onChange={(e) => handleFormChange('avgTurns', parseInt(e.target.value) || 12)}
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">Min Turns</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={formData.minTurns}
+                            onChange={(e) => handleFormChange('minTurns', parseInt(e.target.value) || 4)}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600 mb-1">Max Turns</label>
+                          <input
+                            type="number"
+                            min="10"
+                            max="100"
+                            value={formData.maxTurns}
+                            onChange={(e) => handleFormChange('maxTurns', parseInt(e.target.value) || 30)}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-gray-700">Student Characteristics</h4>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600 mb-1">Average Confusion (1-5)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="5"
+                          step="0.1"
+                          value={formData.avgConfusion}
+                          onChange={(e) => handleFormChange('avgConfusion', parseFloat(e.target.value) || 3.0)}
+                          className="w-full p-2 border rounded"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Correct (%)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"import React, { useState } from 'react';
 import ConfigViewer from './ConfigViewer';
 
 export default function LandingPage({ onSubmit, loading, error, progress }) {
@@ -520,11 +585,80 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
                       <p className="text-xs text-gray-500 mt-1">Recommended: 1-5 conversations</p>
                     </div>
 
-                    {/* Continue with existing form fields... */}
-                    {/* I'll keep the rest short for brevity, but include all existing fields */}
+                    {/* Difficulty */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Difficulty Level</label>
+                      <div className="space-y-2">
+                        {difficultyOptions.map(option => (
+                          <label key={option.value} className="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="radio"
+                              name="difficulty"
+                              value={option.value}
+                              checked={formData.difficulty === option.value}
+                              onChange={(e) => handleFormChange('difficulty', e.target.value)}
+                              className="mt-1 mr-3"
+                            />
+                            <div>
+                              <div className="font-medium">{option.label}</div>
+                              <div className="text-sm text-gray-600">{option.description}</div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Advanced Settings column would continue here */}
+                  {/* Advanced Settings */}
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Advanced Settings</h3>
+                    
+                    {/* Student Level */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Student Level</label>
+                      <div className="space-y-2">
+                        {studentLevelOptions.map(option => (
+                          <label key={option.value} className="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="radio"
+                              name="studentLevel"
+                              value={option.value}
+                              checked={formData.studentLevel === option.value}
+                              onChange={(e) => handleFormChange('studentLevel', e.target.value)}
+                              className="mt-1 mr-3"
+                            />
+                            <div>
+                              <div className="font-medium">{option.label}</div>
+                              <div className="text-sm text-gray-600">{option.description}</div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Conversation Style */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Teaching Style</label>
+                      <div className="space-y-2">
+                        {conversationStyleOptions.map(option => (
+                          <label key={option.value} className="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="radio"
+                              name="conversationStyle"
+                              value={option.value}
+                              checked={formData.conversationStyle === option.value}
+                              onChange={(e) => handleFormChange('conversationStyle', e.target.value)}
+                              className="mt-1 mr-3"
+                            />
+                            <div>
+                              <div className="font-medium">{option.label}</div>
+                              <div className="text-sm text-gray-600">{option.description}</div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Action Button */}
@@ -584,8 +718,113 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
                 )}
               </div>
             ) : (
-              /* Upload tab content here - keeping existing upload functionality */
-              <div>Upload tab content...</div>
+            ) : (
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Configuration</h2>
+                  <p className="text-gray-600">Upload an existing JSON configuration file</p>
+                </div>
+
+                {/* Number of Conversations for Upload */}
+                <div className="mb-6">
+                  <div className="max-w-md mx-auto">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Conversations to Generate</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={formData.numberOfConversations}
+                      onChange={(e) => {
+                        const newValue = parseInt(e.target.value) || 3;
+                        handleFormChange('numberOfConversations', newValue);
+                        if (config) {
+                          setConfig(prev => ({ ...prev, numberOfConversations: newValue }));
+                        }
+                      }}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">This will override any value in the uploaded configuration</p>
+                  </div>
+                </div>
+
+                {/* AI Settings Override for Upload */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md mx-auto">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-4">AI Settings Required</h4>
+                  
+                  {/* OpenAI API Key for Upload */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      OpenAI API Key *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showApiKey ? 'text' : 'password'}
+                        value={formData.openaiApiKey}
+                        onChange={(e) => handleFormChange('openaiApiKey', e.target.value)}
+                        placeholder="sk-..."
+                        className={`w-full p-3 border rounded-lg pr-12 ${
+                          formData.openaiApiKey && !validateApiKey(formData.openaiApiKey)
+                            ? 'border-red-300 bg-red-50'
+                            : formData.openaiApiKey && validateApiKey(formData.openaiApiKey)
+                            ? 'border-green-300 bg-green-50'
+                            : 'border-gray-300'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                      >
+                        {showApiKey ? '🙈' : '👁️'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Model Selection for Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">AI Model</label>
+                    <select
+                      value={formData.aiModel}
+                      onChange={(e) => handleFormChange('aiModel', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                    >
+                      {aiModelOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label} - {option.cost}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Will override model in uploaded config</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <div className="w-full max-w-md">
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-8 h-8 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-sm text-gray-500">Click to upload JSON file</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        disabled={loading}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {config && (
+                  <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Uploaded Configuration</h3>
+                    <ConfigViewer config={config} />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
