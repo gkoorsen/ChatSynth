@@ -252,19 +252,6 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     onSubmit(finalConfig);
   };
 
-  const getEstimatedCost = () => {
-    const costs = {
-      'gpt-3.5-turbo': 0.001,
-      'gpt-4o': 0.03,
-      'o3-mini': 0.005
-    };
-    const tokensPerConv = formData.maxTokens;
-    const totalTokens = formData.numberOfConversations * tokensPerConv;
-    const multiplier = formData.generationMode === 'dual_ai' ? 2 : 1;
-    const estimatedCost = (totalTokens / 1000) * costs[formData.aiModel] * multiplier;
-    return estimatedCost.toFixed(3);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Modern Header */}
@@ -285,9 +272,6 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
               <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
                 <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                 <span>Lambda Ready</span>
-              </div>
-              <div className="text-xs text-gray-500">
-                Est. ${getEstimatedCost()}
               </div>
             </div>
           </div>
@@ -364,7 +348,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
               <div className="flex flex-wrap gap-2 text-xs">
                 <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">Realistic</span>
                 <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded">Natural flow</span>
-                <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded">2x cost</span>
+                <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded">Slower</span>
               </div>
             </div>
           </div>
