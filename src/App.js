@@ -221,7 +221,7 @@ function App() {
               <p className="text-gray-600">Generated Conversations</p>
               {config?.ai_settings && (
                 <p className="text-sm text-gray-500">
-                  Generated with {config.ai_settings.model} • Temperature: {config.ai_settings.temperature}
+                  Generated with {config.ai_settings.model} • Temperature: {config.ai_settings.temperature} • Mode: {config.generationMode || 'single_ai'}
                 </p>
               )}
             </div>
@@ -289,7 +289,7 @@ function App() {
             </div>
           )}
           <div className="text-sm">
-            Using {apiInfo.environment} API • Model: {config?.ai_settings?.model} • Lambda Environment Variables
+            Using {apiInfo.environment} API • Model: {config?.ai_settings?.model} • Mode: {config?.generationMode || 'single_ai'}
           </div>
         </div>
       )}
@@ -304,7 +304,7 @@ function App() {
                 </h2>
                 {config?.ai_settings && (
                   <p className="text-sm text-gray-600 mt-1">
-                    Model: {config.ai_settings.model} • Temperature: {config.ai_settings.temperature} • Max Tokens: {config.ai_settings.max_tokens}
+                    Model: {config.ai_settings.model} • Temperature: {config.ai_settings.temperature} • Max Tokens: {config.ai_settings.max_tokens} • Mode: {config.generationMode || 'single_ai'}
                     {config.ai_settings.reasoning_effort && ` • Reasoning: ${config.ai_settings.reasoning_effort}`}
                   </p>
                 )}
