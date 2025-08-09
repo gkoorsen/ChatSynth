@@ -10,9 +10,9 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     // Basic Settings
     subject: 'mathematics',
     numberOfConversations: 3,
-    generationMode: 'single_ai',
+    generationMode: 'single_ai', // New parameter: 'single_ai' or 'dual_ai'
     
-    // AI Model Controls
+    // AI Model Controls (will NOT be sent to Lambda if using env variables)
     aiModel: 'gpt-3.5-turbo',
     temperature: 0.8,
     maxTokens: 2000,
@@ -20,18 +20,18 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     customInstructions: '',
     conversationStarter: 'tutor',
     
-    // Conversation Structure
+    // Conversation Structure - All Parameters
     avgTurns: 12,
     stdTurns: 4.8,
     minTurns: 4,
     maxTurns: 30,
     tutorStudentRatio: 1.2,
     
-    // Vocabulary
+    // Vocabulary - Custom Terms
     customVocabulary: {},
     usePresetVocabulary: true,
     
-    // Tutor Questions
+    // Tutor Questions - All Purposes (built-in + custom)
     tutorPurposes: {
       guidance: 0.4,
       assessment: 0.3,
@@ -39,7 +39,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
       clarification: 0.1
     },
     
-    // Student Utterances
+    // Student Utterances - All Parameters
     confusionMean: 3.0,
     confusionStd: 1.0,
     confusionMin: 1,
@@ -75,11 +75,11 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
   ];
 
   const subjectOptions = [
-    { value: 'mathematics', label: 'Mathematics', icon: '📊', color: 'blue' },
-    { value: 'science', label: 'Science', icon: '🔬', color: 'green' },
-    { value: 'language', label: 'Language Arts', icon: '📚', color: 'purple' },
-    { value: 'history', label: 'History', icon: '🏛️', color: 'yellow' },
-    { value: 'custom', label: 'Custom Subject', icon: '⚙️', color: 'gray' }
+    { value: 'mathematics', label: 'Mathematics', icon: '📊' },
+    { value: 'science', label: 'Science', icon: '🔬' },
+    { value: 'language', label: 'Language Arts', icon: '📚' },
+    { value: 'history', label: 'History', icon: '🏛️' },
+    { value: 'custom', label: 'Custom Subject', icon: '⚙️' }
   ];
 
   const handleFormChange = (field, value) => {
@@ -89,6 +89,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     }));
   };
 
+  // Add or update custom vocabulary term
   const updateVocabularyTerm = (term, frequency) => {
     setFormData(prev => ({
       ...prev,
@@ -99,6 +100,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     }));
   };
 
+  // Remove vocabulary term
   const removeVocabularyTerm = (term) => {
     setFormData(prev => {
       const newVocab = { ...prev.customVocabulary };
@@ -110,6 +112,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     });
   };
 
+  // Add or update tutor purpose
   const updateTutorPurpose = (purpose, weight) => {
     setFormData(prev => ({
       ...prev,
@@ -120,6 +123,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     }));
   };
 
+  // Remove tutor purpose
   const removeTutorPurpose = (purpose) => {
     setFormData(prev => {
       const newPurposes = { ...prev.tutorPurposes };
@@ -131,6 +135,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     });
   };
 
+  // Normalize tutor question weights to sum to 1.0
   const normalizeTutorWeights = () => {
     const purposes = formData.tutorPurposes;
     const total = Object.values(purposes).reduce((sum, weight) => sum + weight, 0);
@@ -149,6 +154,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
   };
 
   const generateConfig = () => {
+    // Normalize weights before generating config
     const purposes = formData.tutorPurposes;
     const total = Object.values(purposes).reduce((sum, weight) => sum + weight, 0);
     
@@ -159,6 +165,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
       }, {}) : 
       { guidance: 0.4, assessment: 0.3, encouragement: 0.2, clarification: 0.1 };
 
+    // Get vocabulary - either custom or preset
     const vocabulary = formData.usePresetVocabulary 
       ? getVocabularyForSubject(formData.subject)
       : Object.keys(formData.customVocabulary).length > 0
@@ -168,8 +175,9 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     const generatedConfig = {
       subject: formData.subject,
       numberOfConversations: formData.numberOfConversations,
-      generationMode: formData.generationMode,
+      generationMode: formData.generationMode, // Add generation mode
       
+      // AI Model Configuration (optional - Lambda uses environment variables)
       ai_settings: {
         model: formData.aiModel,
         temperature: formData.temperature,
@@ -178,6 +186,7 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         custom_instructions: formData.customInstructions.trim() || null
       },
       
+      // Complete Conversation Structure
       conversation_structure: {
         turns: {
           mean: formData.avgTurns,
@@ -189,14 +198,17 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
         conversation_starter: formData.conversationStarter
       },
       
+      // Complete Vocabulary Configuration
       vocabulary: {
         term_frequencies: vocabulary
       },
       
+      // Complete Tutor Questions Configuration
       tutor_questions: {
         purpose_distribution: normalizedWeights
       },
       
+      // Complete Student Utterances Configuration
       student_utterances: {
         confusion_scores: {
           mean: formData.confusionMean,
@@ -247,467 +259,956 @@ export default function LandingPage({ onSubmit, loading, error, progress }) {
     return vocabularies[subject] || vocabularies.custom;
   };
 
+  const loadPresetConfig = (preset) => {
+    const presets = {
+      basic_math: {
+        subject: 'mathematics', generationMode: 'single_ai',
+        avgTurns: 8, stdTurns: 3, minTurns: 4, maxTurns: 15,
+        tutorStudentRatio: 1.5, conversationStarter: 'tutor',
+        tutorPurposes: { guidance: 0.5, assessment: 0.2, encouragement: 0.2, clarification: 0.1 },
+        confusionMean: 2.5, confusionStd: 1.0,
+        correctIndependent: 1500, correctAssisted: 400, incorrect: 100
+      },
+      advanced_science: {
+        subject: 'science', generationMode: 'dual_ai',
+        avgTurns: 15, stdTurns: 6, minTurns: 8, maxTurns: 30,
+        tutorStudentRatio: 1.0, conversationStarter: 'tutor',
+        tutorPurposes: { guidance: 0.3, assessment: 0.4, encouragement: 0.1, clarification: 0.2 },
+        confusionMean: 4.0, confusionStd: 1.2,
+        correctIndependent: 800, correctAssisted: 600, incorrect: 600
+      },
+      writing_practice: {
+        subject: 'language', generationMode: 'single_ai',
+        avgTurns: 12, stdTurns: 4, minTurns: 6, maxTurns: 25,
+        tutorStudentRatio: 1.3, conversationStarter: 'tutor',
+        tutorPurposes: { guidance: 0.45, assessment: 0.25, encouragement: 0.2, clarification: 0.1 },
+        confusionMean: 3.2, confusionStd: 1.1,
+        correctIndependent: 1200, correctAssisted: 500, incorrect: 300
+      }
+    };
+
+    if (presets[preset]) {
+      setFormData(prev => ({ ...prev, ...presets[preset] }));
+    }
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const uploadedConfig = JSON.parse(e.target.result);
+        
+        // Convert uploaded config back to form data
+        const newFormData = {
+          ...formData,
+          subject: uploadedConfig.subject || 'mathematics',
+          numberOfConversations: uploadedConfig.numberOfConversations || 3,
+          generationMode: uploadedConfig.generationMode || 'single_ai',
+          
+          // AI Settings
+          aiModel: uploadedConfig.ai_settings?.model || 'gpt-3.5-turbo',
+          temperature: uploadedConfig.ai_settings?.temperature || 0.8,
+          maxTokens: uploadedConfig.ai_settings?.max_tokens || 2000,
+          reasoningEffort: uploadedConfig.ai_settings?.reasoning_effort || 'medium',
+          customInstructions: uploadedConfig.ai_settings?.custom_instructions || '',
+          
+          // Conversation Structure
+          avgTurns: uploadedConfig.conversation_structure?.turns?.mean || 12,
+          stdTurns: uploadedConfig.conversation_structure?.turns?.std || 4.8,
+          minTurns: uploadedConfig.conversation_structure?.turns?.min || 4,
+          maxTurns: uploadedConfig.conversation_structure?.turns?.max || 30,
+          tutorStudentRatio: uploadedConfig.conversation_structure?.tutor_student_ratio || 1.2,
+          conversationStarter: uploadedConfig.conversation_structure?.conversation_starter || 'tutor',
+          
+          // Vocabulary
+          customVocabulary: uploadedConfig.vocabulary?.term_frequencies || {},
+          usePresetVocabulary: false,
+          
+          // Tutor Questions
+          tutorPurposes: uploadedConfig.tutor_questions?.purpose_distribution || {
+            guidance: 0.4, assessment: 0.3, encouragement: 0.2, clarification: 0.1
+          },
+          
+          // Student Utterances
+          confusionMean: uploadedConfig.student_utterances?.confusion_scores?.mean || 3.0,
+          confusionStd: uploadedConfig.student_utterances?.confusion_scores?.std || 1.0,
+          confusionMin: uploadedConfig.student_utterances?.confusion_scores?.min || 1,
+          confusionMax: uploadedConfig.student_utterances?.confusion_scores?.max || 5,
+          correctIndependent: uploadedConfig.student_utterances?.correctness_distribution?.correct_independent || 1400,
+          correctAssisted: uploadedConfig.student_utterances?.correctness_distribution?.correct_assisted || 400,
+          incorrect: uploadedConfig.student_utterances?.correctness_distribution?.incorrect || 200
+        };
+        
+        setFormData(newFormData);
+        setConfig(uploadedConfig);
+        setActiveTab('upload');
+      } catch (error) {
+        alert('Invalid JSON file. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleSubmit = () => {
     const finalConfig = config || generateConfig();
     onSubmit(finalConfig);
   };
 
+  const downloadConfig = () => {
+    const configToDownload = config || generateConfig();
+    const blob = new Blob([JSON.stringify(configToDownload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chatsynth-config-${formData.subject}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Modern Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mr-3">
-                <span className="text-white font-bold text-lg">CS</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">ChatSynth</h1>
-                <p className="text-xs text-gray-500">AI Conversation Generator</p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">ChatSynth</h1>
+              <p className="text-gray-600 mt-1">Synthetic Educational Conversation Generator</p>
             </div>
-            
-            <div className="flex items-center space-x-3">
-              <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span>Lambda Ready</span>
-              </div>
+            <div className="text-sm text-gray-500 text-right">
+              <div>Lambda Environment Variables</div>
+              <div className="text-xs">Model: {formData.aiModel} • API Key: Environment</div>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Hero Section */}
-      <section className="py-12 lg:py-20 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Generate Realistic
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                Educational Conversations
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Create synthetic tutoring conversations with advanced AI. Perfect for training language models, 
-              educational research, and conversation analysis.
-            </p>
+      <div className="container mx-auto px-6 py-8">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="flex border-b">
+            <button
+              className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
+                activeTab === 'create' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setActiveTab('create')}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-xl">⚙️</span>
+                <span>Create New Configuration</span>
+              </div>
+            </button>
+            <button
+              className={`flex-1 px-6 py-4 text-center font-medium transition-colors ${
+                activeTab === 'upload' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setActiveTab('upload')}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-xl">📁</span>
+                <span>Upload Configuration</span>
+              </div>
+            </button>
           </div>
 
-          {/* Generation Mode Selection Cards */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
-            {/* Single AI Mode */}
-            <div className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
-              formData.generationMode === 'single_ai' 
-                ? 'border-green-300 bg-green-50/50 shadow-lg scale-105' 
-                : 'border-gray-200 bg-white/70 hover:border-green-200 hover:shadow-md'
-            }`}
-            onClick={() => handleFormChange('generationMode', 'single_ai')}>
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl flex items-center justify-center mr-4">
-                  <span className="text-2xl">🎯</span>
+          <div className="p-8">
+            {activeTab === 'create' ? (
+              <div className="space-y-8">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Complete Configuration Builder</h2>
+                  <p className="text-gray-600">Configure all Lambda function parameters</p>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">Single AI Mode</h3>
-                  <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full">Fast & Controlled</span>
-                </div>
-              </div>
-              
-              <p className="text-gray-600 mb-4">
-                One AI generates entire conversations in a single request. Perfect for controlled vocabulary and structured content.
-              </p>
-              
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="bg-green-100 text-green-700 px-2 py-1 rounded">Lower cost</span>
-                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">Faster</span>
-                <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded">Predictable</span>
-              </div>
-            </div>
 
-            {/* Interactive AI Mode */}
-            <div className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
-              formData.generationMode === 'dual_ai' 
-                ? 'border-blue-300 bg-blue-50/50 shadow-lg scale-105' 
-                : 'border-gray-200 bg-white/70 hover:border-blue-200 hover:shadow-md'
-            }`}
-            onClick={() => handleFormChange('generationMode', 'dual_ai')}>
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
-                  <span className="text-2xl">🤝</span>
+                {/* Quick Presets */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-4">Quick Start Presets</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button
+                      onClick={() => loadPresetConfig('basic_math')}
+                      className="p-4 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 text-left"
+                    >
+                      <div className="font-medium text-purple-900">Basic Math Tutoring</div>
+                      <div className="text-sm text-purple-700 mt-1">Simple problems, encouraging style</div>
+                    </button>
+                    <button
+                      onClick={() => loadPresetConfig('advanced_science')}
+                      className="p-4 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 text-left"
+                    >
+                      <div className="font-medium text-purple-900">Advanced Science</div>
+                      <div className="text-sm text-purple-700 mt-1">Complex topics, assessment-focused</div>
+                    </button>
+                    <button
+                      onClick={() => loadPresetConfig('writing_practice')}
+                      className="p-4 bg-white border border-purple-200 rounded-lg hover:bg-purple-50 text-left"
+                    >
+                      <div className="font-medium text-purple-900">Writing Practice</div>
+                      <div className="text-sm text-purple-700 mt-1">Language arts, guidance-heavy</div>
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">Interactive AI Mode</h3>
-                  <span className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">Realistic & Dynamic</span>
-                </div>
-              </div>
-              
-              <p className="text-gray-600 mb-4">
-                Two separate AIs engage in real conversations. Creates natural interactions with emergent behavior.
-              </p>
-              
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">Realistic</span>
-                <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded">Natural flow</span>
-                <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded">Slower</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Floating Animation Elements */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-blue-200/30 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-16 h-16 bg-purple-200/30 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-green-200/30 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
-      </section>
-
-      {/* Configuration Interface */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden">
-            
-            {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200/50">
-              <button
-                className={`flex-1 px-8 py-6 text-center font-semibold transition-all duration-300 ${
-                  activeTab === 'create' 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
-                    : 'bg-gray-50/50 text-gray-700 hover:bg-gray-100/50'
-                }`}
-                onClick={() => setActiveTab('create')}
-              >
-                <div className="flex items-center justify-center space-x-3">
-                  <span className="text-2xl">⚙️</span>
-                  <span>Create Configuration</span>
-                </div>
-              </button>
-              <button
-                className={`flex-1 px-8 py-6 text-center font-semibold transition-all duration-300 ${
-                  activeTab === 'upload' 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white' 
-                    : 'bg-gray-50/50 text-gray-700 hover:bg-gray-100/50'
-                }`}
-                onClick={() => setActiveTab('upload')}
-              >
-                <div className="flex items-center justify-center space-x-3">
-                  <span className="text-2xl">📁</span>
-                  <span>Upload Configuration</span>
-                </div>
-              </button>
-            </div>
-
-            <div className="p-8">
-              {activeTab === 'create' ? (
-                <div className="space-y-8">
-                  {/* Subject Selection */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Basic Settings */}
                   <div className="space-y-6">
-                    <h3 className="text-2xl font-bold text-gray-900">Subject & Basic Settings</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Basic Settings</h3>
                     
-                    {/* Subject Cards */}
+                    {/* Subject */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-4">Choose Subject Area</label>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Subject Area</label>
+                      <div className="space-y-2">
                         {subjectOptions.map(option => (
-                          <div
-                            key={option.value}
-                            className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
-                              formData.subject === option.value
-                                ? `border-${option.color}-300 bg-${option.color}-50 shadow-lg transform scale-105`
-                                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
-                            }`}
-                            onClick={() => handleFormChange('subject', option.value)}
-                          >
-                            <div className="text-center">
-                              <div className="text-3xl mb-2">{option.icon}</div>
-                              <div className="font-medium text-sm">{option.label}</div>
-                            </div>
-                          </div>
+                          <label key={option.value} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="radio"
+                              name="subject"
+                              value={option.value}
+                              checked={formData.subject === option.value}
+                              onChange={(e) => handleFormChange('subject', e.target.value)}
+                              className="mr-3"
+                            />
+                            <span className="text-xl mr-3">{option.icon}</span>
+                            <span className="font-medium">{option.label}</span>
+                          </label>
                         ))}
                       </div>
                     </div>
 
-                    {/* Number of Conversations & AI Model */}
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Number of Conversations</label>
-                        <input
-                          type="number"
-                          min="1"
-                          max="10"
-                          value={formData.numberOfConversations}
-                          onChange={(e) => handleFormChange('numberOfConversations', parseInt(e.target.value) || 3)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formData.generationMode === 'dual_ai' ? 'Interactive mode takes longer' : 'Fast generation mode'}
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">AI Model</label>
-                        <select
-                          value={formData.aiModel}
-                          onChange={(e) => handleFormChange('aiModel', e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        >
-                          {aiModelOptions.map(option => (
-                            <option key={option.value} value={option.value}>
-                              {option.label} - {option.cost}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Advanced Configuration Sections */}
-                  <div className="grid lg:grid-cols-2 gap-8">
-                    {/* AI Parameters */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200/50">
-                      <h4 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
-                        <span className="mr-2">🤖</span>
-                        AI Parameters
-                      </h4>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Temperature: {formData.temperature}
-                          </label>
+                    {/* Generation Mode Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Generation Method</label>
+                      <div className="space-y-3">
+                        <label className="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
                           <input
-                            type="range"
-                            min="0.1"
-                            max="1.0"
-                            step="0.1"
-                            value={formData.temperature}
-                            onChange={(e) => handleFormChange('temperature', parseFloat(e.target.value))}
-                            className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                            type="radio"
+                            name="generationMode"
+                            value="single_ai"
+                            checked={formData.generationMode === 'single_ai'}
+                            onChange={(e) => handleFormChange('generationMode', e.target.value)}
+                            className="mt-1 mr-3"
                           />
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>Focused</span>
-                            <span>Balanced</span>
-                            <span>Creative</span>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">🤖 Single AI (Scripted)</div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              One AI generates entire conversation based on parameters
+                            </div>
+                            <div className="text-xs text-green-600 mt-1">
+                              ✓ Fast • ✓ Cheaper • ✓ Controlled • ✓ Predictable vocabulary
+                            </div>
                           </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Max Tokens</label>
+                        </label>
+                        
+                        <label className="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
                           <input
-                            type="number"
-                            min="500"
-                            max="4000"
-                            step="100"
-                            value={formData.maxTokens}
-                            onChange={(e) => handleFormChange('maxTokens', parseInt(e.target.value))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            type="radio"
+                            name="generationMode"
+                            value="dual_ai"
+                            checked={formData.generationMode === 'dual_ai'}
+                            onChange={(e) => handleFormChange('generationMode', e.target.value)}
+                            className="mt-1 mr-3"
                           />
-                        </div>
-
-                        {formData.aiModel === 'o3-mini' && (
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Reasoning Effort</label>
-                            <select
-                              value={formData.reasoningEffort}
-                              onChange={(e) => handleFormChange('reasoningEffort', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            >
-                              <option value="low">Low</option>
-                              <option value="medium">Medium</option>
-                              <option value="high">High</option>
-                            </select>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">🤖↔️🤖 Dual AI (Interactive)</div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              Separate tutor and student AIs have real conversation
+                            </div>
+                            <div className="text-xs text-blue-600 mt-1">
+                              ✓ Realistic • ✓ Dynamic • ✓ Emergent behavior • ✓ Natural flow
+                            </div>
+                            <div className="text-xs text-amber-600 mt-1">
+                              ⚠️ Slower • ⚠️ Less predictable
+                            </div>
                           </div>
-                        )}
+                        </label>
                       </div>
                     </div>
 
-                    {/* Conversation Flow */}
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200/50">
-                      <h4 className="text-lg font-semibold text-green-900 mb-4 flex items-center">
-                        <span className="mr-2">💬</span>
-                        Conversation Flow
-                      </h4>
-                      
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Avg Turns</label>
-                            <input
-                              type="number"
-                              min="4"
-                              max="50"
-                              value={formData.avgTurns}
-                              onChange={(e) => handleFormChange('avgTurns', parseFloat(e.target.value))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Ratio</label>
-                            <input
-                              type="number"
-                              min="0.1"
-                              max="5.0"
-                              step="0.1"
-                              value={formData.tutorStudentRatio}
-                              onChange={(e) => handleFormChange('tutorStudentRatio', parseFloat(e.target.value))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Who Starts?</label>
-                          <div className="grid grid-cols-3 gap-2">
-                            {[
-                              { value: 'tutor', label: '👨‍🏫 Tutor', desc: 'Traditional' },
-                              { value: 'student', label: '👨‍🎓 Student', desc: 'Student-led' },
-                              { value: 'random', label: '🎲 Random', desc: 'Mixed' }
-                            ].map(option => (
-                              <label
-                                key={option.value}
-                                className={`flex flex-col items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                                  formData.conversationStarter === option.value
-                                    ? 'border-green-300 bg-green-50'
-                                    : 'border-gray-200 hover:border-green-200'
-                                }`}
-                              >
-                                <input
-                                  type="radio"
-                                  name="conversationStarter"
-                                  value={option.value}
-                                  checked={formData.conversationStarter === option.value}
-                                  onChange={(e) => handleFormChange('conversationStarter', e.target.value)}
-                                  className="sr-only"
-                                />
-                                <div className="text-lg mb-1">{option.label.split(' ')[0]}</div>
-                                <div className="text-xs font-medium">{option.label.split(' ')[1]}</div>
-                                <div className="text-xs text-gray-500">{option.desc}</div>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 border-t border-gray-200">
-                    <button
-                      onClick={() => generateConfig()}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center justify-center"
-                    >
-                      🔧 Generate Configuration
-                    </button>
-                    
-                    <button
-                      onClick={handleSubmit}
-                      disabled={loading}
-                      className={`px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center ${
-                        loading
-                          ? 'bg-gray-400 cursor-not-allowed' 
-                          : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-105'
-                      }`}
-                    >
-                      {loading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-xl mr-2">🚀</span>
-                          Generate {formData.numberOfConversations} Conversations
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Progress Display */}
-                  {loading && progress.total > 0 && (
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-blue-900">
-                          Generating conversation {progress.current} of {progress.total}
-                        </span>
-                        <span className="text-sm font-bold text-blue-700">
-                          {Math.round((progress.current / progress.total) * 100)}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-blue-200 rounded-full h-3">
-                        <div 
-                          className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-300"
-                          style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-xs text-blue-600 mt-2 flex items-center">
-                        <span className="animate-pulse mr-2">⚡</span>
-                        Using {formData.aiModel} in {formData.generationMode.replace('_', ' ')} mode
+                    {/* Number of Conversations */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Number of Conversations</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={formData.numberOfConversations}
+                        onChange={(e) => handleFormChange('numberOfConversations', parseInt(e.target.value) || 3)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Recommended: 1-5 conversations • {formData.generationMode === 'dual_ai' ? 'Dual AI takes longer' : 'Single AI is faster'}
                       </p>
                     </div>
-                  )}
 
-                  {/* Error Display */}
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                      <div className="flex items-center">
-                        <span className="text-red-500 mr-2">⚠️</span>
-                        <div className="text-red-800 font-medium">Generation Failed</div>
-                      </div>
-                      <div className="text-red-700 text-sm mt-2">{error}</div>
+                    {/* AI Model Selection (for metadata only) */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">AI Model (Metadata Only)</label>
+                      <select
+                        value={formData.aiModel}
+                        onChange={(e) => handleFormChange('aiModel', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      >
+                        {aiModelOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label} - {option.description}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">Lambda uses OPENAI_API_KEY environment variable</p>
                     </div>
-                  )}
-                </div>
-              ) : (
-                /* Upload Tab */
-                <div className="space-y-8">
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Upload Configuration</h2>
-                    <p className="text-gray-600">Upload an existing JSON configuration file</p>
                   </div>
 
-                  <div className="flex justify-center">
-                    <div className="w-full max-w-md">
-                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                          <svg className="w-8 h-8 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                          </svg>
-                          <p className="text-sm text-gray-500">Click to upload JSON file</p>
-                        </div>
-                        <input
-                          type="file"
-                          accept=".json"
-                          className="hidden"
-                          disabled={loading}
-                        />
+                  {/* AI Settings */}
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">AI Model Parameters</h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Temperature: {formData.temperature}
                       </label>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="1.0"
+                        step="0.1"
+                        value={formData.temperature}
+                        onChange={(e) => handleFormChange('temperature', parseFloat(e.target.value))}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Focused</span>
+                        <span>Balanced</span>
+                        <span>Creative</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Max Tokens</label>
+                      <input
+                        type="number"
+                        min="500"
+                        max="4000"
+                        step="100"
+                        value={formData.maxTokens}
+                        onChange={(e) => handleFormChange('maxTokens', parseInt(e.target.value))}
+                        className="w-full p-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    {formData.aiModel === 'o3-mini' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Reasoning Effort</label>
+                        <select
+                          value={formData.reasoningEffort}
+                          onChange={(e) => handleFormChange('reasoningEffort', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Custom Instructions</label>
+                      <textarea
+                        value={formData.customInstructions}
+                        onChange={(e) => handleFormChange('customInstructions', e.target.value)}
+                        placeholder="Additional instructions for the AI..."
+                        className="w-full p-3 border border-gray-300 rounded-lg h-20 resize-none"
+                      />
                     </div>
                   </div>
+                </div>
 
-                  {config && (
-                    <div className="mt-8">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Uploaded Configuration</h3>
-                      <ConfigViewer config={config} />
-                      
-                      <div className="mt-6 flex justify-center">
-                        <button
-                          onClick={handleSubmit}
-                          disabled={loading}
-                          className={`px-8 py-3 rounded-xl font-semibold text-white transition-all ${
-                            loading
-                              ? 'bg-gray-400 cursor-not-allowed' 
-                              : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg'
-                          }`}
-                        >
-                          {loading ? 'Generating...' : `🚀 Generate ${formData.numberOfConversations} Conversations`}
-                        </button>
+                {/* Conversation Structure Section */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-green-900 mb-4">Conversation Structure</h3>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Turn Configuration */}
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-3">Turn Configuration</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Average Turns</label>
+                          <input
+                            type="number"
+                            min="4"
+                            max="50"
+                            value={formData.avgTurns}
+                            onChange={(e) => handleFormChange('avgTurns', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Std Deviation</label>
+                          <input
+                            type="number"
+                            min="0.5"
+                            max="10"
+                            step="0.1"
+                            value={formData.stdTurns}
+                            onChange={(e) => handleFormChange('stdTurns', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={formData.minTurns}
+                            onChange={(e) => handleFormChange('minTurns', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Max Turns</label>
+                          <input
+                            type="number"
+                            min="10"
+                            max="100"
+                            value={formData.maxTurns}
+                            onChange={(e) => handleFormChange('maxTurns', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Interaction Configuration */}
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-3">Interaction Configuration</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Tutor:Student Ratio</label>
+                          <input
+                            type="number"
+                            min="0.1"
+                            max="5.0"
+                            step="0.1"
+                            value={formData.tutorStudentRatio}
+                            onChange={(e) => handleFormChange('tutorStudentRatio', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formData.tutorStudentRatio > 1 ? 'Tutor talks more' : 
+                             formData.tutorStudentRatio < 1 ? 'Student talks more' : 'Equal participation'}
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Who Starts the Conversation?</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
+                              <input
+                                type="radio"
+                                name="conversationStarter"
+                                value="tutor"
+                                checked={formData.conversationStarter === 'tutor'}
+                                onChange={(e) => handleFormChange('conversationStarter', e.target.value)}
+                                className="mr-3"
+                              />
+                              <div>
+                                <div className="font-medium text-sm">👨‍🏫 Tutor Starts</div>
+                                <div className="text-xs text-gray-600">Traditional approach - tutor initiates with question/topic</div>
+                              </div>
+                            </label>
+                            <label className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
+                              <input
+                                type="radio"
+                                name="conversationStarter"
+                                value="student"
+                                checked={formData.conversationStarter === 'student'}
+                                onChange={(e) => handleFormChange('conversationStarter', e.target.value)}
+                                className="mr-3"
+                              />
+                              <div>
+                                <div className="font-medium text-sm">👨‍🎓 Student Starts</div>
+                                <div className="text-xs text-gray-600">Student-driven approach - student asks question or states problem</div>
+                              </div>
+                            </label>
+                            <label className="flex items-center p-2 border rounded cursor-pointer hover:bg-gray-50">
+                              <input
+                                type="radio"
+                                name="conversationStarter"
+                                value="random"
+                                checked={formData.conversationStarter === 'random'}
+                                onChange={(e) => handleFormChange('conversationStarter', e.target.value)}
+                                className="mr-3"
+                              />
+                              <div>
+                                <div className="font-medium text-sm">🎲 Random</div>
+                                <div className="text-xs text-gray-600">Randomly choose who starts each conversation</div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vocabulary Section */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-yellow-900 mb-4">Vocabulary Configuration</h3>
+                  
+                  <div className="mb-4">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={formData.usePresetVocabulary}
+                        onChange={(e) => handleFormChange('usePresetVocabulary', e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm font-medium">Use preset vocabulary for {formData.subject}</span>
+                    </label>
+                  </div>
+
+                  {!formData.usePresetVocabulary && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Custom Vocabulary Terms</h4>
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {Object.entries(formData.customVocabulary).map(([term, frequency]) => (
+                          <div key={term} className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              value={term}
+                              onChange={(e) => {
+                                const oldTerm = term;
+                                const newTerm = e.target.value;
+                                if (newTerm !== oldTerm) {
+                                  removeVocabularyTerm(oldTerm);
+                                  updateVocabularyTerm(newTerm, frequency);
+                                }
+                              }}
+                              className="flex-1 p-2 border rounded text-sm"
+                              placeholder="Term"
+                            />
+                            <input
+                              type="number"
+                              min="0"
+                              max="1"
+                              step="0.01"
+                              value={frequency}
+                              onChange={(e) => updateVocabularyTerm(term, parseFloat(e.target.value))}
+                              className="w-20 p-2 border rounded text-sm"
+                              placeholder="0.15"
+                            />
+                            <button
+                              onClick={() => removeVocabularyTerm(term)}
+                              className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => updateVocabularyTerm('new_term', 0.1)}
+                        className="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-sm"
+                      >
+                        + Add Term
+                      </button>
                     </div>
                   )}
                 </div>
-              )}
-            </div>
+
+                {/* Tutor Questions Section */}
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-orange-900 mb-4">Tutor Question Distribution</h3>
+                  
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-700">Purpose Types & Weights</h4>
+                    
+                    {/* Dynamic Purpose List */}
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {Object.entries(formData.tutorPurposes).map(([purpose, weight]) => (
+                        <div key={purpose} className="flex items-center space-x-3 bg-white p-3 rounded border">
+                          <input
+                            type="text"
+                            value={purpose}
+                            onChange={(e) => {
+                              const oldPurpose = purpose;
+                              const newPurpose = e.target.value;
+                              if (newPurpose !== oldPurpose && newPurpose.trim()) {
+                                removeTutorPurpose(oldPurpose);
+                                updateTutorPurpose(newPurpose.trim(), weight);
+                              }
+                            }}
+                            className="flex-1 p-2 border rounded text-sm font-medium capitalize"
+                            placeholder="Purpose name"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value={weight}
+                            onChange={(e) => updateTutorPurpose(purpose, parseFloat(e.target.value) || 0)}
+                            className="w-20 p-2 border rounded text-sm"
+                            placeholder="0.4"
+                          />
+                          <span className="text-xs text-gray-500 w-12">
+                            {(weight * 100).toFixed(0)}%
+                          </span>
+                          <button
+                            onClick={() => removeTutorPurpose(purpose)}
+                            className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                            title="Remove purpose"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add New Purpose */}
+                    <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                      <input
+                        type="text"
+                        placeholder="New purpose name (e.g., 'motivation', 'scaffolding', 'reflection')"
+                        className="flex-1 p-2 border rounded text-sm"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            const purposeName = e.target.value.trim().toLowerCase();
+                            if (purposeName && !formData.tutorPurposes[purposeName]) {
+                              updateTutorPurpose(purposeName, 0.1);
+                              e.target.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={(e) => {
+                          const input = e.target.parentElement.querySelector('input');
+                          const purposeName = input.value.trim().toLowerCase();
+                          if (purposeName && !formData.tutorPurposes[purposeName]) {
+                            updateTutorPurpose(purposeName, 0.1);
+                            input.value = '';
+                          }
+                        }}
+                        className="px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+                      >
+                        + Add Purpose
+                      </button>
+                    </div>
+
+                    {/* Quick Add Common Purposes */}
+                    <div>
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">Quick Add Common Purposes:</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          'motivation', 'scaffolding', 'reflection', 'verification', 
+                          'elaboration', 'connection', 'application', 'synthesis',
+                          'metacognition', 'feedback', 'probing', 'redirection'
+                        ].filter(purpose => !formData.tutorPurposes[purpose]).map(purpose => (
+                          <button
+                            key={purpose}
+                            onClick={() => updateTutorPurpose(purpose, 0.1)}
+                            className="px-3 py-1 bg-white border border-orange-200 rounded text-sm hover:bg-orange-50 capitalize"
+                          >
+                            + {purpose}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Weight Summary & Normalization */}
+                    <div className="flex justify-between items-center pt-3 border-t">
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Total Weight: </span>
+                        <span className={`${
+                          Math.abs(Object.values(formData.tutorPurposes).reduce((sum, w) => sum + w, 0) - 1.0) < 0.01
+                            ? 'text-green-600 font-medium' 
+                            : 'text-amber-600 font-medium'
+                        }`}>
+                          {Object.values(formData.tutorPurposes).reduce((sum, w) => sum + w, 0).toFixed(3)}
+                        </span>
+                        <span className="ml-2 text-xs">
+                          ({Object.keys(formData.tutorPurposes).length} purposes)
+                        </span>
+                      </div>
+                      <button
+                        onClick={normalizeTutorWeights}
+                        className="px-4 py-2 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+                      >
+                        ⚖️ Normalize to 1.0
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Student Utterances Section */}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-red-900 mb-4">Student Response Characteristics</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-3">Confusion Levels</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Mean (1-5)</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="5"
+                            step="0.1"
+                            value={formData.confusionMean}
+                            onChange={(e) => handleFormChange('confusionMean', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Std Dev</label>
+                          <input
+                            type="number"
+                            min="0.1"
+                            max="3"
+                            step="0.1"
+                            value={formData.confusionStd}
+                            onChange={(e) => handleFormChange('confusionStd', parseFloat(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Min</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="5"
+                            value={formData.confusionMin}
+                            onChange={(e) => handleFormChange('confusionMin', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Max</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="5"
+                            value={formData.confusionMax}
+                            onChange={(e) => handleFormChange('confusionMax', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-3">Correctness Distribution</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Correct Independent</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="2000"
+                            value={formData.correctIndependent}
+                            onChange={(e) => handleFormChange('correctIndependent', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Correct Assisted</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="2000"
+                            value={formData.correctAssisted}
+                            onChange={(e) => handleFormChange('correctAssisted', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Incorrect</label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="2000"
+                            value={formData.incorrect}
+                            onChange={(e) => handleFormChange('incorrect', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Total: {formData.correctIndependent + formData.correctAssisted + formData.incorrect}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Preview Configuration */}
+                {config && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Generated Configuration Preview</h3>
+                    <ConfigViewer config={config} />
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <button
+                    onClick={() => generateConfig()}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    🔧 Generate Configuration
+                  </button>
+                  
+                  <button
+                    onClick={downloadConfig}
+                    className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    💾 Download Config
+                  </button>
+                  
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className={`px-8 py-3 rounded-lg font-semibold text-white transition-all ${
+                      loading
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg'
+                    }`}
+                  >
+                    {loading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Generating with {formData.aiModel}...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">🚀</span>
+                        <span>Generate {formData.numberOfConversations} Conversations</span>
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+                {/* Progress Display */}
+                {loading && progress.total > 0 && (
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-blue-900">
+                        Generating conversation {progress.current} of {progress.total}
+                      </span>
+                      <span className="text-sm text-blue-700">
+                        {Math.round((progress.current / progress.total) * 100)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Using {formData.aiModel} • Estimated time: {((progress.total - progress.current) * 15)} seconds remaining
+                    </p>
+                  </div>
+                )}
+
+                {/* Error Display */}
+                {error && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="text-red-800 font-medium mb-1">Generation Failed</div>
+                    <div className="text-red-700 text-sm">{error}</div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Upload Tab
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Configuration</h2>
+                  <p className="text-gray-600">Upload an existing JSON configuration file</p>
+                </div>
+
+                {/* Number of Conversations for Upload */}
+                <div className="mb-6">
+                  <div className="max-w-md mx-auto">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Number of Conversations to Generate</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={formData.numberOfConversations}
+                      onChange={(e) => {
+                        const newValue = parseInt(e.target.value) || 3;
+                        handleFormChange('numberOfConversations', newValue);
+                        if (config) {
+                          setConfig(prev => ({ ...prev, numberOfConversations: newValue }));
+                        }
+                      }}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">This will override any value in the uploaded configuration</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <div className="w-full max-w-md">
+                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-8 h-8 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-sm text-gray-500">Click to upload JSON file</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        disabled={loading}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {config && (
+                  <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Uploaded Configuration</h3>
+                    <ConfigViewer config={config} />
+                    
+                    <div className="mt-6 flex gap-4 justify-center">
+                      <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className={`px-8 py-3 rounded-lg font-semibold text-white transition-all ${
+                          loading
+                            ? 'bg-gray-400 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg'
+                        }`}
+                      >
+                        {loading ? (
+                          <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Generating...</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xl">🚀</span>
+                            <span>Generate {formData.numberOfConversations} Conversations</span>
+                          </div>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
