@@ -9,6 +9,7 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
 
   // API Configuration - Support both local and production
   const getApiUrl = () => {
@@ -24,75 +25,106 @@ function App() {
     }
     
     // Fallback to your AWS API Gateway
-    return 'https://3py567dr52.execute-api.us-east-1.amazonaws.com/prod';
+    return 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod';
+  };
+
+  const generateMultipleConversations = async (cfg) => {
+    const apiUrl = getApiUrl();
+    const singleConversationConfig = {
+      ...cfg,
+      numberOfConversations: 1 // Always request 1 conversation at a time
+    };
+    
+    const allConversations = [];
+    const totalWanted = cfg.numberOfConversations || 3;
+    
+    setProgress({ current: 0, total: totalWanted });
+    
+    for (let i = 0; i < totalWanted; i++) {
+      try {
+        console.log(`Generating conversation ${i + 1}/${totalWanted}`);
+        setProgress({ current: i + 1, total: totalWanted });
+        
+        const response = await fetch(`${apiUrl}/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(singleConversationConfig)
+        });
+        
+        console.log(`Conversation ${i + 1} response status:`, response.status);
+        
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch (e) {
+            // If we can't parse JSON, use the basic error
+          }
+          throw new Error(`Conversation ${i + 1} failed: ${errorMessage}`);
+        }
+        
+        const data = await response.json();
+        console.log(`✅ Successfully generated conversation ${i + 1}`);
+        
+        // Handle different response formats
+        let parsedData = data;
+        
+        // If it's a Lambda response with statusCode, body format
+        if (data.statusCode && data.body) {
+          if (data.statusCode !== 200) {
+            const errorBody = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
+            throw new Error(errorBody.error || 'API returned error status');
+          }
+          parsedData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
+        }
+        
+        // Check for errors in the parsed data
+        if (parsedData.error) {
+          throw new Error(`Conversation ${i + 1}: ${parsedData.error}`);
+        }
+        
+        // Add conversations to our collection
+        if (parsedData.conversations && Array.isArray(parsedData.conversations) && parsedData.conversations.length > 0) {
+          allConversations.push(...parsedData.conversations);
+        } else {
+          console.warn(`Conversation ${i + 1} returned no conversations`);
+        }
+        
+        // Small delay between requests to avoid overwhelming the API
+        if (i < totalWanted - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+      } catch (error) {
+        console.error(`❌ Error generating conversation ${i + 1}:`, error);
+        throw new Error(`Failed at conversation ${i + 1}: ${error.message}`);
+      }
+    }
+    
+    return allConversations;
   };
 
   const handleGenerate = async (cfg) => {
     setConfig(cfg);
     setLoading(true);
     setError(null);
+    setProgress({ current: 0, total: 0 });
     
     try {
-      const apiUrl = getApiUrl();
-      const endpoint = `${apiUrl}/generate`;
-      
-      console.log('Calling API:', endpoint);
+      console.log('Starting conversation generation...');
       console.log('Config:', cfg);
       
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(cfg)
-      });
+      const allConversations = await generateMultipleConversations(cfg);
       
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        // Try to get error details
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch (e) {
-          // If we can't parse JSON, use the basic error
-        }
-        throw new Error(errorMessage);
-      }
-      
-      const data = await response.json();
-      console.log('API Response:', data);
-      
-      // Handle different response formats
-      let parsedData = data;
-      
-      // If it's a Lambda response with statusCode, body format
-      if (data.statusCode && data.body) {
-        if (data.statusCode !== 200) {
-          const errorBody = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
-          throw new Error(errorBody.error || 'API returned error status');
-        }
-        parsedData = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
-      }
-      
-      // Check for errors in the parsed data
-      if (parsedData.error) {
-        throw new Error(parsedData.error);
-      }
-      
-      // Extract conversations
-      if (parsedData.conversations && Array.isArray(parsedData.conversations) && parsedData.conversations.length > 0) {
-        setConversations(parsedData.conversations);
+      if (allConversations.length > 0) {
+        setConversations(allConversations);
         setSelectedIndex(0); // Reset to first conversation
         
         // Log success info
-        console.log(`✅ Successfully generated ${parsedData.conversations.length} conversations`);
-        if (parsedData.metadata) {
-          console.log('📊 Metadata:', parsedData.metadata);
-        }
+        console.log(`✅ Successfully generated ${allConversations.length} total conversations`);
       } else {
-        throw new Error('No conversations returned from API');
+        throw new Error('No conversations were generated');
       }
       
     } catch (err) {
@@ -112,11 +144,14 @@ function App() {
         userMessage = 'CORS error - the API server may not be configured properly for this domain.';
       } else if (err.message.includes('OpenAI API key')) {
         userMessage = 'OpenAI API key is not configured on the server.';
+      } else if (err.message.includes('Endpoint request timed out')) {
+        userMessage = 'Request timed out. The API took too long to respond.';
       }
       
       setError(`Failed to generate conversations: ${userMessage}`);
     } finally {
       setLoading(false);
+      setProgress({ current: 0, total: 0 });
     }
   };
 
@@ -150,6 +185,8 @@ function App() {
       <LandingPage
         onSubmit={handleGenerate}
         loading={loading}
+        error={error}
+        progress={progress}
       />
     );
   }
@@ -174,6 +211,7 @@ function App() {
                   setConfig(null);
                   setSelectedIndex(0);
                   setError(null);
+                  setProgress({ current: 0, total: 0 });
                 }}
               >
                 ← New Configuration
@@ -205,15 +243,28 @@ function App() {
         </div>
       )}
 
-      {/* Enhanced Loading Display */}
+      {/* Enhanced Loading Display with Progress */}
       {loading && (
         <div className="mt-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
-          <div className="flex items-center">
+          <div className="flex items-center mb-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2"></div>
             <span className="font-medium">Generating conversations with OpenAI...</span>
           </div>
-          <div className="text-sm mt-1">
-            Using {apiInfo.environment} API • This may take 10-30 seconds
+          {progress.total > 0 && (
+            <div className="mb-2">
+              <div className="text-sm mb-1">
+                Progress: {progress.current}/{progress.total} conversations
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+          <div className="text-sm">
+            Using {apiInfo.environment} API • Each conversation takes ~10-15 seconds
           </div>
         </div>
       )}
@@ -282,7 +333,7 @@ function App() {
         <div className="mt-8 pt-6 border-t text-sm text-gray-500 text-center">
           <div className="flex justify-between items-center">
             <div>
-              ChatSynth v1.0 • Powered by OpenAI GPT-3.5-turbo
+              ChatSynth v1.0 • Powered by OpenAI o3-mini
             </div>
             <div>
               API: {apiInfo.environment}
