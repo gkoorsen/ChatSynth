@@ -225,26 +225,66 @@ const LandingPage = () => {
     });
   };
 
-  const generateConversation = async () => {
-    setIsGenerating(true);
-    try {
-      // Simulate API call - replace with actual endpoint
-      const response = await fetch('/api/generate-conversation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-      });
-      
-      const data = await response.json();
-      setResults(data);
-      setActiveTab('results');
-    } catch (error) {
-      console.error('Generation failed:', error);
-      alert('Failed to generate conversation. Please check your configuration.');
-    } finally {
-      setIsGenerating(false);
+const generateConversation = async () => {
+  setIsGenerating(true);
+  try {
+    // Validate required fields
+    if (!config.generationMode) {
+      alert('Please select a generation mode');
+      return;
     }
-  };
+
+    if (!config.educational_objectives?.subject) {
+      alert('Please specify a subject');
+      return;
+    }
+
+    // Prepare the config for the API
+    const apiConfig = {
+      ...config,
+      // Ensure ai_settings is properly formatted
+      ai_settings: {
+        model: config.models?.coordinator?.model || config.models?.tutor?.model || 'gpt-4o',
+        temperature: config.models?.coordinator?.temperature || config.models?.tutor?.temperature || 0.8,
+        max_tokens: config.models?.coordinator?.max_tokens || config.models?.tutor?.max_tokens || 2000,
+        reasoning_effort: config.models?.coordinator?.reasoning_effort || 'medium'
+      }
+    };
+
+    console.log('Sending config:', apiConfig);
+
+    // Replace with your actual Lambda endpoint URL
+    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod';
+    
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(apiConfig)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    setResults(data);
+    setActiveTab('results');
+  } catch (error) {
+    console.error('Generation failed:', error);
+    alert(`Failed to generate conversation: ${error.message}`);
+  } finally {
+    setIsGenerating(false);
+  }
+};
 
   const exportConfig = () => {
     const dataStr = JSON.stringify(config, null, 2);
