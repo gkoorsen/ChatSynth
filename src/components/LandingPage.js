@@ -1068,113 +1068,226 @@ const renderResults = () => {
           </div>
         )}
 
-        {/* Results Tab */}
-        {activeTab === 'results' && (
-          <div className="space-y-6">
-            {results ? (
-              <div className="space-y-6">
-                {/* Results Header */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900">Generated Conversations</h2>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-gray-600">
-                        {results.metadata?.conversation_count} conversation{results.metadata?.conversation_count > 1 ? 's' : ''}
-                      </span>
-                      <span className="text-sm text-gray-600">
-                        {results.metadata?.generation_mode}
-                      </span>
-                      <button
-                        onClick={() => {
-                          const dataStr = JSON.stringify(results, null, 2);
-                          const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                          const url = URL.createObjectURL(dataBlob);
-                          const link = document.createElement('a');
-                          link.href = url;
-                          link.download = 'conversation-results.json';
-                          link.click();
-                        }}
-                        className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                      >
-                        <Download className="w-4 h-4" />
-                        <span>Export Results</span>
-                      </button>
-                    </div>
-                  </div>
+       // Replace the Results Tab section in your LandingPage.js with this:
 
-                  {results.metadata && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="text-gray-600">Subject</div>
-                        <div className="font-semibold">{results.metadata.subject}</div>
+      {/* Results Tab */}
+      {activeTab === 'results' && (
+        <div className="space-y-6">
+          {results ? (
+            <div className="space-y-6">
+              {/* Show progress while generating */}
+              {results.status === 'generating' ? (
+                <>
+                  {/* Progress Header */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-gray-900">Generating Conversations</h2>
+                      <div className="flex items-center space-x-2">
+                        <Loader className="w-5 h-5 animate-spin text-blue-600" />
+                        <span className="text-sm text-gray-600">
+                          {results.progress?.current} of {results.progress?.total}
+                        </span>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="text-gray-600">Model Used</div>
-                        <div className="font-semibold">{results.metadata.model_used}</div>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${results.progress?.percentage || 0}%` }}
+                      ></div>
+                    </div>
+                    
+                    <p className="text-gray-600">{results.message}</p>
+                  </div>
+      
+                  {/* Show completed conversations so far */}
+                  {results.conversations && results.conversations.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Completed Conversations</h3>
+                      {results.conversations.map((convData, index) => (
+                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                          <h4 className="font-medium text-gray-900 mb-2">
+                            Conversation {convData.conversation_number}
+                            {convData.error && <span className="text-red-600 ml-2">(Error)</span>}
+                          </h4>
+                          {convData.error ? (
+                            <p className="text-red-600 text-sm">{convData.error}</p>
+                          ) : (
+                            <p className="text-gray-600 text-sm">
+                              {convData.conversation?.length || 0} turns completed
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Final Results Header */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-gray-900">Generated Conversations</h2>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm text-gray-600">
+                          {results.metadata?.successful_count || 0} successful
+                        </span>
+                        {results.metadata?.failed_count > 0 && (
+                          <span className="text-sm text-red-600">
+                            {results.metadata.failed_count} failed
+                          </span>
+                        )}
+                        <button
+                          onClick={() => {
+                            const dataStr = JSON.stringify(results, null, 2);
+                            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                            const url = URL.createObjectURL(dataBlob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = 'conversation-results.json';
+                            link.click();
+                          }}
+                          className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Export Results</span>
+                        </button>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="text-gray-600">Generated</div>
-                        <div className="font-semibold">
-                          {new Date(results.metadata.generated_at).toLocaleTimeString()}
+                    </div>
+      
+                    {results.metadata && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="text-gray-600">Subject</div>
+                          <div className="font-semibold">{results.metadata.subject}</div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="text-gray-600">Model Used</div>
+                          <div className="font-semibold">{results.metadata.model_used}</div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="text-gray-600">Total Conversations</div>
+                          <div className="font-semibold">{results.metadata.conversation_count}</div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="text-gray-600">Total Turns</div>
+                          <div className="font-semibold">{results.metadata.total_turns}</div>
                         </div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="text-gray-600">Total Turns</div>
-                        <div className="font-semibold">
-                          {results.conversations?.reduce((sum, conv) => sum + (Array.isArray(conv) ? conv.length : 0), 0) || 0}
+                    )}
+                  </div>
+      
+                  {/* Individual Conversations */}
+                  {results.conversations && Array.isArray(results.conversations) && results.conversations.map((convData, convIndex) => (
+                    <div key={convIndex} className="bg-white rounded-xl shadow-sm border border-gray-200">
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Conversation {convData.conversation_number || (convIndex + 1)}
+                            {convData.error && <span className="text-red-600 ml-2">(Error)</span>}
+                          </h3>
+                          <span className="text-sm text-gray-500">
+                            {convData.conversation?.length || 0} turns
+                          </span>
                         </div>
+                        
+                        {convData.error ? (
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <p className="text-red-800">{convData.error}</p>
+                          </div>
+                        ) : convData.conversation && Array.isArray(convData.conversation) ? (
+                          <div className="space-y-4">
+                            {convData.conversation.map((turn, index) => (
+                              <div
+                                key={index}
+                                className={`flex ${turn.role === 'tutor' ? 'justify-start' : 'justify-end'}`}
+                              >
+                                <div
+                                  className={`max-w-3xl px-4 py-3 rounded-lg ${
+                                    turn.role === 'tutor'
+                                      ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                                      : 'bg-green-50 text-green-900 border border-green-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <span className="text-xs font-medium uppercase tracking-wide">
+                                      {turn.role}
+                                    </span>
+                                    <span className="text-xs text-gray-500">Turn {index + 1}</span>
+                                  </div>
+                                  <p className="text-sm leading-relaxed">{turn.message}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <p className="text-gray-600">No conversation data available</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+      
+                  {/* Handle old format for backward compatibility */}
+                  {results.conversations && results.conversations.length === 0 && results.conversation && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                      <div className="p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Generated Conversation</h3>
+                        {Array.isArray(results.conversation) ? (
+                          <div className="space-y-4">
+                            {results.conversation.map((turn, index) => (
+                              <div
+                                key={index}
+                                className={`flex ${turn.role === 'tutor' ? 'justify-start' : 'justify-end'}`}
+                              >
+                                <div
+                                  className={`max-w-3xl px-4 py-3 rounded-lg ${
+                                    turn.role === 'tutor'
+                                      ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                                      : 'bg-green-50 text-green-900 border border-green-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <span className="text-xs font-medium uppercase tracking-wide">
+                                      {turn.role}
+                                    </span>
+                                    <span className="text-xs text-gray-500">Turn {index + 1}</span>
+                                  </div>
+                                  <p className="text-sm leading-relaxed">{turn.message}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-gray-600">Invalid conversation format</p>
+                        )}
                       </div>
                     </div>
                   )}
-                </div>
-
-                {/* Multiple Conversations Display */}
-                {results.conversations?.map((conversation, convIndex) => (
-                  <div key={convIndex} className="bg-white rounded-xl shadow-sm border border-gray-200">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Conversation {convIndex + 1}
-                          {conversation.error && <span className="text-red-600 ml-2">(Error)</span>}
-                        </h3>
-                        <span className="text-sm text-gray-500">
-                          {Array.isArray(conversation) ? conversation.length : 0} turns
-                        </span>
-                      </div>
-                      
-                      {conversation.error ? (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                          <p className="text-red-800">{conversation.error}</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {conversation?.map((turn, index) => (
-                            <div
-                              key={index}
-                              className={`flex ${turn.role === 'tutor' ? 'justify-start' : 'justify-end'}`}
-                            >
-                              <div
-                                className={`max-w-3xl px-4 py-3 rounded-lg ${
-                                  turn.role === 'tutor'
-                                    ? 'bg-blue-50 text-blue-900 border border-blue-200'
-                                    : 'bg-green-50 text-green-900 border border-green-200'
-                                }`}
-                              >
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <span className="text-xs font-medium uppercase tracking-wide">
-                                    {turn.role}
-                                  </span>
-                                  <span className="text-xs text-gray-500">Turn {index + 1}</span>
-                                </div>
-                                <p className="text-sm leading-relaxed">{turn.message}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Users className="w-16 h-16 mx-auto" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Results Yet</h3>
+              <p className="text-gray-600 mb-6">
+                Configure your settings and generate conversations to see results here.
+              </p>
+              <button
+                onClick={() => setActiveTab('configure')}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Go to Configuration
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
                 {/* Coordinator Log */}
                 {results.coordinator_log && results.coordinator_log.length > 0 && (
