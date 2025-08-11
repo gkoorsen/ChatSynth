@@ -253,11 +253,12 @@ const generateConversation = async () => {
 
     console.log('Sending config:', apiConfig);
 
-    // Replace with your actual Lambda endpoint URL
-    const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod';
+    // Your API Gateway endpoint
+    const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod';
     
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
+      mode: 'cors',
       headers: { 
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -265,12 +266,17 @@ const generateConversation = async () => {
       body: JSON.stringify(apiConfig)
     });
     
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('Response error:', errorText);
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
     
     const data = await response.json();
+    console.log('Response data:', data);
     
     if (data.error) {
       throw new Error(data.error);
