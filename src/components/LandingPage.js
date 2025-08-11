@@ -23,6 +23,7 @@ const LandingPage = () => {
       icon: "📚",
       config: {
         generationMode: "single_ai",
+        conversation_count: 1,
         models: {
           coordinator: { model: "gpt-4o", temperature: 0.3, max_tokens: 1500 },
           tutor: { model: "gpt-3.5-turbo", temperature: 0.8, max_tokens: 1000 },
@@ -58,6 +59,7 @@ const LandingPage = () => {
       icon: "🧠",
       config: {
         generationMode: "three_ai_coordinated",
+        conversation_count: 3,
         models: {
           coordinator: { model: "gpt-4o", temperature: 0.2, max_tokens: 2000, reasoning_effort: "high" },
           tutor: { model: "gpt-4", temperature: 0.7, max_tokens: 1200 },
@@ -129,6 +131,7 @@ const LandingPage = () => {
       icon: "🔬",
       config: {
         generationMode: "dual_ai",
+        conversation_count: 2,
         models: {
           coordinator: { model: "gpt-4o", temperature: 0.3, max_tokens: 1500 },
           tutor: { model: "gpt-4", temperature: 0.6, max_tokens: 1000 },
@@ -165,6 +168,7 @@ const LandingPage = () => {
       icon: "✍️",
       config: {
         generationMode: "dual_ai",
+        conversation_count: 2,
         models: {
           coordinator: { model: "gpt-4", temperature: 0.4, max_tokens: 1500 },
           tutor: { model: "gpt-4", temperature: 0.9, max_tokens: 1200 },
@@ -225,72 +229,72 @@ const LandingPage = () => {
     });
   };
 
-const generateConversation = async () => {
-  setIsGenerating(true);
-  try {
-    // Validate required fields
-    if (!config.generationMode) {
-      alert('Please select a generation mode');
-      return;
-    }
-
-    if (!config.educational_objectives?.subject) {
-      alert('Please specify a subject');
-      return;
-    }
-
-    // Prepare the config for the API
-    const apiConfig = {
-      ...config,
-      // Ensure ai_settings is properly formatted
-      ai_settings: {
-        model: config.models?.coordinator?.model || config.models?.tutor?.model || 'gpt-4o',
-        temperature: config.models?.coordinator?.temperature || config.models?.tutor?.temperature || 0.8,
-        max_tokens: config.models?.coordinator?.max_tokens || config.models?.tutor?.max_tokens || 2000,
-        reasoning_effort: config.models?.coordinator?.reasoning_effort || 'medium'
+  const generateConversation = async () => {
+    setIsGenerating(true);
+    try {
+      // Validate required fields
+      if (!config.generationMode) {
+        alert('Please select a generation mode');
+        return;
       }
-    };
 
-    console.log('Sending config:', apiConfig);
+      if (!config.educational_objectives?.subject) {
+        alert('Please specify a subject');
+        return;
+      }
 
-    // Your API Gateway endpoint
-    const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
-    
-    const response = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(apiConfig)
-    });
-    
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Response error:', errorText);
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
+      // Prepare the config for the API
+      const apiConfig = {
+        ...config,
+        // Ensure ai_settings is properly formatted
+        ai_settings: {
+          model: config.models?.coordinator?.model || config.models?.tutor?.model || 'gpt-4o',
+          temperature: config.models?.coordinator?.temperature || config.models?.tutor?.temperature || 0.8,
+          max_tokens: config.models?.coordinator?.max_tokens || config.models?.tutor?.max_tokens || 2000,
+          reasoning_effort: config.models?.coordinator?.reasoning_effort || 'medium'
+        }
+      };
+
+      console.log('Sending config:', apiConfig);
+
+      // Your API Gateway endpoint
+      const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
+      
+      const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(apiConfig)
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      setResults(data);
+      setActiveTab('results');
+    } catch (error) {
+      console.error('Generation failed:', error);
+      alert(`Failed to generate conversation: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
     }
-    
-    const data = await response.json();
-    console.log('Response data:', data);
-    
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    setResults(data);
-    setActiveTab('results');
-  } catch (error) {
-    console.error('Generation failed:', error);
-    alert(`Failed to generate conversation: ${error.message}`);
-  } finally {
-    setIsGenerating(false);
-  }
-};
+  };
 
   const exportConfig = () => {
     const dataStr = JSON.stringify(config, null, 2);
@@ -405,6 +409,10 @@ const generateConversation = async () => {
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-500">Mode:</span>
                             <span className="font-medium text-gray-900">{preset.config.generationMode}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">Conversations:</span>
+                            <span className="font-medium text-gray-900">{preset.config.conversation_count || 1}</span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-500">Subject:</span>
@@ -631,7 +639,18 @@ const generateConversation = async () => {
                   
                   {expandedSections.conversation && (
                     <div className="mt-4 space-y-4 p-4 border border-gray-200 rounded-lg">
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Number of Conversations</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            value={config.conversation_count || 1}
+                            onChange={(e) => updateConfig('conversation_count', parseInt(e.target.value))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Average Turns</label>
                           <input
@@ -720,12 +739,12 @@ const generateConversation = async () => {
                   {isGenerating ? (
                     <>
                       <Loader className="w-5 h-5 animate-spin" />
-                      <span>Generating Conversation...</span>
+                      <span>Generating {config.conversation_count || 1} Conversation{(config.conversation_count || 1) > 1 ? 's' : ''}...</span>
                     </>
                   ) : (
                     <>
                       <Play className="w-5 h-5" />
-                      <span>Generate Conversation</span>
+                      <span>Generate {config.conversation_count || 1} Conversation{(config.conversation_count || 1) > 1 ? 's' : ''}</span>
                     </>
                   )}
                 </button>
@@ -740,6 +759,10 @@ const generateConversation = async () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Mode:</span>
                     <span className="font-medium">{config.generationMode || 'Not set'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Conversations:</span>
+                    <span className="font-medium">{config.conversation_count || 1}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subject:</span>
@@ -803,10 +826,10 @@ const generateConversation = async () => {
                 {/* Results Header */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900">Generated Conversation</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Generated Conversations</h2>
                     <div className="flex items-center space-x-4">
                       <span className="text-sm text-gray-600">
-                        {results.metadata?.total_turns} turns
+                        {results.metadata?.conversation_count} conversation{results.metadata?.conversation_count > 1 ? 's' : ''}
                       </span>
                       <span className="text-sm text-gray-600">
                         {results.metadata?.generation_mode}
@@ -846,45 +869,62 @@ const generateConversation = async () => {
                         </div>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-3">
-                        <div className="text-gray-600">Duration</div>
+                        <div className="text-gray-600">Total Turns</div>
                         <div className="font-semibold">
-                          {results.metadata.intervention_count ? `${results.metadata.intervention_count} interventions` : 'No interventions'}
+                          {results.conversations?.reduce((sum, conv) => sum + (Array.isArray(conv) ? conv.length : 0), 0) || 0}
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Conversation Display */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Conversation</h3>
-                    <div className="space-y-4">
-                      {results.conversations?.[0]?.map((turn, index) => (
-                        <div
-                          key={index}
-                          className={`flex ${turn.role === 'tutor' ? 'justify-start' : 'justify-end'}`}
-                        >
-                          <div
-                            className={`max-w-3xl px-4 py-3 rounded-lg ${
-                              turn.role === 'tutor'
-                                ? 'bg-blue-50 text-blue-900 border border-blue-200'
-                                : 'bg-green-50 text-green-900 border border-green-200'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-2 mb-2">
-                              <span className="text-xs font-medium uppercase tracking-wide">
-                                {turn.role}
-                              </span>
-                              <span className="text-xs text-gray-500">Turn {index + 1}</span>
-                            </div>
-                            <p className="text-sm leading-relaxed">{turn.message}</p>
-                          </div>
+                {/* Multiple Conversations Display */}
+                {results.conversations?.map((conversation, convIndex) => (
+                  <div key={convIndex} className="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Conversation {convIndex + 1}
+                          {conversation.error && <span className="text-red-600 ml-2">(Error)</span>}
+                        </h3>
+                        <span className="text-sm text-gray-500">
+                          {Array.isArray(conversation) ? conversation.length : 0} turns
+                        </span>
+                      </div>
+                      
+                      {conversation.error ? (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <p className="text-red-800">{conversation.error}</p>
                         </div>
-                      ))}
+                      ) : (
+                        <div className="space-y-4">
+                          {conversation?.map((turn, index) => (
+                            <div
+                              key={index}
+                              className={`flex ${turn.role === 'tutor' ? 'justify-start' : 'justify-end'}`}
+                            >
+                              <div
+                                className={`max-w-3xl px-4 py-3 rounded-lg ${
+                                  turn.role === 'tutor'
+                                    ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                                    : 'bg-green-50 text-green-900 border border-green-200'
+                                }`}
+                              >
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <span className="text-xs font-medium uppercase tracking-wide">
+                                    {turn.role}
+                                  </span>
+                                  <span className="text-xs text-gray-500">Turn {index + 1}</span>
+                                </div>
+                                <p className="text-sm leading-relaxed">{turn.message}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                ))}
 
                 {/* Coordinator Log */}
                 {results.coordinator_log && results.coordinator_log.length > 0 && (
@@ -926,7 +966,7 @@ const generateConversation = async () => {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No Results Yet</h3>
                 <p className="text-gray-600 mb-6">
-                  Configure your settings and generate a conversation to see results here.
+                  Configure your settings and generate conversations to see results here.
                 </p>
                 <button
                   onClick={() => setActiveTab('configure')}
