@@ -230,71 +230,321 @@ const LandingPage = () => {
   };
 
   const generateConversation = async () => {
-    setIsGenerating(true);
-    try {
-      // Validate required fields
-      if (!config.generationMode) {
-        alert('Please select a generation mode');
-        return;
-      }
-
-      if (!config.educational_objectives?.subject) {
-        alert('Please specify a subject');
-        return;
-      }
-
-      // Prepare the config for the API
-      const apiConfig = {
-        ...config,
-        // Ensure ai_settings is properly formatted
-        ai_settings: {
-          model: config.models?.coordinator?.model || config.models?.tutor?.model || 'gpt-4o',
-          temperature: config.models?.coordinator?.temperature || config.models?.tutor?.temperature || 0.8,
-          max_tokens: config.models?.coordinator?.max_tokens || config.models?.tutor?.max_tokens || 2000,
-          reasoning_effort: config.models?.coordinator?.reasoning_effort || 'medium'
-        }
-      };
-
-      console.log('Sending config:', apiConfig);
-
-      // Your API Gateway endpoint
-      const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
-      
-      const response = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(apiConfig)
-      });
-      
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Response data:', data);
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      setResults(data);
-      setActiveTab('results');
-    } catch (error) {
-      console.error('Generation failed:', error);
-      alert(`Failed to generate conversation: ${error.message}`);
-    } finally {
-      setIsGenerating(false);
+  setIsGenerating(true);
+  try {
+    // Validate required fields
+    if (!config.generationMode) {
+      alert('Please select a generation mode');
+      return;
     }
-  };
+
+    if (!config.educational_objectives?.subject) {
+      alert('Please specify a subject');
+      return;
+    }
+
+    // Prepare the config for the API
+    const apiConfig = {
+      ...config,
+      ai_settings: {
+        model: config.models?.coordinator?.model || config.models?.tutor?.model || 'gpt-4o',
+        temperature: config.models?.coordinator?.temperature || config.models?.tutor?.temperature || 0.8,
+        max_tokens: config.models?.coordinator?.max_tokens || config.models?.tutor?.max_tokens || 2000,
+        reasoning_effort: config.models?.coordinator?.reasoning_effort || 'medium'
+      }
+    };
+
+    const conversationCount = config.conversation_count || 1;
+    const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
+    
+    console.log('Generating', conversationCount, 'conversations...');
+    
+    const conversations = [];
+    const errors = [];
+    
+    // Loop through and generate conversations one by one
+    for (let i = 0; i < conversationCount; i++) {
+      try {
+        console.log(`Generating conversation ${i + 1} of ${conversationCount}...`);
+        
+        // Update UI to show progress
+        setResults({
+          status: 'generating',
+          progress: {
+            current: i + 1,
+            total: conversationCount,
+            percentage: Math.round(((i + 1) / conversationCount) * 100)
+          },
+          conversations: [...conversations], // Show completed conversations
+          message: `Generating conversation ${i + 1} of ${conversationCount}...`
+        });
+        
+        const response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          mode: 'cors',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(apiConfig)
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        // Add the single conversation to our array
+        conversations.push({
+          conversation: data.conversation,
+          metadata: data.metadata,
+          conversation_number: i + 1,
+          generated_at: new Date().toISOString()
+        });
+        
+        console.log(`Conversation ${i + 1} completed successfully`);
+        
+        // Add a small delay between requests to be nice to the API
+        if (i < conversationCount - 1) {
+          console.log('Waiting 2 seconds before next conversation...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        
+      } catch (error) {
+        console.error(`Error generating conversation ${i + 1}:`, error);
+        errors.push({
+          conversation_number: i + 1,
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Continue with next conversation even if one fails
+        conversations.push({
+          conversation: null,
+          error: error.message,
+          conversation_number: i + 1,
+          generated_at: new Date().toISOString()
+        });
+      }
+    }
+    
+    // Final results
+    const finalResults = {
+      status: 'completed',
+      conversations,
+      errors,
+      metadata: {
+        generated_at: new Date().toISOString(),
+        conversation_count: conversations.length,
+        successful_count: conversations.filter(c => c.conversation && !c.error).length,
+        failed_count: errors.length,
+        total_turns: conversations.reduce((sum, conv) => {
+          return sum + (conv.conversation?.length || 0);
+        }, 0),
+        subject: config.educational_objectives?.subject,
+        model_used: apiConfig.ai_settings.model,
+        generation_mode: config.generationMode
+      }
+    };
+    
+    console.log('All conversations completed:', finalResults);
+    setResults(finalResults);
+    setActiveTab('results');
+    
+  } catch (error) {
+    console.error('Generation failed:', error);
+    alert(`Failed to generate conversations: ${error.message}`);
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
+// Updated Results Tab Component
+const renderResults = () => {
+  if (!results) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-gray-400 mb-4">
+          <Users className="w-16 h-16 mx-auto" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Results Yet</h3>
+        <p className="text-gray-600 mb-6">
+          Configure your settings and generate conversations to see results here.
+        </p>
+        <button
+          onClick={() => setActiveTab('configure')}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Go to Configuration
+        </button>
+      </div>
+    );
+  }
+
+  // Show progress while generating
+  if (results.status === 'generating') {
+    return (
+      <div className="space-y-6">
+        {/* Progress Header */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">Generating Conversations</h2>
+            <div className="flex items-center space-x-2">
+              <Loader className="w-5 h-5 animate-spin text-blue-600" />
+              <span className="text-sm text-gray-600">
+                {results.progress.current} of {results.progress.total}
+              </span>
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${results.progress.percentage}%` }}
+            ></div>
+          </div>
+          
+          <p className="text-gray-600">{results.message}</p>
+        </div>
+
+        {/* Show completed conversations so far */}
+        {results.conversations.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Completed Conversations</h3>
+            {results.conversations.map((convData, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <h4 className="font-medium text-gray-900 mb-2">
+                  Conversation {convData.conversation_number}
+                  {convData.error && <span className="text-red-600 ml-2">(Error)</span>}
+                </h4>
+                {convData.error ? (
+                  <p className="text-red-600 text-sm">{convData.error}</p>
+                ) : (
+                  <p className="text-gray-600 text-sm">
+                    {convData.conversation?.length || 0} turns completed
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Show final results
+  return (
+    <div className="space-y-6">
+      {/* Results Header */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gray-900">Generated Conversations</h2>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600">
+              {results.metadata?.successful_count} successful
+            </span>
+            {results.metadata?.failed_count > 0 && (
+              <span className="text-sm text-red-600">
+                {results.metadata.failed_count} failed
+              </span>
+            )}
+            <button
+              onClick={() => {
+                const dataStr = JSON.stringify(results, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'conversation-results.json';
+                link.click();
+              }}
+              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export Results</span>
+            </button>
+          </div>
+        </div>
+
+        {results.metadata && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="text-gray-600">Subject</div>
+              <div className="font-semibold">{results.metadata.subject}</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="text-gray-600">Model Used</div>
+              <div className="font-semibold">{results.metadata.model_used}</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="text-gray-600">Total Conversations</div>
+              <div className="font-semibold">{results.metadata.conversation_count}</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="text-gray-600">Total Turns</div>
+              <div className="font-semibold">{results.metadata.total_turns}</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Individual Conversations */}
+      {results.conversations?.map((convData, convIndex) => (
+        <div key={convIndex} className="bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Conversation {convData.conversation_number}
+                {convData.error && <span className="text-red-600 ml-2">(Error)</span>}
+              </h3>
+              <span className="text-sm text-gray-500">
+                {convData.conversation?.length || 0} turns
+              </span>
+            </div>
+            
+            {convData.error ? (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800">{convData.error}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {convData.conversation?.map((turn, index) => (
+                  <div
+                    key={index}
+                    className={`flex ${turn.role === 'tutor' ? 'justify-start' : 'justify-end'}`}
+                  >
+                    <div
+                      className={`max-w-3xl px-4 py-3 rounded-lg ${
+                        turn.role === 'tutor'
+                          ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                          : 'bg-green-50 text-green-900 border border-green-200'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-xs font-medium uppercase tracking-wide">
+                          {turn.role}
+                        </span>
+                        <span className="text-xs text-gray-500">Turn {index + 1}</span>
+                      </div>
+                      <p className="text-sm leading-relaxed">{turn.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
   const exportConfig = () => {
     const dataStr = JSON.stringify(config, null, 2);
