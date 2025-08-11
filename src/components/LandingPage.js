@@ -254,7 +254,7 @@ const generateConversation = async () => {
     console.log('Sending config:', apiConfig);
 
     // Your API Gateway endpoint
-    const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod';
+    const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
     
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
