@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Settings, Zap, Brain, Users, Download, Upload, Play, Save, Loader } from 'lucide-react';
+import { ChevronDown, ChevronRight, Settings, Zap, Brain, Users, Download, Upload, Play, Save, Loader, Plus, X } from 'lucide-react';
 
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState('presets');
@@ -12,6 +12,7 @@ const LandingPage = () => {
     conversation: false,
     intervention: false,
     educational: false,
+    purposes: false,
     logging: false
   });
 
@@ -49,6 +50,24 @@ const LandingPage = () => {
           confusion_scores: { mean: 3, std: 1, min: 1, max: 5 },
           learning_preferences: ["visual examples", "step-by-step"],
           correctness_distribution: { correct_independent: 0.3, correct_assisted: 0.5, incorrect: 0.2 }
+        },
+        student_purposes: {
+          purpose_weights: {
+            "better_understanding": 0.4,
+            "practice": 0.3,
+            "clarification": 0.2,
+            "validation": 0.1
+          },
+          custom_purposes: []
+        },
+        tutor_purposes: {
+          purpose_weights: {
+            "scaffolding": 0.4,
+            "explanation": 0.3,
+            "assessment": 0.2,
+            "encouragement": 0.1
+          },
+          custom_purposes: []
         }
       }
     },
@@ -116,6 +135,24 @@ const LandingPage = () => {
             "student can solve basic linear equations"
           ]
         },
+        student_purposes: {
+          purpose_weights: {
+            "better_understanding": 0.3,
+            "clarification": 0.3,
+            "validation": 0.2,
+            "practice": 0.2
+          },
+          custom_purposes: []
+        },
+        tutor_purposes: {
+          purpose_weights: {
+            "guided_discovery": 0.4,
+            "scaffolding": 0.3,
+            "assessment": 0.2,
+            "explanation": 0.1
+          },
+          custom_purposes: []
+        },
         logging: {
           coordinator_decisions: true,
           intervention_triggers: true,
@@ -158,6 +195,23 @@ const LandingPage = () => {
           confusion_scores: { mean: 2.5, std: 1, min: 1, max: 4 },
           learning_preferences: ["hands-on examples", "discovery learning"],
           correctness_distribution: { correct_independent: 0.4, correct_assisted: 0.4, incorrect: 0.2 }
+        },
+        student_purposes: {
+          purpose_weights: {
+            "better_understanding": 0.4,
+            "help_with_problem": 0.3,
+            "practice": 0.2,
+            "clarification": 0.1
+          },
+          custom_purposes: []
+        },
+        tutor_purposes: {
+          purpose_weights: {
+            "guided_discovery": 0.5,
+            "explanation": 0.3,
+            "encouragement": 0.2
+          },
+          custom_purposes: []
         }
       }
     },
@@ -195,6 +249,24 @@ const LandingPage = () => {
           confusion_scores: { mean: 2, std: 0.5, min: 1, max: 3 },
           learning_preferences: ["creative expression", "peer feedback"],
           correctness_distribution: { correct_independent: 0.6, correct_assisted: 0.3, incorrect: 0.1 }
+        },
+        student_purposes: {
+          purpose_weights: {
+            "better_understanding": 0.3,
+            "practice": 0.4,
+            "validation": 0.2,
+            "clarification": 0.1
+          },
+          custom_purposes: []
+        },
+        tutor_purposes: {
+          purpose_weights: {
+            "encouragement": 0.4,
+            "guided_discovery": 0.3,
+            "explanation": 0.2,
+            "scaffolding": 0.1
+          },
+          custom_purposes: []
         }
       }
     }
@@ -227,6 +299,33 @@ const LandingPage = () => {
       current[keys[keys.length - 1]] = value;
       return newConfig;
     });
+  };
+
+  const addCustomPurpose = (role) => {
+    const newPurpose = prompt(`Enter a custom ${role} purpose:`);
+    if (newPurpose && newPurpose.trim()) {
+      const cleanPurpose = newPurpose.trim().toLowerCase().replace(/[^a-z0-9_\s]/g, '').replace(/\s+/g, '_');
+      if (cleanPurpose) {
+        // Add to custom purposes list
+        updateConfig(`${role}_purposes.custom_purposes`, [
+          ...(config[`${role}_purposes`]?.custom_purposes || []),
+          cleanPurpose
+        ]);
+        // Add to purpose weights with default weight
+        updateConfig(`${role}_purposes.purpose_weights.${cleanPurpose}`, 0.1);
+      }
+    }
+  };
+
+  const removeCustomPurpose = (role, purpose) => {
+    // Remove from custom purposes list
+    const customPurposes = config[`${role}_purposes`]?.custom_purposes || [];
+    updateConfig(`${role}_purposes.custom_purposes`, customPurposes.filter(p => p !== purpose));
+    
+    // Remove from purpose weights
+    const newWeights = { ...(config[`${role}_purposes`]?.purpose_weights || {}) };
+    delete newWeights[purpose];
+    updateConfig(`${role}_purposes.purpose_weights`, newWeights);
   };
 
   const generateConversation = async () => {
@@ -390,6 +489,116 @@ const LandingPage = () => {
       };
       reader.readAsText(file);
     }
+  };
+
+  // Helper to render purpose configuration UI
+  const renderPurposeSection = (role, roleTitle) => {
+    const roleConfig = config[`${role}_purposes`] || {};
+    const purposeWeights = roleConfig.purpose_weights || {};
+    const customPurposes = roleConfig.custom_purposes || [];
+
+    // Define predefined purposes
+    const predefinedPurposes = role === 'student' 
+      ? ['better_understanding', 'clarification', 'practice', 'validation', 'help_with_problem']
+      : ['scaffolding', 'explanation', 'assessment', 'encouragement', 'guided_discovery'];
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-gray-900">{roleTitle} Purposes</h4>
+          <button
+            onClick={() => addCustomPurpose(role)}
+            className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-700"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Custom</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3">
+          {predefinedPurposes.map(purpose => (
+            <div key={purpose} className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id={`${role}_${purpose}`}
+                checked={(purposeWeights[purpose] || 0) > 0}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    updateConfig(`${role}_purposes.purpose_weights.${purpose}`, 0.2);
+                  } else {
+                    const newWeights = { ...purposeWeights };
+                    delete newWeights[purpose];
+                    updateConfig(`${role}_purposes.purpose_weights`, newWeights);
+                  }
+                }}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label
+                htmlFor={`${role}_${purpose}`}
+                className="flex-1 text-sm text-gray-700 capitalize cursor-pointer"
+              >
+                {purpose.replace(/_/g, ' ')}
+              </label>
+              {(purposeWeights[purpose] || 0) > 0 && (
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="1"
+                  value={purposeWeights[purpose] || 0}
+                  onChange={(e) => updateConfig(`${role}_purposes.purpose_weights.${purpose}`, parseFloat(e.target.value) || 0)}
+                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
+            </div>
+          ))}
+
+          {/* Custom purposes */}
+          {customPurposes.map(purpose => (
+            <div key={purpose} className="flex items-center space-x-3 bg-blue-50 p-2 rounded">
+              <input
+                type="checkbox"
+                id={`${role}_custom_${purpose}`}
+                checked={(purposeWeights[purpose] || 0) > 0}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    updateConfig(`${role}_purposes.purpose_weights.${purpose}`, 0.2);
+                  } else {
+                    const newWeights = { ...purposeWeights };
+                    delete newWeights[purpose];
+                    updateConfig(`${role}_purposes.purpose_weights`, newWeights);
+                  }
+                }}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label
+                htmlFor={`${role}_custom_${purpose}`}
+                className="flex-1 text-sm text-blue-700 capitalize cursor-pointer"
+              >
+                {purpose.replace(/_/g, ' ')} (custom)
+              </label>
+              {(purposeWeights[purpose] || 0) > 0 && (
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="1"
+                  value={purposeWeights[purpose] || 0}
+                  onChange={(e) => updateConfig(`${role}_purposes.purpose_weights.${purpose}`, parseFloat(e.target.value) || 0)}
+                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
+              <button
+                onClick={() => removeCustomPurpose(role, purpose)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -639,6 +848,31 @@ const LandingPage = () => {
                   )}
                 </div>
 
+                {/* NEW: Conversation Purposes Section */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => toggleSection('purposes')}
+                    className="flex items-center justify-between w-full p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900">Conversation Purposes</h3>
+                    {expandedSections.purposes ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                  </button>
+                  
+                  {expandedSections.purposes && (
+                    <div className="mt-4 space-y-6 p-4 border border-gray-200 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-4">
+                        Configure the purposes that guide conversation flow. Purposes are selected based on who starts the conversation.
+                        Higher weights make purposes more likely to be selected.
+                      </div>
+                      
+                      {renderPurposeSection('student', 'Student')}
+                      <div className="border-t border-gray-200 pt-6">
+                        {renderPurposeSection('tutor', 'Tutor')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Intervention System */}
                 {config.generationMode === 'three_ai_coordinated' && (
                   <div className="mb-6">
@@ -850,6 +1084,37 @@ const LandingPage = () => {
                       <span className="text-gray-600">Coordinator:</span>
                       <span className="font-medium">{config.models?.coordinator?.model || 'Not set'}</span>
                     </div>
+                  )}
+                  
+                  {/* Purpose Preview */}
+                  {(config.student_purposes?.purpose_weights || config.tutor_purposes?.purpose_weights) && (
+                    <>
+                      <div className="border-t border-gray-200 pt-3 mt-3">
+                        <span className="text-gray-600 text-xs uppercase tracking-wide">Purposes</span>
+                      </div>
+                      {config.student_purposes?.purpose_weights && Object.keys(config.student_purposes.purpose_weights).length > 0 && (
+                        <div>
+                          <span className="text-gray-600">Student:</span>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {Object.entries(config.student_purposes.purpose_weights)
+                              .filter(([_, weight]) => weight > 0)
+                              .map(([purpose, weight]) => `${purpose.replace(/_/g, ' ')} (${weight})`)
+                              .join(', ')}
+                          </div>
+                        </div>
+                      )}
+                      {config.tutor_purposes?.purpose_weights && Object.keys(config.tutor_purposes.purpose_weights).length > 0 && (
+                        <div>
+                          <span className="text-gray-600">Tutor:</span>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {Object.entries(config.tutor_purposes.purpose_weights)
+                              .filter(([_, weight]) => weight > 0)
+                              .map(([purpose, weight]) => `${purpose.replace(/_/g, ' ')} (${weight})`)
+                              .join(', ')}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
