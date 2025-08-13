@@ -1294,6 +1294,11 @@ const LandingPage = () => {
                           <span className="text-sm text-gray-600">
                             {results.progress?.current} of {results.progress?.total}
                           </span>
+                          {results.asyncJobId && (
+                            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              Async Mode
+                            </span>
+                          )}
                         </div>
                       </div>
                       
@@ -1305,7 +1310,25 @@ const LandingPage = () => {
                         ></div>
                       </div>
                       
+                      {/* Progress Message */}
                       <p className="text-gray-600">{results.message}</p>
+                      
+                      {/* Async Job Details */}
+                      {results.currentJobStatus && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <div className="text-sm text-blue-800">
+                            <div className="flex justify-between items-center">
+                              <span>Job Progress:</span>
+                              <span className="font-medium">{results.currentJobStatus.progress || 0}%</span>
+                            </div>
+                            {results.asyncJobId && (
+                              <div className="text-xs text-blue-600 mt-1">
+                                Job ID: {results.asyncJobId}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Show completed conversations so far */}
@@ -1314,10 +1337,21 @@ const LandingPage = () => {
                         <h3 className="text-lg font-semibold text-gray-900">Completed Conversations</h3>
                         {results.conversations.map((convData, index) => (
                           <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                            <h4 className="font-medium text-gray-900 mb-2">
-                              Conversation {convData.conversation_number}
-                              {convData.error && <span className="text-red-600 ml-2">(Error)</span>}
-                            </h4>
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium text-gray-900 mb-2">
+                                Conversation {convData.conversation_number}
+                                {convData.error && <span className="text-red-600 ml-2">(Error)</span>}
+                                {convData.generation_method && (
+                                  <span className={`ml-2 text-xs px-2 py-1 rounded ${
+                                    convData.generation_method === 'async' 
+                                      ? 'bg-blue-100 text-blue-800' 
+                                      : 'bg-green-100 text-green-800'
+                                  }`}>
+                                    {convData.generation_method}
+                                  </span>
+                                )}
+                              </h4>
+                            </div>
                             {convData.error ? (
                               <p className="text-red-600 text-sm">{convData.error}</p>
                             ) : (
@@ -1364,7 +1398,7 @@ const LandingPage = () => {
                       </div>
 
                       {results.metadata && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="text-gray-600">Subject</div>
                             <div className="font-semibold">{results.metadata.subject}</div>
@@ -1380,6 +1414,14 @@ const LandingPage = () => {
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="text-gray-600">Total Turns</div>
                             <div className="font-semibold">{results.metadata.total_turns}</div>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <div className="text-gray-600">Processing</div>
+                            <div className={`font-semibold ${
+                              results.metadata.processing_method === 'async' ? 'text-blue-600' : 'text-green-600'
+                            }`}>
+                              {results.metadata.processing_method || 'sync'}
+                            </div>
                           </div>
                         </div>
                       )}
