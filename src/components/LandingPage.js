@@ -364,14 +364,18 @@ const LandingPage = () => {
       // Determine if we need async processing
       const needsAsync = config.generationMode === 'dual_ai' || config.generationMode === 'three_ai_coordinated';
       
+      // TEMPORARY: Force sync mode until async endpoints are deployed
+      const forceSync = true; // Set to false once Lambda is updated
+      
       // Loop through and generate conversations one by one
       for (let i = 0; i < conversationCount; i++) {
         try {
           console.log(`Generating conversation ${i + 1} of ${conversationCount}...`);
           
-          if (needsAsync) {
+          if (needsAsync && !forceSync) {
             // === ASYNC PROCESSING PATH ===
             console.log(`Using async processing for ${config.generationMode} mode`);
+            console.log(`Calling: ${BASE_URL}/generate?mode=async`);
             
             // Start async job
             setResults({
@@ -385,7 +389,7 @@ const LandingPage = () => {
               message: `Starting async generation for conversation ${i + 1}...`
             });
             
-            const startResponse = await fetch(`${BASE_URL}/generate-async`, {
+            const startResponse = await fetch(`${BASE_URL}/generate?mode=async`, {
               method: 'POST',
               mode: 'cors',
               headers: { 
@@ -418,8 +422,14 @@ const LandingPage = () => {
             });
             
           } else {
-            // === SYNCHRONOUS PROCESSING PATH (Single AI) ===
-            console.log(`Using synchronous processing for ${config.generationMode} mode`);
+            // === SYNCHRONOUS PROCESSING PATH (Single AI or Forced Sync) ===
+            if (needsAsync && forceSync) {
+              console.log(`TEMPORARILY using sync mode for ${config.generationMode} (async not deployed yet)`);
+            } else {
+              console.log(`Using synchronous processing for ${config.generationMode} mode`);
+            }
+            
+            console.log(`Calling: ${BASE_URL}/generate`);
             
             setResults({
               status: 'generating',
@@ -530,7 +540,7 @@ const LandingPage = () => {
       try {
         console.log(`Polling job ${jobId}...`);
         
-        const statusResponse = await fetch(`${baseUrl}/status/${jobId}`, {
+        const statusResponse = await fetch(`${baseUrl}/generate?mode=status&jobId=${jobId}`, {
           method: 'GET',
           mode: 'cors',
           headers: { 'Accept': 'application/json' }
