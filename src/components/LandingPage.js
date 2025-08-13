@@ -365,7 +365,7 @@ const LandingPage = () => {
       const needsAsync = config.generationMode === 'dual_ai' || config.generationMode === 'three_ai_coordinated';
       
       // TEMPORARY: Force sync mode until async endpoints are deployed
-      const forceSync = true; // Set to false once Lambda is updated
+      const forceSync = false; // Set to false once Lambda is updated
       
       // Loop through and generate conversations one by one
       for (let i = 0; i < conversationCount; i++) {
