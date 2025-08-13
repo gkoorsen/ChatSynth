@@ -1,226 +1,232 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { 
-  Brain, 
-  Zap, 
-  Settings, 
-  Users, 
-  ChevronRight, 
-  Play, 
-  CheckCircle,
-  ArrowRight,
-  Target,
-  BookOpen,
-  MessageSquare,
-  BarChart3,
-  Loader2,
-  Download,
-  Copy,
-  RefreshCw
-} from 'lucide-react';
 
-const ImprovedLandingPage = () => {
+const LandingPage = ({ onSubmit, loading, error, progress }) => {
   const [selectedPreset, setSelectedPreset] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedConversation, setGeneratedConversation] = useState(null);
-  const [formData, setFormData] = useState({
+  const [config, setConfig] = useState({
     generationMode: 'single_ai',
-    subject: 'mathematics',
-    conversationLength: 8,
-    temperature: 0.8,
-    maxTokens: 2000,
-    conversationStarter: 'tutor',
-    customTopic: ''
+    numberOfConversations: 3,
+    conversation_structure: {
+      turns: 8,
+      starter: 'tutor',
+      purpose: 'tutoring'
+    },
+    vocabulary: {
+      complexity: 'intermediate',
+      domain_specific: true
+    },
+    tutor_questions: {
+      frequency: 'moderate',
+      type: 'scaffolding'
+    },
+    student_utterances: {
+      engagement: 'high',
+      confusion_level: 'realistic'
+    },
+    ai_settings: {
+      model: 'gpt-4o',
+      temperature: 0.7,
+      max_tokens: 2000
+    }
   });
 
-  // Preset configurations focused on single and dual AI modes
+  // Professional preset configurations
   const presets = [
     {
-      id: 'basic_math_single',
-      name: "Basic Math Tutoring",
-      description: "Simple algebra tutoring with single AI model",
-      complexity: "Beginner",
-      subject: "Mathematics",
-      mode: "single_ai",
-      featured: false,
+      id: 'math_basic',
+      title: 'Mathematics Tutoring',
+      description: 'Basic algebra and arithmetic problem-solving sessions',
+      mode: 'Single AI',
+      complexity: 'Beginner',
+      popular: true,
       config: {
         generationMode: 'single_ai',
-        subject: 'mathematics',
+        conversation_structure: {
+          turns: 8,
+          starter: 'tutor',
+          purpose: 'mathematics tutoring focusing on algebra and problem-solving'
+        },
+        vocabulary: {
+          complexity: 'intermediate',
+          domain_specific: true,
+          subject: 'mathematics'
+        },
+        tutor_questions: {
+          frequency: 'high',
+          type: 'scaffolding'
+        },
+        student_utterances: {
+          engagement: 'high',
+          confusion_level: 'moderate'
+        },
+        ai_settings: {
+          model: 'gpt-4o',
+          temperature: 0.6,
+          max_tokens: 1800
+        }
+      }
+    },
+    {
+      id: 'science_discovery',
+      title: 'Science Discovery Learning',
+      description: 'Inquiry-based science exploration and hypothesis testing',
+      mode: 'Dual AI',
+      complexity: 'Intermediate',
+      popular: true,
+      config: {
+        generationMode: 'dual_ai',
+        conversation_structure: {
+          turns: 10,
+          starter: 'student',
+          purpose: 'science discovery learning with inquiry-based approach'
+        },
+        vocabulary: {
+          complexity: 'intermediate',
+          domain_specific: true,
+          subject: 'science'
+        },
+        tutor_questions: {
+          frequency: 'moderate',
+          type: 'socratic'
+        },
+        student_utterances: {
+          engagement: 'high',
+          confusion_level: 'realistic'
+        },
         ai_settings: {
           model: 'gpt-4o',
           temperature: 0.8,
-          max_tokens: 1500
-        },
-        conversation_structure: {
-          turns: { mean: 6, std: 1, min: 4, max: 8 },
-          conversation_starter: 'tutor'
-        },
-        educational_objectives: {
-          subject: 'mathematics',
-          topic: 'basic algebra'
+          max_tokens: 2200
         }
       }
     },
     {
-      id: 'science_dual',
-      name: "Science Discovery Learning",
-      description: "Dual AI system for scientific method exploration",
-      complexity: "Intermediate",
-      subject: "Science",
-      mode: "dual_ai",
-      featured: true,
-      config: {
-        generationMode: 'dual_ai',
-        subject: 'science',
-        models: {
-          tutor: {
-            model: 'gpt-4o',
-            temperature: 0.7,
-            max_tokens: 1200
-          },
-          student: {
-            model: 'gpt-4o',
-            temperature: 0.9,
-            max_tokens: 800
-          }
-        },
-        conversation_structure: {
-          turns: { mean: 10, std: 2, min: 8, max: 12 },
-          conversation_starter: 'student'
-        },
-        student_purposes: {
-          purpose_weights: {
-            better_understanding: 0.4,
-            clarification: 0.3,
-            practice: 0.3
-          }
-        },
-        tutor_purposes: {
-          purpose_weights: {
-            scaffolding: 0.3,
-            explanation: 0.4,
-            guided_discovery: 0.3
-          }
-        }
-      }
-    },
-    {
-      id: 'advanced_math_dual',
-      name: "Advanced Math Collaboration",
-      description: "Dual AI for complex mathematical problem solving",
-      complexity: "Advanced",
-      subject: "Mathematics",
-      mode: "dual_ai",
-      featured: true,
-      config: {
-        generationMode: 'dual_ai',
-        subject: 'mathematics',
-        models: {
-          tutor: {
-            model: 'o3-mini',
-            max_tokens: 1000,
-            reasoning_effort: 'medium'
-          },
-          student: {
-            model: 'gpt-4o',
-            temperature: 0.8,
-            max_tokens: 600
-          }
-        },
-        conversation_structure: {
-          turns: { mean: 8, std: 1, min: 6, max: 10 },
-          conversation_starter: 'tutor'
-        },
-        educational_objectives: {
-          subject: 'mathematics',
-          topic: 'calculus and derivatives'
-        }
-      }
-    },
-    {
-      id: 'language_single',
-      name: "Language Arts Tutoring",
-      description: "Single AI for grammar and writing instruction",
-      complexity: "Beginner",
-      subject: "Language Arts",
-      mode: "single_ai",
-      featured: false,
+      id: 'language_arts',
+      title: 'Language Arts Discussion',
+      description: 'Reading comprehension and literary analysis conversations',
+      mode: 'Single AI',
+      complexity: 'Intermediate',
       config: {
         generationMode: 'single_ai',
-        subject: 'language',
+        conversation_structure: {
+          turns: 12,
+          starter: 'tutor',
+          purpose: 'language arts discussion focusing on reading comprehension'
+        },
+        vocabulary: {
+          complexity: 'advanced',
+          domain_specific: true,
+          subject: 'language arts'
+        },
+        tutor_questions: {
+          frequency: 'moderate',
+          type: 'analytical'
+        },
+        student_utterances: {
+          engagement: 'high',
+          confusion_level: 'low'
+        },
         ai_settings: {
           model: 'gpt-4o',
           temperature: 0.7,
-          max_tokens: 1800
-        },
-        conversation_structure: {
-          turns: { mean: 7, std: 1, min: 5, max: 9 },
-          conversation_starter: 'student'
-        },
-        educational_objectives: {
-          subject: 'language',
-          topic: 'grammar and sentence structure'
+          max_tokens: 2000
         }
       }
     },
     {
-      id: 'history_dual',
-      name: "Historical Analysis",
-      description: "Dual AI for exploring historical events and contexts",
-      complexity: "Intermediate",
-      subject: "History",
-      mode: "dual_ai",
-      featured: false,
+      id: 'history_analysis',
+      title: 'Historical Analysis',
+      description: 'Critical thinking about historical events and contexts',
+      mode: 'Dual AI',
+      complexity: 'Advanced',
       config: {
         generationMode: 'dual_ai',
-        subject: 'history',
         conversation_structure: {
-          turns: { mean: 9, std: 2, min: 7, max: 11 },
-          conversation_starter: 'tutor'
+          turns: 10,
+          starter: 'tutor',
+          purpose: 'historical analysis with critical thinking emphasis'
         },
-        student_purposes: {
-          purpose_weights: {
-            better_understanding: 0.5,
-            clarification: 0.3,
-            validation: 0.2
-          }
+        vocabulary: {
+          complexity: 'advanced',
+          domain_specific: true,
+          subject: 'history'
         },
-        tutor_purposes: {
-          purpose_weights: {
-            explanation: 0.4,
-            assessment: 0.3,
-            guided_discovery: 0.3
-          }
+        tutor_questions: {
+          frequency: 'high',
+          type: 'analytical'
+        },
+        student_utterances: {
+          engagement: 'high',
+          confusion_level: 'moderate'
+        },
+        ai_settings: {
+          model: 'gpt-4o',
+          temperature: 0.7,
+          max_tokens: 2400
         }
       }
     },
     {
-      id: 'custom_single',
-      name: "Custom Topic - Single AI",
-      description: "Flexible single AI configuration for any subject",
-      complexity: "Customizable",
-      subject: "Custom",
-      mode: "single_ai",
-      featured: false,
+      id: 'custom_topic',
+      title: 'Custom Topic Exploration',
+      description: 'Flexible conversation generation for any educational topic',
+      mode: 'Single AI',
+      complexity: 'Beginner',
       config: {
         generationMode: 'single_ai',
-        subject: 'custom',
+        conversation_structure: {
+          turns: 8,
+          starter: 'tutor',
+          purpose: 'custom topic exploration with adaptive approach'
+        },
+        vocabulary: {
+          complexity: 'intermediate',
+          domain_specific: false
+        },
+        tutor_questions: {
+          frequency: 'moderate',
+          type: 'exploratory'
+        },
+        student_utterances: {
+          engagement: 'moderate',
+          confusion_level: 'realistic'
+        },
         ai_settings: {
           model: 'gpt-4o',
           temperature: 0.8,
           max_tokens: 2000
-        },
+        }
+      }
+    },
+    {
+      id: 'advanced_reasoning',
+      title: 'Advanced Problem Solving',
+      description: 'Complex reasoning tasks using O3-mini model',
+      mode: 'Single AI',
+      complexity: 'Advanced',
+      config: {
+        generationMode: 'single_ai',
         conversation_structure: {
-          turns: { mean: 8, std: 2, min: 6, max: 10 },
-          conversation_starter: 'tutor'
+          turns: 6,
+          starter: 'tutor',
+          purpose: 'advanced problem solving with step-by-step reasoning'
+        },
+        vocabulary: {
+          complexity: 'advanced',
+          domain_specific: true
+        },
+        tutor_questions: {
+          frequency: 'high',
+          type: 'reasoning'
+        },
+        student_utterances: {
+          engagement: 'high',
+          confusion_level: 'high'
+        },
+        ai_settings: {
+          model: 'o3-mini',
+          temperature: 0.5,
+          max_tokens: 1500,
+          reasoning_effort: 'medium'
         }
       }
     }
@@ -228,542 +234,292 @@ const ImprovedLandingPage = () => {
 
   const handlePresetSelect = (preset) => {
     setSelectedPreset(preset);
-    setFormData({
-      ...preset.config,
-      customTopic: preset.config.educational_objectives?.topic || ''
-    });
+    setConfig({ ...config, ...preset.config });
   };
 
-  const handleFormChange = (field, value) => {
-    setFormData(prev => ({
+  const handleConfigChange = (section, key, value) => {
+    setConfig(prev => ({
       ...prev,
-      [field]: value
+      [section]: {
+        ...prev[section],
+        [key]: value
+      }
     }));
   };
 
-  const handleGenerate = async () => {
-    setIsGenerating(true);
-    try {
-      // Simulate API call - replace with actual API endpoint
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      
-      const result = await response.json();
-      setGeneratedConversation(result);
-    } catch (error) {
-      console.error('Generation failed:', error);
-    } finally {
-      setIsGenerating(false);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(config);
+  };
+
+  const getComplexityColor = (complexity) => {
+    switch (complexity) {
+      case 'Beginner': return 'bg-green-100 text-green-800';
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'Advanced': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
+  const getModeColor = (mode) => {
+    return mode === 'Dual AI' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">ChatSynth</h1>
-                <p className="text-xs text-slate-600">Educational Conversation Generator</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">Documentation</Button>
-              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600">
-                API Access
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="space-y-4 mb-8">
-            <Badge className="bg-blue-100 text-blue-700 border-blue-200">
-              <Zap className="w-4 h-4 mr-1" />
-              AI-Powered Education
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
-              Generate Educational
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Conversations </span>
-              with AI
-            </h1>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              Create realistic, engaging educational conversations using advanced AI models. 
-              Choose between single AI or dual AI modes for different learning scenarios.
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-6 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">ChatSynth</h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Generate realistic educational conversations using advanced AI models. 
+              Choose from preset configurations or customize your own tutoring scenarios.
             </p>
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              <Play className="w-5 h-5 mr-2" />
-              Start Generating
-            </Button>
-            <Button size="lg" variant="outline">
-              View Examples
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-center space-x-8 text-sm text-slate-600">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Single & Dual AI Modes</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Multiple Subjects</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
-              <span>Customizable Parameters</span>
-            </div>
-          </div>
         </div>
+      </div>
 
+      <div className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Preset Cards Section */}
+          
+          {/* Preset Cards - 2/3 width */}
           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="w-5 h-5 text-blue-500" />
-                  <span>Choose a Preset Configuration</span>
-                </CardTitle>
-                <CardDescription>
-                  Select from pre-configured setups optimized for different educational scenarios
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {presets.map((preset) => (
-                    <Card 
-                      key={preset.id} 
-                      className={`group cursor-pointer transition-all duration-300 hover:shadow-lg border-2 ${
-                        selectedPreset?.id === preset.id 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-slate-200 hover:border-blue-200'
-                      }`}
-                      onClick={() => handlePresetSelect(preset)}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-base group-hover:text-blue-600 transition-colors flex items-center">
-                              {preset.name}
-                              {preset.featured && (
-                                <Badge className="ml-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs">
-                                  Popular
-                                </Badge>
-                              )}
-                            </CardTitle>
-                            <CardDescription className="mt-1 text-sm">
-                              {preset.description}
-                            </CardDescription>
-                          </div>
-                          <ChevronRight className={`w-4 h-4 transition-all duration-300 ${
-                            selectedPreset?.id === preset.id 
-                              ? 'text-blue-500 rotate-90' 
-                              : 'text-slate-400 group-hover:text-blue-500'
-                          }`} />
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">Mode:</span>
-                            <Badge variant={preset.mode === 'dual_ai' ? 'default' : 'secondary'} className="text-xs">
-                              {preset.mode === 'dual_ai' ? 'Dual AI' : 'Single AI'}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">Subject:</span>
-                            <Badge variant="outline" className="text-xs">{preset.subject}</Badge>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-600">Complexity:</span>
-                            <Badge 
-                              variant={
-                                preset.complexity === 'Advanced' ? 'destructive' : 
-                                preset.complexity === 'Intermediate' ? 'default' : 'secondary'
-                              }
-                              className="text-xs"
-                            >
-                              {preset.complexity}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Configuration Form */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Settings className="w-5 h-5 text-purple-500" />
-                  <span>Configuration</span>
-                </CardTitle>
-                <CardDescription>
-                  Customize your conversation generation settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Generation Mode */}
-                <div className="space-y-2">
-                  <Label htmlFor="mode">Generation Mode</Label>
-                  <Select 
-                    value={formData.generationMode} 
-                    onValueChange={(value) => handleFormChange('generationMode', value)}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Choose a Preset Configuration</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {presets.map((preset) => (
+                  <div
+                    key={preset.id}
+                    className={`relative p-6 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      selectedPreset?.id === preset.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => handlePresetSelect(preset)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select mode" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single_ai">
-                        <div className="flex items-center space-x-2">
-                          <Brain className="w-4 h-4" />
-                          <span>Single AI</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="dual_ai">
-                        <div className="flex items-center space-x-2">
-                          <Users className="w-4 h-4" />
-                          <span>Dual AI</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Subject */}
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject</Label>
-                  <Select 
-                    value={formData.subject} 
-                    onValueChange={(value) => handleFormChange('subject', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select subject" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mathematics">Mathematics</SelectItem>
-                      <SelectItem value="science">Science</SelectItem>
-                      <SelectItem value="language">Language Arts</SelectItem>
-                      <SelectItem value="history">History</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Custom Topic */}
-                {formData.subject === 'custom' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="topic">Custom Topic</Label>
-                    <Input
-                      id="topic"
-                      placeholder="Enter your topic..."
-                      value={formData.customTopic}
-                      onChange={(e) => handleFormChange('customTopic', e.target.value)}
-                    />
-                  </div>
-                )}
-
-                {/* Conversation Length */}
-                <div className="space-y-3">
-                  <Label>Conversation Length: {formData.conversationLength} turns</Label>
-                  <Slider
-                    value={[formData.conversationLength]}
-                    onValueChange={(value) => handleFormChange('conversationLength', value[0])}
-                    max={15}
-                    min={4}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-slate-500">
-                    <span>4 turns</span>
-                    <span>15 turns</span>
-                  </div>
-                </div>
-
-                {/* Conversation Starter */}
-                <div className="space-y-2">
-                  <Label htmlFor="starter">Conversation Starter</Label>
-                  <Select 
-                    value={formData.conversationStarter} 
-                    onValueChange={(value) => handleFormChange('conversationStarter', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Who starts?" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tutor">Tutor</SelectItem>
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="random">Random</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Advanced Settings for Single AI */}
-                {formData.generationMode === 'single_ai' && (
-                  <>
-                    <div className="space-y-3">
-                      <Label>Temperature: {formData.temperature}</Label>
-                      <Slider
-                        value={[formData.temperature]}
-                        onValueChange={(value) => handleFormChange('temperature', value[0])}
-                        max={1}
-                        min={0}
-                        step={0.1}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs text-slate-500">
-                        <span>Focused</span>
-                        <span>Creative</span>
+                    {preset.popular && (
+                      <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                        Popular
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-lg font-semibold text-gray-900">{preset.title}</h3>
+                      <div className="flex gap-2">
+                        <span className={`text-xs px-2 py-1 rounded-full ${getModeColor(preset.mode)}`}>
+                          {preset.mode}
+                        </span>
+                        <span className={`text-xs px-2 py-1 rounded-full ${getComplexityColor(preset.complexity)}`}>
+                          {preset.complexity}
+                        </span>
                       </div>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label>Max Tokens: {formData.maxTokens}</Label>
-                      <Slider
-                        value={[formData.maxTokens]}
-                        onValueChange={(value) => handleFormChange('maxTokens', value[0])}
-                        max={3000}
-                        min={500}
-                        step={100}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs text-slate-500">
-                        <span>500</span>
-                        <span>3000</span>
-                      </div>
+                    
+                    <p className="text-gray-600 text-sm mb-4">{preset.description}</p>
+                    
+                    <div className="text-xs text-gray-500">
+                      <div>Model: {preset.config.ai_settings.model}</div>
+                      <div>Turns: {preset.config.conversation_structure.turns}</div>
+                      <div>Mode: {preset.config.generationMode.replace('_', ' ')}</div>
                     </div>
-                  </>
-                )}
-
-                {/* Generate Button */}
-                <Button 
-                  onClick={handleGenerate}
-                  disabled={isGenerating}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  size="lg"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Generate Conversation
-                    </>
-                  )}
-                </Button>
-
-                {/* Quick Actions */}
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Reset
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Download className="w-4 h-4 mr-1" />
-                    Export
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Mode Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">
-                  {formData.generationMode === 'dual_ai' ? 'Dual AI Mode' : 'Single AI Mode'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-slate-600 space-y-2">
-                  {formData.generationMode === 'dual_ai' ? (
-                    <>
-                      <p>Uses separate AI models for tutor and student roles, creating more realistic interactions through turn-by-turn generation.</p>
-                      <div className="flex items-center space-x-2 text-xs">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>Async processing with progress tracking</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>Individual AI personalities</span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <p>Uses a single AI model to generate the entire conversation in one request. Faster and more cost-effective.</p>
-                      <div className="flex items-center space-x-2 text-xs">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>Quick generation (10-30 seconds)</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>Consistent conversation flow</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Results Section */}
-        {generatedConversation && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="w-5 h-5 text-green-500" />
-                  <span>Generated Conversation</span>
-                </div>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => copyToClipboard(JSON.stringify(generatedConversation, null, 2))}>
-                    <Copy className="w-4 h-4 mr-1" />
-                    Copy JSON
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-1" />
-                    Download
-                  </Button>
-                </div>
-              </CardTitle>
-              <CardDescription>
-                Your AI-generated educational conversation is ready
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {generatedConversation.conversation?.map((turn, index) => (
-                  <div key={index} className={`p-4 rounded-lg ${
-                    turn.role === 'tutor' 
-                      ? 'bg-blue-50 border-l-4 border-blue-400' 
-                      : 'bg-green-50 border-l-4 border-green-400'
-                  }`}>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Badge variant={turn.role === 'tutor' ? 'default' : 'secondary'}>
-                        {turn.role === 'tutor' ? 'Tutor' : 'Student'}
-                      </Badge>
-                      <span className="text-xs text-slate-500">Turn {index + 1}</span>
-                    </div>
-                    <p className="text-slate-700">{turn.message}</p>
                   </div>
                 ))}
               </div>
-              
-              {generatedConversation.metadata && (
-                <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-                  <h4 className="font-medium text-slate-900 mb-2">Conversation Metadata</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-slate-600">Total Turns:</span>
-                      <div className="font-medium">{generatedConversation.metadata.total_turns}</div>
-                    </div>
-                    <div>
-                      <span className="text-slate-600">Subject:</span>
-                      <div className="font-medium capitalize">{generatedConversation.metadata.subject}</div>
-                    </div>
-                    <div>
-                      <span className="text-slate-600">Model:</span>
-                      <div className="font-medium">{generatedConversation.metadata.model_used}</div>
-                    </div>
-                    <div>
-                      <span className="text-slate-600">Mode:</span>
-                      <div className="font-medium">{generatedConversation.metadata.generation_mode}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Features Section */}
-        <div className="mt-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Why Choose ChatSynth?</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Advanced AI technology meets educational expertise to create the most realistic conversations
-            </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Brain,
-                title: "Advanced AI Models",
-                description: "Powered by GPT-4o and O3-mini for high-quality, contextually aware conversations"
-              },
-              {
-                icon: Users,
-                title: "Dual AI Architecture",
-                description: "Separate AI agents for tutor and student roles create authentic interactions"
-              },
-              {
-                icon: Target,
-                title: "Educational Focus",
-                description: "Purpose-built for educational scenarios with learning objectives in mind"
-              },
-              {
-                icon: Settings,
-                title: "Highly Customizable",
-                description: "Fine-tune every aspect from conversation length to AI personality traits"
-              },
-              {
-                icon: BarChart3,
-                title: "Real-time Progress",
-                description: "Track generation progress with detailed status updates and metadata"
-              },
-              {
-                icon: BookOpen,
-                title: "Multiple Subjects",
-                description: "Pre-configured for mathematics, science, language arts, history, and custom topics"
-              }
-            ].map((feature, index) => (
-              <div key={index} className="group p-6 rounded-xl border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300">
-                <div className="space-y-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="w-6 h-6 text-white" />
+          {/* Configuration Panel - 1/3 width */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Configuration</h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* Generation Mode */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Generation Mode
+                  </label>
+                  <select
+                    value={config.generationMode}
+                    onChange={(e) => setConfig(prev => ({ ...prev, generationMode: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="single_ai">Single AI (Faster)</option>
+                    <option value="dual_ai">Dual AI (More Realistic)</option>
+                  </select>
+                </div>
+
+                {/* Number of Conversations */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Number of Conversations: {config.numberOfConversations}
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    value={config.numberOfConversations}
+                    onChange={(e) => setConfig(prev => ({ ...prev, numberOfConversations: parseInt(e.target.value) }))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>1</span>
+                    <span>5</span>
+                  </div>
+                </div>
+
+                {/* Conversation Length */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Conversation Length: {config.conversation_structure.turns} turns
+                  </label>
+                  <input
+                    type="range"
+                    min="4"
+                    max="15"
+                    value={config.conversation_structure.turns}
+                    onChange={(e) => handleConfigChange('conversation_structure', 'turns', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>4</span>
+                    <span>15</span>
+                  </div>
+                </div>
+
+                {/* AI Model Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    AI Model
+                  </label>
+                  <select
+                    value={config.ai_settings.model}
+                    onChange={(e) => handleConfigChange('ai_settings', 'model', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="gpt-4o">GPT-4o (Recommended)</option>
+                    <option value="o3-mini">O3-mini (Advanced Reasoning)</option>
+                  </select>
+                </div>
+
+                {/* Temperature */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Creativity Level: {config.ai_settings.temperature}
+                  </label>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="1.0"
+                    step="0.1"
+                    value={config.ai_settings.temperature}
+                    onChange={(e) => handleConfigChange('ai_settings', 'temperature', parseFloat(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Focused</span>
+                    <span>Creative</span>
+                  </div>
+                </div>
+
+                {/* Max Tokens */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Response Length: {config.ai_settings.max_tokens} tokens
+                  </label>
+                  <input
+                    type="range"
+                    min="1000"
+                    max="3000"
+                    step="200"
+                    value={config.ai_settings.max_tokens}
+                    onChange={(e) => handleConfigChange('ai_settings', 'max_tokens', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Short</span>
+                    <span>Long</span>
+                  </div>
+                </div>
+
+                {/* O3-mini specific settings */}
+                {config.ai_settings.model === 'o3-mini' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Reasoning Effort
+                    </label>
+                    <select
+                      value={config.ai_settings.reasoning_effort || 'medium'}
+                      onChange={(e) => handleConfigChange('ai_settings', 'reasoning_effort', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Generate Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+                    loading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
+                  }`}
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Generating...
+                    </div>
+                  ) : (
+                    'Generate Conversations'
+                  )}
+                </button>
+
+                {/* Progress Display */}
+                {loading && progress.total > 0 && (
+                  <div className="mt-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                      Progress: {progress.current}/{progress.total}
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error Display */}
+                {error && (
+                  <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
+              </form>
+
+              {/* Mode Information */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Mode Information</h3>
+                <div className="space-y-2 text-xs text-gray-600">
+                  <div>
+                    <strong>Single AI:</strong> Faster generation (10-30s), cost-effective, good for basic scenarios
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-slate-600 mt-2 leading-relaxed">
-                      {feature.description}
-                    </p>
+                    <strong>Dual AI:</strong> More realistic interactions (30-120s), separate tutor/student personalities
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
@@ -771,4 +527,4 @@ const ImprovedLandingPage = () => {
   );
 };
 
-export default ImprovedLandingPage;
+export default LandingPage;
