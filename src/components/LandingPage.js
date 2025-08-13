@@ -354,58 +354,113 @@ const LandingPage = () => {
       };
 
       const conversationCount = config.conversation_count || 1;
-      const API_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
+      const BASE_URL = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod';
       
       console.log('Generating', conversationCount, 'conversations...');
       
       const conversations = [];
       const errors = [];
       
+      // Determine if we need async processing
+      const needsAsync = config.generationMode === 'dual_ai' || config.generationMode === 'three_ai_coordinated';
+      
       // Loop through and generate conversations one by one
       for (let i = 0; i < conversationCount; i++) {
         try {
           console.log(`Generating conversation ${i + 1} of ${conversationCount}...`);
           
-          // Update UI to show progress
-          setResults({
-            status: 'generating',
-            progress: {
-              current: i + 1,
-              total: conversationCount,
-              percentage: Math.round(((i + 1) / conversationCount) * 100)
-            },
-            conversations: [...conversations], // Show completed conversations
-            message: `Generating conversation ${i + 1} of ${conversationCount}...`
-          });
-          
-          const response = await fetch(API_ENDPOINT, {
-            method: 'POST',
-            mode: 'cors',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify(apiConfig)
-          });
-          
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
+          if (needsAsync) {
+            // === ASYNC PROCESSING PATH ===
+            console.log(`Using async processing for ${config.generationMode} mode`);
+            
+            // Start async job
+            setResults({
+              status: 'generating',
+              progress: {
+                current: i + 1,
+                total: conversationCount,
+                percentage: Math.round(((i) / conversationCount) * 100)
+              },
+              conversations: [...conversations],
+              message: `Starting async generation for conversation ${i + 1}...`
+            });
+            
+            const startResponse = await fetch(`${BASE_URL}/generate-async`, {
+              method: 'POST',
+              mode: 'cors',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify(apiConfig)
+            });
+            
+            if (!startResponse.ok) {
+              const errorText = await startResponse.text();
+              throw new Error(`HTTP ${startResponse.status}: ${errorText}`);
+            }
+            
+            const startData = await startResponse.json();
+            const jobId = startData.jobId;
+            
+            console.log(`Async job started: ${jobId}`);
+            
+            // Poll for completion
+            const conversation = await pollJobCompletion(jobId, BASE_URL, i + 1, conversationCount, conversations);
+            
+            conversations.push({
+              conversation: conversation.conversation,
+              metadata: conversation.metadata,
+              conversation_number: i + 1,
+              generated_at: new Date().toISOString(),
+              generation_method: 'async',
+              job_id: jobId
+            });
+            
+          } else {
+            // === SYNCHRONOUS PROCESSING PATH (Single AI) ===
+            console.log(`Using synchronous processing for ${config.generationMode} mode`);
+            
+            setResults({
+              status: 'generating',
+              progress: {
+                current: i + 1,
+                total: conversationCount,
+                percentage: Math.round(((i + 1) / conversationCount) * 100)
+              },
+              conversations: [...conversations],
+              message: `Generating conversation ${i + 1} of ${conversationCount}...`
+            });
+            
+            const response = await fetch(`${BASE_URL}/generate`, {
+              method: 'POST',
+              mode: 'cors',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify(apiConfig)
+            });
+            
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+              throw new Error(data.error);
+            }
+            
+            conversations.push({
+              conversation: data.conversation,
+              metadata: data.metadata,
+              conversation_number: i + 1,
+              generated_at: new Date().toISOString(),
+              generation_method: 'sync'
+            });
           }
-          
-          const data = await response.json();
-          
-          if (data.error) {
-            throw new Error(data.error);
-          }
-          
-          // Add the single conversation to our array
-          conversations.push({
-            conversation: data.conversation,
-            metadata: data.metadata,
-            conversation_number: i + 1,
-            generated_at: new Date().toISOString()
-          });
           
           console.log(`Conversation ${i + 1} completed successfully`);
           
@@ -448,7 +503,8 @@ const LandingPage = () => {
           }, 0),
           subject: config.educational_objectives?.subject,
           model_used: apiConfig.ai_settings.model,
-          generation_mode: config.generationMode
+          generation_mode: config.generationMode,
+          processing_method: needsAsync ? 'async' : 'sync'
         }
       };
       
@@ -462,6 +518,75 @@ const LandingPage = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Helper function to poll job completion
+  const pollJobCompletion = async (jobId, baseUrl, conversationNum, totalConversations, existingConversations) => {
+    const maxPollTime = 10 * 60 * 1000; // 10 minutes max
+    const pollInterval = 2000; // 2 seconds
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < maxPollTime) {
+      try {
+        console.log(`Polling job ${jobId}...`);
+        
+        const statusResponse = await fetch(`${baseUrl}/status/${jobId}`, {
+          method: 'GET',
+          mode: 'cors',
+          headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!statusResponse.ok) {
+          throw new Error(`Status check failed: ${statusResponse.status}`);
+        }
+        
+        const status = await statusResponse.json();
+        console.log(`Job ${jobId} status:`, status.status, `${status.progress || 0}%`);
+        
+        // Update UI with current job progress
+        const overallProgress = Math.round(((conversationNum - 1) / totalConversations) * 100) + 
+                               Math.round((status.progress || 0) / totalConversations);
+        
+        setResults({
+          status: 'generating',
+          progress: {
+            current: conversationNum,
+            total: totalConversations,
+            percentage: Math.min(overallProgress, 95),
+            jobProgress: status.progress || 0
+          },
+          conversations: [...existingConversations],
+          message: status.message || `Processing conversation ${conversationNum}...`,
+          asyncJobId: jobId,
+          currentJobStatus: status
+        });
+        
+        if (status.status === 'completed') {
+          console.log(`Job ${jobId} completed successfully`);
+          return {
+            conversation: status.conversation,
+            metadata: status.metadata
+          };
+        }
+        
+        if (status.status === 'failed') {
+          throw new Error(`Job failed: ${status.error || 'Unknown error'}`);
+        }
+        
+        // Wait before next poll
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+        
+      } catch (error) {
+        console.error(`Error polling job ${jobId}:`, error);
+        // Continue polling unless it's a permanent error
+        if (error.message.includes('Job not found')) {
+          throw error;
+        }
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+      }
+    }
+    
+    throw new Error(`Job ${jobId} timed out after ${maxPollTime / 1000} seconds`);
   };
 
   const exportConfig = () => {
