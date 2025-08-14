@@ -249,275 +249,540 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(config);
+    if (onSubmit) {
+      onSubmit(config);
+    }
   };
 
   const getComplexityColor = (complexity) => {
     switch (complexity) {
-      case 'Beginner': return 'bg-green-100 text-green-800';
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Beginner': return { backgroundColor: '#dcfce7', color: '#166534' };
+      case 'Intermediate': return { backgroundColor: '#fef3c7', color: '#92400e' };
+      case 'Advanced': return { backgroundColor: '#fecaca', color: '#991b1b' };
+      default: return { backgroundColor: '#f3f4f6', color: '#374151' };
     }
   };
 
   const getModeColor = (mode) => {
-    return mode === 'Dual AI' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
+    return mode === 'Dual AI' 
+      ? { backgroundColor: '#e9d5ff', color: '#7c3aed' }
+      : { backgroundColor: '#dbeafe', color: '#1d4ed8' };
+  };
+
+  // Embedded styles
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+    },
+    header: {
+      backgroundColor: '#ffffff',
+      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+      borderBottom: '1px solid #e5e7eb',
+      padding: '2rem 0'
+    },
+    headerContent: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '0 1.5rem',
+      textAlign: 'center'
+    },
+    title: {
+      fontSize: '2.5rem',
+      fontWeight: 'bold',
+      color: '#111827',
+      marginBottom: '1rem'
+    },
+    subtitle: {
+      fontSize: '1.25rem',
+      color: '#6b7280',
+      maxWidth: '48rem',
+      margin: '0 auto'
+    },
+    mainContent: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '2rem 1.5rem',
+      display: 'grid',
+      gridTemplateColumns: '2fr 1fr',
+      gap: '2rem'
+    },
+    presetsSection: {
+      backgroundColor: '#ffffff',
+      borderRadius: '0.75rem',
+      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+      border: '1px solid #e5e7eb',
+      padding: '1.5rem'
+    },
+    sectionTitle: {
+      fontSize: '1.5rem',
+      fontWeight: 'bold',
+      color: '#111827',
+      marginBottom: '1.5rem'
+    },
+    presetsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      gap: '1rem'
+    },
+    presetCard: {
+      position: 'relative',
+      padding: '1.5rem',
+      border: '2px solid #e5e7eb',
+      borderRadius: '0.5rem',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease-in-out'
+    },
+    presetCardSelected: {
+      borderColor: '#3b82f6',
+      backgroundColor: '#eff6ff'
+    },
+    presetCardHover: {
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      borderColor: '#d1d5db'
+    },
+    popularBadge: {
+      position: 'absolute',
+      top: '-0.5rem',
+      right: '-0.5rem',
+      backgroundColor: '#f97316',
+      color: '#ffffff',
+      fontSize: '0.75rem',
+      padding: '0.25rem 0.5rem',
+      borderRadius: '9999px'
+    },
+    presetHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: '0.75rem'
+    },
+    presetTitle: {
+      fontSize: '1.125rem',
+      fontWeight: '600',
+      color: '#111827'
+    },
+    badgeContainer: {
+      display: 'flex',
+      gap: '0.5rem'
+    },
+    badge: {
+      fontSize: '0.75rem',
+      padding: '0.25rem 0.5rem',
+      borderRadius: '9999px'
+    },
+    presetDescription: {
+      color: '#6b7280',
+      fontSize: '0.875rem',
+      marginBottom: '1rem'
+    },
+    presetDetails: {
+      fontSize: '0.75rem',
+      color: '#9ca3af'
+    },
+    configSection: {
+      backgroundColor: '#ffffff',
+      borderRadius: '0.75rem',
+      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+      border: '1px solid #e5e7eb',
+      padding: '1.5rem',
+      position: 'sticky',
+      top: '1.5rem',
+      height: 'fit-content'
+    },
+    form: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1.5rem'
+    },
+    formGroup: {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+    label: {
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      color: '#374151',
+      marginBottom: '0.5rem'
+    },
+    select: {
+      width: '100%',
+      padding: '0.5rem 0.75rem',
+      border: '1px solid #d1d5db',
+      borderRadius: '0.375rem',
+      fontSize: '0.875rem',
+      outline: 'none',
+      transition: 'border-color 0.2s'
+    },
+    slider: {
+      width: '100%',
+      height: '0.5rem',
+      borderRadius: '0.25rem',
+      background: '#e5e7eb',
+      outline: 'none',
+      cursor: 'pointer'
+    },
+    sliderLabels: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: '0.75rem',
+      color: '#9ca3af',
+      marginTop: '0.25rem'
+    },
+    button: {
+      width: '100%',
+      padding: '0.75rem 1rem',
+      borderRadius: '0.5rem',
+      fontWeight: '500',
+      transition: 'all 0.2s',
+      border: 'none',
+      cursor: 'pointer'
+    },
+    buttonPrimary: {
+      backgroundColor: '#2563eb',
+      color: '#ffffff'
+    },
+    buttonDisabled: {
+      backgroundColor: '#9ca3af',
+      cursor: 'not-allowed'
+    },
+    loadingSpinner: {
+      display: 'inline-block',
+      width: '1rem',
+      height: '1rem',
+      border: '2px solid transparent',
+      borderTop: '2px solid #ffffff',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginRight: '0.5rem'
+    },
+    progressContainer: {
+      marginTop: '1rem'
+    },
+    progressText: {
+      fontSize: '0.875rem',
+      color: '#6b7280',
+      marginBottom: '0.5rem'
+    },
+    progressBar: {
+      width: '100%',
+      height: '0.5rem',
+      backgroundColor: '#e5e7eb',
+      borderRadius: '9999px',
+      overflow: 'hidden'
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: '#2563eb',
+      transition: 'width 0.3s ease'
+    },
+    errorMessage: {
+      marginTop: '1rem',
+      padding: '0.75rem',
+      backgroundColor: '#fef2f2',
+      border: '1px solid #fecaca',
+      color: '#dc2626',
+      borderRadius: '0.5rem',
+      fontSize: '0.875rem'
+    },
+    modeInfo: {
+      marginTop: '1.5rem',
+      paddingTop: '1.5rem',
+      borderTop: '1px solid #e5e7eb'
+    },
+    modeInfoTitle: {
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      color: '#111827',
+      marginBottom: '0.75rem'
+    },
+    modeInfoContent: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem',
+      fontSize: '0.75rem',
+      color: '#6b7280'
+    },
+    responsive: {
+      '@media (max-width: 1024px)': {
+        gridTemplateColumns: '1fr',
+        gap: '1.5rem'
+      }
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div style={styles.container}>
+      {/* Add keyframes for spinner animation */}
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @media (max-width: 1024px) {
+            .main-content {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}
+      </style>
+
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-6 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">ChatSynth</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Generate realistic educational conversations using advanced AI models. 
-              Choose from preset configurations or customize your own tutoring scenarios.
-            </p>
-          </div>
+      <div style={styles.header}>
+        <div style={styles.headerContent}>
+          <h1 style={styles.title}>ChatSynth</h1>
+          <p style={styles.subtitle}>
+            Generate realistic educational conversations using advanced AI models. 
+            Choose from preset configurations or customize your own tutoring scenarios.
+          </p>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div style={styles.mainContent} className="main-content">
+        
+        {/* Preset Cards - 2/3 width */}
+        <div style={styles.presetsSection}>
+          <h2 style={styles.sectionTitle}>Choose a Preset Configuration</h2>
           
-          {/* Preset Cards - 2/3 width */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Choose a Preset Configuration</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {presets.map((preset) => (
-                  <div
-                    key={preset.id}
-                    className={`relative p-6 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      selectedPreset?.id === preset.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => handlePresetSelect(preset)}
-                  >
-                    {preset.popular && (
-                      <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-                        Popular
-                      </div>
-                    )}
-                    
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{preset.title}</h3>
-                      <div className="flex gap-2">
-                        <span className={`text-xs px-2 py-1 rounded-full ${getModeColor(preset.mode)}`}>
-                          {preset.mode}
-                        </span>
-                        <span className={`text-xs px-2 py-1 rounded-full ${getComplexityColor(preset.complexity)}`}>
-                          {preset.complexity}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-gray-600 text-sm mb-4">{preset.description}</p>
-                    
-                    <div className="text-xs text-gray-500">
-                      <div>Model: {preset.config.ai_settings.model}</div>
-                      <div>Turns: {preset.config.conversation_structure.turns}</div>
-                      <div>Mode: {preset.config.generationMode.replace('_', ' ')}</div>
-                    </div>
+          <div style={styles.presetsGrid}>
+            {presets.map((preset) => (
+              <div
+                key={preset.id}
+                style={{
+                  ...styles.presetCard,
+                  ...(selectedPreset?.id === preset.id ? styles.presetCardSelected : {})
+                }}
+                onClick={() => handlePresetSelect(preset)}
+                onMouseEnter={(e) => {
+                  if (selectedPreset?.id !== preset.id) {
+                    Object.assign(e.target.style, styles.presetCardHover);
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedPreset?.id !== preset.id) {
+                    e.target.style.boxShadow = 'none';
+                    e.target.style.borderColor = '#e5e7eb';
+                  }
+                }}
+              >
+                {preset.popular && (
+                  <div style={styles.popularBadge}>
+                    Popular
                   </div>
-                ))}
+                )}
+                
+                <div style={styles.presetHeader}>
+                  <h3 style={styles.presetTitle}>{preset.title}</h3>
+                  <div style={styles.badgeContainer}>
+                    <span style={{...styles.badge, ...getModeColor(preset.mode)}}>
+                      {preset.mode}
+                    </span>
+                    <span style={{...styles.badge, ...getComplexityColor(preset.complexity)}}>
+                      {preset.complexity}
+                    </span>
+                  </div>
+                </div>
+                
+                <p style={styles.presetDescription}>{preset.description}</p>
+                
+                <div style={styles.presetDetails}>
+                  <div>Model: {preset.config.ai_settings.model}</div>
+                  <div>Turns: {preset.config.conversation_structure.turns}</div>
+                  <div>Mode: {preset.config.generationMode.replace('_', ' ')}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Configuration Panel - 1/3 width */}
+        <div style={styles.configSection}>
+          <h2 style={styles.sectionTitle}>Configuration</h2>
+          
+          <form onSubmit={handleSubmit} style={styles.form}>
+            
+            {/* Generation Mode */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Generation Mode
+              </label>
+              <select
+                value={config.generationMode}
+                onChange={(e) => setConfig(prev => ({ ...prev, generationMode: e.target.value }))}
+                style={styles.select}
+              >
+                <option value="single_ai">Single AI (Faster)</option>
+                <option value="dual_ai">Dual AI (More Realistic)</option>
+              </select>
+            </div>
+
+            {/* Number of Conversations */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Number of Conversations: {config.numberOfConversations}
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                value={config.numberOfConversations}
+                onChange={(e) => setConfig(prev => ({ ...prev, numberOfConversations: parseInt(e.target.value) }))}
+                style={styles.slider}
+              />
+              <div style={styles.sliderLabels}>
+                <span>1</span>
+                <span>5</span>
               </div>
             </div>
-          </div>
 
-          {/* Configuration Panel - 1/3 width */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Configuration</h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                
-                {/* Generation Mode */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Generation Mode
-                  </label>
-                  <select
-                    value={config.generationMode}
-                    onChange={(e) => setConfig(prev => ({ ...prev, generationMode: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="single_ai">Single AI (Faster)</option>
-                    <option value="dual_ai">Dual AI (More Realistic)</option>
-                  </select>
-                </div>
+            {/* Conversation Length */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Conversation Length: {config.conversation_structure.turns} turns
+              </label>
+              <input
+                type="range"
+                min="4"
+                max="15"
+                value={config.conversation_structure.turns}
+                onChange={(e) => handleConfigChange('conversation_structure', 'turns', parseInt(e.target.value))}
+                style={styles.slider}
+              />
+              <div style={styles.sliderLabels}>
+                <span>4</span>
+                <span>15</span>
+              </div>
+            </div>
 
-                {/* Number of Conversations */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Number of Conversations: {config.numberOfConversations}
-                  </label>
-                  <input
-                    type="range"
-                    min="1"
-                    max="5"
-                    value={config.numberOfConversations}
-                    onChange={(e) => setConfig(prev => ({ ...prev, numberOfConversations: parseInt(e.target.value) }))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>1</span>
-                    <span>5</span>
-                  </div>
-                </div>
+            {/* AI Model Selection */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                AI Model
+              </label>
+              <select
+                value={config.ai_settings.model}
+                onChange={(e) => handleConfigChange('ai_settings', 'model', e.target.value)}
+                style={styles.select}
+              >
+                <option value="gpt-4o">GPT-4o (Recommended)</option>
+                <option value="o3-mini">O3-mini (Advanced Reasoning)</option>
+              </select>
+            </div>
 
-                {/* Conversation Length */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Conversation Length: {config.conversation_structure.turns} turns
-                  </label>
-                  <input
-                    type="range"
-                    min="4"
-                    max="15"
-                    value={config.conversation_structure.turns}
-                    onChange={(e) => handleConfigChange('conversation_structure', 'turns', parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>4</span>
-                    <span>15</span>
-                  </div>
-                </div>
+            {/* Temperature */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Creativity Level: {config.ai_settings.temperature}
+              </label>
+              <input
+                type="range"
+                min="0.1"
+                max="1.0"
+                step="0.1"
+                value={config.ai_settings.temperature}
+                onChange={(e) => handleConfigChange('ai_settings', 'temperature', parseFloat(e.target.value))}
+                style={styles.slider}
+              />
+              <div style={styles.sliderLabels}>
+                <span>Focused</span>
+                <span>Creative</span>
+              </div>
+            </div>
 
-                {/* AI Model Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    AI Model
-                  </label>
-                  <select
-                    value={config.ai_settings.model}
-                    onChange={(e) => handleConfigChange('ai_settings', 'model', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="gpt-4o">GPT-4o (Recommended)</option>
-                    <option value="o3-mini">O3-mini (Advanced Reasoning)</option>
-                  </select>
-                </div>
+            {/* Max Tokens */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Response Length: {config.ai_settings.max_tokens} tokens
+              </label>
+              <input
+                type="range"
+                min="1000"
+                max="3000"
+                step="200"
+                value={config.ai_settings.max_tokens}
+                onChange={(e) => handleConfigChange('ai_settings', 'max_tokens', parseInt(e.target.value))}
+                style={styles.slider}
+              />
+              <div style={styles.sliderLabels}>
+                <span>Short</span>
+                <span>Long</span>
+              </div>
+            </div>
 
-                {/* Temperature */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Creativity Level: {config.ai_settings.temperature}
-                  </label>
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="1.0"
-                    step="0.1"
-                    value={config.ai_settings.temperature}
-                    onChange={(e) => handleConfigChange('ai_settings', 'temperature', parseFloat(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Focused</span>
-                    <span>Creative</span>
-                  </div>
-                </div>
-
-                {/* Max Tokens */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Response Length: {config.ai_settings.max_tokens} tokens
-                  </label>
-                  <input
-                    type="range"
-                    min="1000"
-                    max="3000"
-                    step="200"
-                    value={config.ai_settings.max_tokens}
-                    onChange={(e) => handleConfigChange('ai_settings', 'max_tokens', parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Short</span>
-                    <span>Long</span>
-                  </div>
-                </div>
-
-                {/* O3-mini specific settings */}
-                {config.ai_settings.model === 'o3-mini' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Reasoning Effort
-                    </label>
-                    <select
-                      value={config.ai_settings.reasoning_effort || 'medium'}
-                      onChange={(e) => handleConfigChange('ai_settings', 'reasoning_effort', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                )}
-
-                {/* Generate Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                    loading
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
-                  }`}
+            {/* O3-mini specific settings */}
+            {config.ai_settings.model === 'o3-mini' && (
+              <div style={styles.formGroup}>
+                <label style={styles.label}>
+                  Reasoning Effort
+                </label>
+                <select
+                  value={config.ai_settings.reasoning_effort || 'medium'}
+                  onChange={(e) => handleConfigChange('ai_settings', 'reasoning_effort', e.target.value)}
+                  style={styles.select}
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Generating...
-                    </div>
-                  ) : (
-                    'Generate Conversations'
-                  )}
-                </button>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            )}
 
-                {/* Progress Display */}
-                {loading && progress.total > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm text-gray-600 mb-2">
-                      Progress: {progress.current}/{progress.total}
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Error Display */}
-                {error && (
-                  <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-                    {error}
-                  </div>
-                )}
-
-              </form>
-
-              {/* Mode Information */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Mode Information</h3>
-                <div className="space-y-2 text-xs text-gray-600">
-                  <div>
-                    <strong>Single AI:</strong> Faster generation (10-30s), cost-effective, good for basic scenarios
-                  </div>
-                  <div>
-                    <strong>Dual AI:</strong> More realistic interactions (30-120s), separate tutor/student personalities
-                  </div>
+            {/* Generate Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                ...styles.button,
+                ...(loading ? styles.buttonDisabled : styles.buttonPrimary)
+              }}
+            >
+              {loading ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={styles.loadingSpinner}></div>
+                  Generating...
                 </div>
+              ) : (
+                'Generate Conversations'
+              )}
+            </button>
+
+            {/* Progress Display */}
+            {loading && progress && progress.total > 0 && (
+              <div style={styles.progressContainer}>
+                <div style={styles.progressText}>
+                  Progress: {progress.current}/{progress.total}
+                </div>
+                <div style={styles.progressBar}>
+                  <div 
+                    style={{
+                      ...styles.progressFill,
+                      width: `${(progress.current / progress.total) * 100}%`
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            {/* Error Display */}
+            {error && (
+              <div style={styles.errorMessage}>
+                {error}
+              </div>
+            )}
+
+          </form>
+
+          {/* Mode Information */}
+          <div style={styles.modeInfo}>
+            <h3 style={styles.modeInfoTitle}>Mode Information</h3>
+            <div style={styles.modeInfoContent}>
+              <div>
+                <strong>Single AI:</strong> Faster generation (10-30s), cost-effective, good for basic scenarios
+              </div>
+              <div>
+                <strong>Dual AI:</strong> More realistic interactions (30-120s), separate tutor/student personalities
               </div>
             </div>
           </div>
