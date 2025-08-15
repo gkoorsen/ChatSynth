@@ -62,14 +62,21 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         guided_discovery: 0.1
       },
       custom_purposes: []
-    }
+    },
+    // Additional parameters that might be needed by the lambda function
+    response_format: 'json',
+    include_metadata: true,
+    language: 'english'
   });
 
   const [aiSettings, setAiSettings] = useState({
     model: 'gpt-4o',
     temperature: 0.7,
     max_tokens: 2000,
-    reasoning_effort: 'medium' // For O3-mini
+    reasoning_effort: 'medium', // For O3-mini
+    top_p: 1.0,
+    frequency_penalty: 0.0,
+    presence_penalty: 0.0
   });
 
   // Helper function to check if model is O3-mini
@@ -117,13 +124,19 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.4, explanation: 0.3, assessment: 0.2, encouragement: 0.05, guided_discovery: 0.05 },
           custom_purposes: []
-        }
+        },
+        response_format: 'json',
+        include_metadata: true,
+        language: 'english'
       },
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.6,
         max_tokens: 1800,
-        reasoning_effort: 'medium'
+        reasoning_effort: 'medium',
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0
       }
     },
     {
@@ -166,12 +179,18 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.3, explanation: 0.4, assessment: 0.2, encouragement: 0.05, guided_discovery: 0.05 },
           custom_purposes: []
-        }
+        },
+        response_format: 'json',
+        include_metadata: true,
+        language: 'english'
       },
       aiSettings: {
         model: 'o3-mini',
         reasoning_effort: 'high',
-        max_tokens: 2500
+        max_tokens: 2500,
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0
       }
     },
     {
@@ -215,13 +234,19 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.2, explanation: 0.2, assessment: 0.1, encouragement: 0.2, guided_discovery: 0.3 },
           custom_purposes: []
-        }
+        },
+        response_format: 'json',
+        include_metadata: true,
+        language: 'english'
       },
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.8,
         max_tokens: 2200,
-        reasoning_effort: 'medium'
+        reasoning_effort: 'medium',
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0
       }
     },
     {
@@ -264,13 +289,19 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.2, explanation: 0.3, assessment: 0.3, encouragement: 0.1, guided_discovery: 0.1 },
           custom_purposes: []
-        }
+        },
+        response_format: 'json',
+        include_metadata: true,
+        language: 'english'
       },
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.7,
         max_tokens: 2000,
-        reasoning_effort: 'medium'
+        reasoning_effort: 'medium',
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0
       }
     },
     {
@@ -314,12 +345,18 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.2, explanation: 0.3, assessment: 0.3, encouragement: 0.1, guided_discovery: 0.1 },
           custom_purposes: []
-        }
+        },
+        response_format: 'json',
+        include_metadata: true,
+        language: 'english'
       },
       aiSettings: {
         model: 'o3-mini',
         reasoning_effort: 'high',
-        max_tokens: 2400
+        max_tokens: 2400,
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0
       }
     },
     {
@@ -362,12 +399,18 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.35, explanation: 0.35, assessment: 0.2, encouragement: 0.05, guided_discovery: 0.05 },
           custom_purposes: []
-        }
+        },
+        response_format: 'json',
+        include_metadata: true,
+        language: 'english'
       },
       aiSettings: {
         model: 'o3-mini',
         reasoning_effort: 'high',
-        max_tokens: 2800
+        max_tokens: 2800,
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0
       }
     },
     {
@@ -410,13 +453,19 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.3, explanation: 0.3, assessment: 0.2, encouragement: 0.1, guided_discovery: 0.1 },
           custom_purposes: []
-        }
+        },
+        response_format: 'json',
+        include_metadata: true,
+        language: 'english'
       },
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.7,
         max_tokens: 2000,
-        reasoning_effort: 'medium'
+        reasoning_effort: 'medium',
+        top_p: 1.0,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.0
       }
     }
   ];
@@ -472,6 +521,31 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
   const handleSubmit = (e) => {
     e.preventDefault();
     onGenerate(config, aiSettings);
+  };
+
+  // Safe function to get conversations array
+  const getConversationsArray = () => {
+    if (!conversations || !Array.isArray(conversations)) {
+      return [];
+    }
+    return conversations;
+  };
+
+  // Safe function to get conversation content
+  const getConversationContent = (conversation) => {
+    if (!conversation) return [];
+    
+    // If conversation has a 'conversation' property (from metadata structure)
+    if (conversation.conversation && Array.isArray(conversation.conversation)) {
+      return conversation.conversation;
+    }
+    
+    // If conversation is directly an array
+    if (Array.isArray(conversation)) {
+      return conversation;
+    }
+    
+    return [];
   };
 
   return (
@@ -733,6 +807,56 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                       <span>Long</span>
                     </div>
                   </div>
+
+                  {/* Additional AI Parameters for Non-O3 models */}
+                  {!isO3Mini(aiSettings.model) && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Top P: {aiSettings.top_p}
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.1"
+                          value={aiSettings.top_p}
+                          onChange={(e) => handleAiSettingChange('top_p', parseFloat(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Frequency Penalty: {aiSettings.frequency_penalty}
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="2"
+                          step="0.1"
+                          value={aiSettings.frequency_penalty}
+                          onChange={(e) => handleAiSettingChange('frequency_penalty', parseFloat(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Presence Penalty: {aiSettings.presence_penalty}
+                        </label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="2"
+                          step="0.1"
+                          value={aiSettings.presence_penalty}
+                          onChange={(e) => handleAiSettingChange('presence_penalty', parseFloat(e.target.value))}
+                          className="w-full"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -756,6 +880,65 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
 
                 {showAdvanced && (
                   <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
+                    {/* Purpose Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Conversation Purpose
+                      </label>
+                      <textarea
+                        value={config.conversation_structure.purpose}
+                        onChange={(e) => handleConfigChange('conversation_structure.purpose', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        rows="3"
+                        placeholder="Describe the educational purpose of this conversation..."
+                      />
+                    </div>
+
+                    {/* Language Setting */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                      <select
+                        value={config.language || 'english'}
+                        onChange={(e) => handleConfigChange('language', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="english">English</option>
+                        <option value="spanish">Spanish</option>
+                        <option value="french">French</option>
+                        <option value="german">German</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="japanese">Japanese</option>
+                      </select>
+                    </div>
+
+                    {/* Response Format */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Response Format</label>
+                      <select
+                        value={config.response_format || 'json'}
+                        onChange={(e) => handleConfigChange('response_format', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="json">JSON</option>
+                        <option value="text">Plain Text</option>
+                        <option value="structured">Structured</option>
+                      </select>
+                    </div>
+
+                    {/* Include Metadata */}
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="include_metadata"
+                        checked={config.include_metadata !== false}
+                        onChange={(e) => handleConfigChange('include_metadata', e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="include_metadata" className="ml-2 block text-sm text-gray-700">
+                        Include conversation metadata
+                      </label>
+                    </div>
+
                     {/* Vocabulary Complexity */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Vocabulary Complexity</label>
@@ -770,6 +953,20 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                       </select>
                     </div>
 
+                    {/* Domain Specific Vocabulary */}
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="domain_specific"
+                        checked={config.vocabulary.domain_specific}
+                        onChange={(e) => handleConfigChange('vocabulary.domain_specific', e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="domain_specific" className="ml-2 block text-sm text-gray-700">
+                        Use domain-specific vocabulary
+                      </label>
+                    </div>
+
                     {/* Student Engagement */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Student Engagement</label>
@@ -782,6 +979,20 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                         <option value="moderate">Moderate</option>
                         <option value="high">High</option>
                         <option value="very_high">Very High</option>
+                      </select>
+                    </div>
+
+                    {/* Question Frequency */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tutor Question Frequency</label>
+                      <select
+                        value={config.tutor_questions.frequency}
+                        onChange={(e) => handleConfigChange('tutor_questions.frequency', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
                       </select>
                     </div>
 
@@ -830,6 +1041,37 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                         <option value="challenging">Challenging</option>
                       </select>
                     </div>
+
+                    {/* Confusion Score Mean */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Confusion Score Mean: {config.student_utterances.confusion_scores.mean}
+                      </label>
+                      <input
+                        type="range"
+                        min="1"
+                        max="5"
+                        step="0.5"
+                        value={config.student_utterances.confusion_scores.mean}
+                        onChange={(e) => handleConfigChange('student_utterances.confusion_scores.mean', parseFloat(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Tutor Student Ratio */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tutor-Student Ratio</label>
+                      <select
+                        value={config.conversation_structure.tutor_student_ratio}
+                        onChange={(e) => handleConfigChange('conversation_structure.tutor_student_ratio', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="1:1">1:1 (Individual)</option>
+                        <option value="1:2">1:2 (Small Group)</option>
+                        <option value="1:3">1:3 (Small Group)</option>
+                        <option value="1:5">1:5 (Group)</option>
+                      </select>
+                    </div>
                   </div>
                 )}
               </div>
@@ -861,7 +1103,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">Generated Conversations</h2>
-                {conversations.length > 0 && (
+                {getConversationsArray().length > 0 && (
                   <div className="flex space-x-2">
                     <button
                       onClick={onDownload}
@@ -870,7 +1112,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                       Download
                     </button>
                     <button
-                      onClick={onCopy}
+                      onClick={() => onCopy(JSON.stringify(getConversationsArray(), null, 2))}
                       className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       Copy
@@ -900,7 +1142,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
               {isGenerating && (
                 <div className="mb-4">
                   <div className="flex justify-between text-sm text-gray-600 mb-2">
-                    <span>Generating conversation...</span>
+                    <span>Generating conversation {currentConversation}...</span>
                     <span>{progress}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -914,7 +1156,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
 
               {/* Conversations Display */}
               <div className="space-y-4 max-h-96 overflow-y-auto">
-                {conversations.length === 0 && !isGenerating && (
+                {getConversationsArray().length === 0 && !isGenerating && (
                   <div className="text-center py-8 text-gray-500">
                     <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -924,34 +1166,71 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                   </div>
                 )}
 
-                {conversations.map((conversation, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="font-medium text-gray-900 mb-3">Conversation {index + 1}</h3>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {conversation.map((turn, turnIndex) => (
-                        <div
-                          key={turnIndex}
-                          className={`p-3 rounded-lg ${
-                            turn.role === 'tutor'
-                              ? 'bg-blue-50 border-l-4 border-blue-400'
-                              : 'bg-green-50 border-l-4 border-green-400'
-                          }`}
-                        >
-                          <div className="flex items-center mb-1">
-                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                              turn.role === 'tutor'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {turn.role === 'tutor' ? 'Tutor' : 'Student'}
-                            </span>
+                {getConversationsArray().map((conversationData, index) => {
+                  const conversationContent = getConversationContent(conversationData);
+                  
+                  return (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-medium text-gray-900">
+                          Conversation {conversationData.id || index + 1}
+                        </h3>
+                        {conversationData.metadata && (
+                          <span className="text-xs text-gray-500">
+                            {conversationData.metadata.total_turns || conversationContent.length} turns
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Metadata display */}
+                      {conversationData.metadata && (
+                        <div className="mb-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          <div className="grid grid-cols-2 gap-2">
+                            <span>Subject: {conversationData.metadata.subject}</span>
+                            <span>Mode: {conversationData.metadata.generation_mode}</span>
+                            <span>Model: {conversationData.metadata.model}</span>
+                            <span>Generated: {new Date(conversationData.metadata.generated_at).toLocaleDateString()}</span>
                           </div>
-                          <p className="text-sm text-gray-700">{turn.content}</p>
                         </div>
-                      ))}
+                      )}
+
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {conversationContent.length > 0 ? (
+                          conversationContent.map((turn, turnIndex) => (
+                            <div
+                              key={turnIndex}
+                              className={`p-3 rounded-lg ${
+                                turn.role === 'tutor'
+                                  ? 'bg-blue-50 border-l-4 border-blue-400'
+                                  : 'bg-green-50 border-l-4 border-green-400'
+                              }`}
+                            >
+                              <div className="flex items-center mb-1">
+                                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                  turn.role === 'tutor'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-green-100 text-green-800'
+                                }`}>
+                                  {turn.role === 'tutor' ? 'Tutor' : 'Student'}
+                                </span>
+                                {turn.purpose && (
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    ({turn.purpose})
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-700">{turn.content}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-4 text-gray-500 text-sm">
+                            No conversation content available
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -962,4 +1241,3 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
 };
 
 export default LandingPage;
-
