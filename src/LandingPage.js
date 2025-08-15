@@ -69,6 +69,23 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
     language: 'english'
   });
 
+  // Cookie helpers
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  };
+
+  const setCookie = (name, value, days = 30) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+  };
+
+  const [apiKey, setApiKey] = useState(() => getCookie('openai_api_key') || '');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(() => !getCookie('openai_api_key'));
+
   const [aiSettings, setAiSettings] = useState({
     model: 'gpt-4o',
     temperature: 0.7,
@@ -524,9 +541,30 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
     });
   };
 
+  const handleApiKeyChange = (value) => {
+    setApiKey(value);
+    if (value.trim()) {
+      setCookie('openai_api_key', value.trim());
+      setShowApiKeyInput(false);
+    }
+  };
+
+  const handleApiKeyToggle = () => {
+    setShowApiKeyInput(!showApiKeyInput);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onGenerate(config, aiSettings);
+    
+    // Check if API key is provided
+    if (!apiKey.trim()) {
+      alert('Please provide your OpenAI API key before generating conversations.');
+      setShowApiKeyInput(true);
+      return;
+    }
+    
+    // Include API key in the generation call
+    onGenerate(config, { ...aiSettings, api_key: apiKey.trim() });
   };
 
   // Safe function to get conversations array
@@ -573,12 +611,73 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
               <div className="text-sm text-gray-600">
                 {isGenerating ? `Generating... ${progress}%` : 'Ready'}
               </div>
+              {!showApiKeyInput && (
+                <button
+                  onClick={handleApiKeyToggle}
+                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m0 0a2 2 0 01-2 2m2-2a2 2 0 002-2m0 0a2 2 0 00-2-2m-4 6V9a2 2 0 00-2-2V5a2 2 0 10-4 0v2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2z" />
+                  </svg>
+                  <span>API Key</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* API Key Input Section */}
+        {showApiKeyInput && (
+          <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-yellow-800">OpenAI API Key Required</h3>
+                <p className="text-sm text-yellow-700 mt-1 mb-4">
+                  Please enter your OpenAI API key to generate conversations. Your key will be stored securely in your browser and never shared.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="password"
+                    placeholder="sk-..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => handleApiKeyChange(apiKey)}
+                    disabled={!apiKey.trim()}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      apiKey.trim()
+                        ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Save Key
+                  </button>
+                  {apiKey && (
+                    <button
+                      onClick={() => setShowApiKeyInput(false)}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-yellow-600 mt-2">
+                  Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-800">OpenAI Platform</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Left Column - Presets */}
@@ -600,9 +699,6 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <h3 className="font-medium text-gray-900">{preset.title}</h3>
-                          {preset.popular && (
-                            <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Popular</span>
-                          )}
                         </div>
                         <p className="text-sm text-gray-600 mb-2">{preset.description}</p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
@@ -1093,14 +1189,16 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
               {/* Generate Button */}
               <button
                 type="submit"
-                disabled={isGenerating}
+                disabled={isGenerating || !apiKey.trim()}
                 className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-200 ${
-                  isGenerating
+                  isGenerating || !apiKey.trim()
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] active:scale-[0.98]'
                 }`}
               >
-                {isGenerating ? (
+                {!apiKey.trim() ? (
+                  'Please provide API key first'
+                ) : isGenerating ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Generating... {progress}%</span>
