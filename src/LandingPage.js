@@ -706,10 +706,6 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                             <span className="w-2 h-2 bg-blue-400 rounded-full mr-1"></span>
                             {preset.mode}
                           </span>
-                          <span className="flex items-center">
-                            <span className="w-2 h-2 bg-purple-400 rounded-full mr-1"></span>
-                            {preset.complexity}
-                          </span>
                         </div>
                       </div>
                     </div>
