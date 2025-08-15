@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
-const LandingPage = ({ onSubmit, loading, error, progress }) => {
+const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, conversations, error, onDownload, onCopy }) => {
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [config, setConfig] = useState({
     generationMode: 'single_ai',
-    numberOfConversations: 3,
+    conversation_count: 1,
+    subject: 'mathematics',
     conversation_structure: {
       turns: 8,
       starter: 'tutor',
@@ -61,12 +62,13 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
         guided_discovery: 0.1
       },
       custom_purposes: []
-    },
-    ai_settings: {
-      model: 'gpt-4o',
-      temperature: 0.7,
-      max_tokens: 2000
     }
+  });
+
+  const [aiSettings, setAiSettings] = useState({
+    model: 'gpt-4o',
+    temperature: 0.7,
+    max_tokens: 2000
   });
 
   // Professional preset configurations with complete parameters
@@ -80,6 +82,7 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
       popular: true,
       config: {
         generationMode: 'single_ai',
+        subject: 'mathematics',
         conversation_structure: {
           turns: 8,
           starter: 'tutor',
@@ -110,12 +113,12 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.4, explanation: 0.3, assessment: 0.2, encouragement: 0.05, guided_discovery: 0.05 },
           custom_purposes: []
-        },
-        ai_settings: {
-          model: 'gpt-4o',
-          temperature: 0.6,
-          max_tokens: 1800
         }
+      },
+      aiSettings: {
+        model: 'gpt-4o',
+        temperature: 0.6,
+        max_tokens: 1800
       }
     },
     {
@@ -127,6 +130,7 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
       popular: true,
       config: {
         generationMode: 'dual_ai',
+        subject: 'science',
         conversation_structure: {
           turns: 10,
           starter: 'student',
@@ -157,12 +161,12 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.2, explanation: 0.2, assessment: 0.1, encouragement: 0.2, guided_discovery: 0.3 },
           custom_purposes: []
-        },
-        ai_settings: {
-          model: 'gpt-4o',
-          temperature: 0.8,
-          max_tokens: 2200
         }
+      },
+      aiSettings: {
+        model: 'gpt-4o',
+        temperature: 0.8,
+        max_tokens: 2200
       }
     },
     {
@@ -173,6 +177,7 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
       complexity: 'Intermediate',
       config: {
         generationMode: 'single_ai',
+        subject: 'language arts',
         conversation_structure: {
           turns: 12,
           starter: 'tutor',
@@ -203,12 +208,12 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.2, explanation: 0.3, assessment: 0.3, encouragement: 0.1, guided_discovery: 0.1 },
           custom_purposes: []
-        },
-        ai_settings: {
-          model: 'gpt-4o',
-          temperature: 0.7,
-          max_tokens: 2000
         }
+      },
+      aiSettings: {
+        model: 'gpt-4o',
+        temperature: 0.7,
+        max_tokens: 2000
       }
     },
     {
@@ -219,6 +224,7 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
       complexity: 'Advanced',
       config: {
         generationMode: 'dual_ai',
+        subject: 'history',
         conversation_structure: {
           turns: 10,
           starter: 'tutor',
@@ -249,12 +255,12 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.2, explanation: 0.3, assessment: 0.3, encouragement: 0.1, guided_discovery: 0.1 },
           custom_purposes: []
-        },
-        ai_settings: {
-          model: 'gpt-4o',
-          temperature: 0.7,
-          max_tokens: 2400
         }
+      },
+      aiSettings: {
+        model: 'gpt-4o',
+        temperature: 0.7,
+        max_tokens: 2400
       }
     },
     {
@@ -265,6 +271,7 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
       complexity: 'Beginner',
       config: {
         generationMode: 'single_ai',
+        subject: 'general',
         conversation_structure: {
           turns: 8,
           starter: 'tutor',
@@ -295,12 +302,12 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.3, explanation: 0.3, assessment: 0.2, encouragement: 0.1, guided_discovery: 0.1 },
           custom_purposes: []
-        },
-        ai_settings: {
-          model: 'gpt-4o',
-          temperature: 0.8,
-          max_tokens: 2000
         }
+      },
+      aiSettings: {
+        model: 'gpt-4o',
+        temperature: 0.8,
+        max_tokens: 2000
       }
     },
     {
@@ -311,6 +318,7 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
       complexity: 'Advanced',
       config: {
         generationMode: 'single_ai',
+        subject: 'problem solving',
         conversation_structure: {
           turns: 6,
           starter: 'tutor',
@@ -341,13 +349,13 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
         tutor_purposes: {
           purpose_weights: { scaffolding: 0.4, explanation: 0.3, assessment: 0.2, encouragement: 0.05, guided_discovery: 0.05 },
           custom_purposes: []
-        },
-        ai_settings: {
-          model: 'o3-mini',
-          temperature: 0.5,
-          max_tokens: 1500,
-          reasoning_effort: 'medium'
         }
+      },
+      aiSettings: {
+        model: 'o3-mini',
+        temperature: 0.5,
+        max_tokens: 1500,
+        reasoning_effort: 'medium'
       }
     }
   ];
@@ -355,6 +363,7 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
   const handlePresetSelect = (preset) => {
     setSelectedPreset(preset);
     setConfig({ ...config, ...preset.config });
+    setAiSettings({ ...aiSettings, ...preset.aiSettings });
   };
 
   const handleConfigChange = (section, key, value) => {
@@ -380,360 +389,151 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
     }));
   };
 
+  const handleAiSettingsChange = (key, value) => {
+    setAiSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (onSubmit) {
-      onSubmit(config);
-    } else {
-      // Mock submission for testing
-      console.log('Configuration submitted:', config);
-      alert('Configuration ready! (This is a test - no actual generation)');
+    if (onGenerate) {
+      onGenerate(config, aiSettings);
     }
   };
-
-  const getComplexityColor = (complexity) => {
-    switch (complexity) {
-      case 'Beginner': return 'background-color: #dcfce7; color: #166534;';
-      case 'Intermediate': return 'background-color: #fef3c7; color: #92400e;';
-      case 'Advanced': return 'background-color: #fee2e2; color: #991b1b;';
-      default: return 'background-color: #f3f4f6; color: #374151;';
-    }
-  };
-
-  const getModeColor = (mode) => {
-    return mode === 'Dual AI' 
-      ? 'background-color: #ede9fe; color: #6b21a8;'
-      : 'background-color: #dbeafe; color: #1e40af;';
-  };
-
-  const containerStyle = {
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #faf5ff 100%)'
-  };
-
-  const headerStyle = {
-    backgroundColor: 'white',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-    borderBottom: '1px solid #e5e7eb'
-  };
-
-  const headerContentStyle = {
-    maxWidth: '72rem',
-    margin: '0 auto',
-    padding: '2rem 1.5rem',
-    textAlign: 'center'
-  };
-
-  const titleStyle = {
-    fontSize: '2.25rem',
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: '1rem'
-  };
-
-  const subtitleStyle = {
-    fontSize: '1.25rem',
-    color: '#6b7280',
-    maxWidth: '48rem',
-    margin: '0 auto'
-  };
-
-  const mainGridStyle = {
-    maxWidth: '72rem',
-    margin: '0 auto',
-    padding: '1.5rem',
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: '2rem'
-  };
-
-  const presetsContainerStyle = {
-    backgroundColor: 'white',
-    borderRadius: '0.75rem',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e5e7eb',
-    padding: '1.5rem'
-  };
-
-  const presetsTitleStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: '1.5rem'
-  };
-
-  const presetsGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '1rem'
-  };
-
-  const configContainerStyle = {
-    backgroundColor: 'white',
-    borderRadius: '0.75rem',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e5e7eb',
-    padding: '1.5rem',
-    position: 'sticky',
-    top: '1.5rem',
-    height: 'fit-content',
-    maxHeight: '90vh',
-    overflowY: 'auto'
-  };
-
-  const configTitleStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: '1.5rem'
-  };
-
-  const sectionStyle = {
-    backgroundColor: '#f9fafb',
-    padding: '1rem',
-    borderRadius: '0.5rem',
-    border: '1px solid #e5e7eb',
-    marginBottom: '1.5rem'
-  };
-
-  const sectionTitleStyle = {
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: '1rem'
-  };
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: '0.5rem'
-  };
-
-  const inputStyle = {
-    width: '100%',
-    padding: '0.5rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    marginBottom: '1rem'
-  };
-
-  const selectStyle = {
-    width: '100%',
-    padding: '0.5rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    marginBottom: '1rem',
-    backgroundColor: 'white'
-  };
-
-  const textareaStyle = {
-    width: '100%',
-    padding: '0.5rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    minHeight: '80px',
-    resize: 'vertical',
-    marginBottom: '1rem'
-  };
-
-  const rangeStyle = {
-    width: '100%',
-    height: '0.5rem',
-    backgroundColor: '#e5e7eb',
-    borderRadius: '0.5rem',
-    appearance: 'none',
-    cursor: 'pointer',
-    marginBottom: '0.25rem'
-  };
-
-  const buttonStyle = {
-    width: '100%',
-    backgroundColor: '#1f2937',
-    color: 'white',
-    padding: '0.75rem 1rem',
-    border: 'none',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s'
-  };
-
-  const buttonHoverStyle = {
-    backgroundColor: '#374151'
-  };
-
-  // Media query for responsive design
-  const mediaQueryStyle = `
-    @media (min-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 2fr 1fr;
-      }
-    }
-  `;
 
   return (
-    <div style={containerStyle}>
-      <style>{mediaQueryStyle}</style>
-      
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div style={headerStyle}>
-        <div style={headerContentStyle}>
-          <h1 style={titleStyle}>ChatSynth</h1>
-          <p style={subtitleStyle}>
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">ChatSynth</h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Generate realistic educational conversations using advanced AI models. 
             Choose from preset configurations or customize your own tutoring scenarios.
           </p>
         </div>
       </div>
 
-      <div style={mainGridStyle} className="main-grid">
+      <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Preset Cards */}
-        <div style={presetsContainerStyle}>
-          <h2 style={presetsTitleStyle}>Choose a Preset Configuration</h2>
+        {/* Preset Cards - 2/3 width */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Choose a Preset Configuration</h2>
           
-          <div style={presetsGridStyle}>
-            {presets.map((preset) => {
-              const isSelected = selectedPreset?.id === preset.id;
-              const cardStyle = {
-                position: 'relative',
-                padding: '1.5rem',
-                border: isSelected ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                borderRadius: '0.5rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                backgroundColor: isSelected ? '#eff6ff' : 'white'
-              };
-
-              return (
-                <div
-                  key={preset.id}
-                  style={cardStyle}
-                  onClick={() => handlePresetSelect(preset)}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) {
-                      e.target.style.borderColor = '#d1d5db';
-                      e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) {
-                      e.target.style.borderColor = '#e5e7eb';
-                      e.target.style.boxShadow = 'none';
-                    }
-                  }}
-                >
-                  {preset.popular && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '-0.5rem',
-                      right: '-0.5rem',
-                      backgroundColor: '#f97316',
-                      color: 'white',
-                      fontSize: '0.75rem',
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '9999px'
-                    }}>
-                      Popular
-                    </div>
-                  )}
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>{preset.title}</h3>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '9999px',
-                        ...getModeColor(preset.mode).split(';').reduce((acc, style) => {
-                          const [key, value] = style.split(':').map(s => s.trim());
-                          if (key && value) acc[key.replace(/-([a-z])/g, (g) => g[1].toUpperCase())] = value;
-                          return acc;
-                        }, {})
-                      }}>
-                        {preset.mode}
-                      </span>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '9999px',
-                        ...getComplexityColor(preset.complexity).split(';').reduce((acc, style) => {
-                          const [key, value] = style.split(':').map(s => s.trim());
-                          if (key && value) acc[key.replace(/-([a-z])/g, (g) => g[1].toUpperCase())] = value;
-                          return acc;
-                        }, {})
-                      }}>
-                        {preset.complexity}
-                      </span>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {presets.map((preset) => (
+              <div
+                key={preset.id}
+                className={`relative p-6 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  selectedPreset?.id === preset.id 
+                    ? 'border-blue-500 bg-blue-50' 
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+                onClick={() => handlePresetSelect(preset)}
+              >
+                {preset.popular && (
+                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                    Popular
                   </div>
-                  
-                  <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1rem' }}>{preset.description}</p>
-                  
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-                    <div>Model: {preset.config.ai_settings.model}</div>
-                    <div>Turns: {preset.config.conversation_structure.turns}</div>
-                    <div>Starter: {preset.config.conversation_structure.starter}</div>
-                    <div>Type: {preset.config.tutor_questions.type}</div>
+                )}
+                
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900">{preset.title}</h3>
+                  <div className="flex gap-2">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      preset.mode === 'Dual AI' 
+                        ? 'bg-purple-100 text-purple-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {preset.mode}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      preset.complexity === 'Beginner' ? 'bg-green-100 text-green-800' :
+                      preset.complexity === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {preset.complexity}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+                
+                <p className="text-gray-600 text-sm mb-4">{preset.description}</p>
+                
+                <div className="text-xs text-gray-500 space-y-1">
+                  <div>Model: {preset.aiSettings.model}</div>
+                  <div>Turns: {preset.config.conversation_structure.turns}</div>
+                  <div>Starter: {preset.config.conversation_structure.starter}</div>
+                  <div>Type: {preset.config.tutor_questions.type}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Configuration Panel */}
-        <div style={configContainerStyle}>
-          <h2 style={configTitleStyle}>Configuration</h2>
+        {/* Configuration Panel - 1/3 width */}
+        <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6 h-fit max-h-[90vh] overflow-y-auto">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Configuration</h2>
           
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Basic Settings */}
-            <div style={sectionStyle}>
-              <h3 style={sectionTitleStyle}>Basic Settings</h3>
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">Basic Settings</h3>
               
               {/* Generation Mode */}
-              <div>
-                <label style={labelStyle}>Generation Mode</label>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Generation Mode
+                </label>
                 <select
                   value={config.generationMode}
                   onChange={(e) => setConfig(prev => ({ ...prev, generationMode: e.target.value }))}
-                  style={selectStyle}
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value="single_ai">Single AI (Faster)</option>
-                  <option value="dual_ai">Dual AI (More Realistic)</option>
+                  <option value="single_ai">Single AI</option>
+                  <option value="dual_ai">Dual AI</option>
                 </select>
               </div>
 
               {/* Number of Conversations */}
-              <div>
-                <label style={labelStyle}>
-                  Number of Conversations: {config.numberOfConversations}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Conversations: {config.conversation_count}
                 </label>
                 <input
                   type="range"
                   min="1"
                   max="5"
-                  value={config.numberOfConversations}
-                  onChange={(e) => setConfig(prev => ({ ...prev, numberOfConversations: parseInt(e.target.value) }))}
-                  style={rangeStyle}
+                  value={config.conversation_count}
+                  onChange={(e) => setConfig(prev => ({ ...prev, conversation_count: parseInt(e.target.value) }))}
+                  className="w-full"
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
-                  <span>1</span>
-                  <span>5</span>
-                </div>
               </div>
 
-              {/* Conversation Length */}
-              <div>
-                <label style={labelStyle}>
-                  Conversation Length: {config.conversation_structure.turns} turns
+              {/* Subject */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={config.subject}
+                  onChange={(e) => setConfig(prev => ({ ...prev, subject: e.target.value }))}
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                  placeholder="e.g., mathematics, science, history"
+                />
+              </div>
+            </div>
+
+            {/* Conversation Structure */}
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">Conversation Structure</h3>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Turns: {config.conversation_structure.turns}
                 </label>
                 <input
                   type="range"
@@ -741,182 +541,95 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
                   max="15"
                   value={config.conversation_structure.turns}
                   onChange={(e) => handleConfigChange('conversation_structure', 'turns', parseInt(e.target.value))}
-                  style={rangeStyle}
+                  className="w-full"
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
-                  <span>4</span>
-                  <span>15</span>
-                </div>
               </div>
-            </div>
 
-            {/* Conversation Structure */}
-            <div style={sectionStyle}>
-              <h3 style={sectionTitleStyle}>Conversation Structure</h3>
-              
-              {/* Conversation Starter */}
-              <div>
-                <label style={labelStyle}>Who Starts the Conversation?</label>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Who Starts
+                </label>
                 <select
                   value={config.conversation_structure.starter}
-                  onChange={(e) => {
-                    const starter = e.target.value;
-                    handleConfigChange('conversation_structure', 'starter', starter);
-                    handleConfigChange('conversation_structure', 'conversation_starter', starter);
-                  }}
-                  style={selectStyle}
+                  onChange={(e) => handleConfigChange('conversation_structure', 'starter', e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value="tutor">Tutor starts</option>
-                  <option value="student">Student starts</option>
+                  <option value="tutor">Tutor</option>
+                  <option value="student">Student</option>
                 </select>
               </div>
 
-              {/* Conversation Purpose */}
-              <div>
-                <label style={labelStyle}>Conversation Purpose</label>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Conversation Purpose
+                </label>
                 <textarea
                   value={config.conversation_structure.purpose}
                   onChange={(e) => handleConfigChange('conversation_structure', 'purpose', e.target.value)}
-                  style={textareaStyle}
-                  placeholder="Describe the overall goal and focus of the conversation..."
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                  rows="3"
+                  placeholder="Describe the educational goal of this conversation..."
                 />
-              </div>
-            </div>
-
-            {/* Teaching Approach */}
-            <div style={sectionStyle}>
-              <h3 style={sectionTitleStyle}>Teaching Approach</h3>
-              
-              {/* Tutor Question Type */}
-              <div>
-                <label style={labelStyle}>Tutor Question Type</label>
-                <select
-                  value={config.tutor_questions.type}
-                  onChange={(e) => handleConfigChange('tutor_questions', 'type', e.target.value)}
-                  style={selectStyle}
-                >
-                  <option value="scaffolding">Scaffolding (Step-by-step guidance)</option>
-                  <option value="socratic">Socratic (Leading questions)</option>
-                  <option value="analytical">Analytical (Critical thinking)</option>
-                  <option value="reasoning">Reasoning (Logic-based)</option>
-                  <option value="exploratory">Exploratory (Open-ended)</option>
-                </select>
-              </div>
-
-              {/* Tutor Question Frequency */}
-              <div>
-                <label style={labelStyle}>Question Frequency</label>
-                <select
-                  value={config.tutor_questions.frequency}
-                  onChange={(e) => handleConfigChange('tutor_questions', 'frequency', e.target.value)}
-                  style={selectStyle}
-                >
-                  <option value="low">Low (Fewer questions)</option>
-                  <option value="moderate">Moderate (Balanced)</option>
-                  <option value="high">High (Many questions)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Student Characteristics */}
-            <div style={sectionStyle}>
-              <h3 style={sectionTitleStyle}>Student Characteristics</h3>
-              
-              {/* Student Engagement */}
-              <div>
-                <label style={labelStyle}>Student Engagement Level</label>
-                <select
-                  value={config.student_utterances.engagement}
-                  onChange={(e) => handleConfigChange('student_utterances', 'engagement', e.target.value)}
-                  style={selectStyle}
-                >
-                  <option value="low">Low (Passive responses)</option>
-                  <option value="moderate">Moderate (Some initiative)</option>
-                  <option value="high">High (Active participation)</option>
-                </select>
-              </div>
-
-              {/* Student Confusion Level */}
-              <div>
-                <label style={labelStyle}>Student Confusion Level</label>
-                <select
-                  value={config.student_utterances.confusion_level}
-                  onChange={(e) => handleConfigChange('student_utterances', 'confusion_level', e.target.value)}
-                  style={selectStyle}
-                >
-                  <option value="low">Low (Understands easily)</option>
-                  <option value="moderate">Moderate (Some confusion)</option>
-                  <option value="high">High (Frequently confused)</option>
-                  <option value="realistic">Realistic (Natural variation)</option>
-                </select>
               </div>
             </div>
 
             {/* AI Model Settings */}
-            <div style={sectionStyle}>
-              <h3 style={sectionTitleStyle}>AI Model Settings</h3>
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">AI Model Settings</h3>
               
-              {/* AI Model Selection */}
-              <div>
-                <label style={labelStyle}>AI Model</label>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Model
+                </label>
                 <select
-                  value={config.ai_settings.model}
-                  onChange={(e) => handleConfigChange('ai_settings', 'model', e.target.value)}
-                  style={selectStyle}
+                  value={aiSettings.model}
+                  onChange={(e) => handleAiSettingsChange('model', e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value="gpt-4o">GPT-4o (Recommended)</option>
-                  <option value="o3-mini">O3-mini (Advanced Reasoning)</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="o3-mini">O3-mini</option>
                 </select>
               </div>
 
-              {/* Temperature */}
-              <div>
-                <label style={labelStyle}>
-                  Creativity Level: {config.ai_settings.temperature}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Temperature: {aiSettings.temperature}
                 </label>
                 <input
                   type="range"
-                  min="0.1"
-                  max="1.0"
+                  min="0"
+                  max="1"
                   step="0.1"
-                  value={config.ai_settings.temperature}
-                  onChange={(e) => handleConfigChange('ai_settings', 'temperature', parseFloat(e.target.value))}
-                  style={rangeStyle}
+                  value={aiSettings.temperature}
+                  onChange={(e) => handleAiSettingsChange('temperature', parseFloat(e.target.value))}
+                  className="w-full"
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
-                  <span>Focused</span>
-                  <span>Creative</span>
-                </div>
               </div>
 
-              {/* Max Tokens */}
-              <div>
-                <label style={labelStyle}>
-                  Response Length: {config.ai_settings.max_tokens} tokens
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Max Tokens: {aiSettings.max_tokens}
                 </label>
                 <input
                   type="range"
-                  min="1000"
-                  max="3000"
-                  step="200"
-                  value={config.ai_settings.max_tokens}
-                  onChange={(e) => handleConfigChange('ai_settings', 'max_tokens', parseInt(e.target.value))}
-                  style={rangeStyle}
+                  min="500"
+                  max="4000"
+                  step="100"
+                  value={aiSettings.max_tokens}
+                  onChange={(e) => handleAiSettingsChange('max_tokens', parseInt(e.target.value))}
+                  className="w-full"
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
-                  <span>Short</span>
-                  <span>Long</span>
-                </div>
               </div>
 
-              {/* O3-mini specific settings */}
-              {config.ai_settings.model === 'o3-mini' && (
-                <div>
-                  <label style={labelStyle}>Reasoning Effort</label>
+              {aiSettings.model === 'o3-mini' && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Reasoning Effort
+                  </label>
                   <select
-                    value={config.ai_settings.reasoning_effort || 'medium'}
-                    onChange={(e) => handleConfigChange('ai_settings', 'reasoning_effort', e.target.value)}
-                    style={selectStyle}
+                    value={aiSettings.reasoning_effort || 'medium'}
+                    onChange={(e) => handleAiSettingsChange('reasoning_effort', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -927,60 +640,120 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
             </div>
 
             {/* Advanced Settings Toggle */}
-            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem' }}>
-              <div 
-                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginBottom: '1rem' }}
+            <div>
+              <button
+                type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
+                className="w-full text-left text-sm font-medium text-blue-600 hover:text-blue-800 mb-4"
               >
-                <span style={{ fontSize: '0.875rem', marginRight: '0.5rem' }}>
-                  {showAdvanced ? '▼' : '▶'}
-                </span>
-                <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
-                  Advanced Settings
-                </span>
-              </div>
+                {showAdvanced ? '▼ Hide Advanced Settings' : '▶ Show Advanced Settings'}
+              </button>
 
               {showAdvanced && (
-                <div style={sectionStyle}>
-                  <h3 style={sectionTitleStyle}>Vocabulary & Language</h3>
-                  
-                  {/* Vocabulary Complexity */}
-                  <div>
-                    <label style={labelStyle}>Vocabulary Complexity</label>
-                    <select
-                      value={config.vocabulary.complexity}
-                      onChange={(e) => handleConfigChange('vocabulary', 'complexity', e.target.value)}
-                      style={selectStyle}
-                    >
-                      <option value="beginner">Beginner</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="advanced">Advanced</option>
-                    </select>
+                <div className="space-y-4">
+                  {/* Vocabulary Settings */}
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4">Vocabulary Settings</h3>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Complexity Level
+                      </label>
+                      <select
+                        value={config.vocabulary.complexity}
+                        onChange={(e) => handleConfigChange('vocabulary', 'complexity', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                      </select>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={config.vocabulary.domain_specific}
+                          onChange={(e) => handleConfigChange('vocabulary', 'domain_specific', e.target.checked)}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-700">Use domain-specific vocabulary</span>
+                      </label>
+                    </div>
                   </div>
 
-                  {/* Domain Specific */}
-                  <div>
-                    <label style={{ ...labelStyle, display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="checkbox"
-                        checked={config.vocabulary.domain_specific}
-                        onChange={(e) => handleConfigChange('vocabulary', 'domain_specific', e.target.checked)}
-                        style={{ marginRight: '0.5rem' }}
-                      />
-                      Use domain-specific vocabulary
-                    </label>
+                  {/* Tutor Questions */}
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4">Tutor Questions</h3>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Question Frequency
+                      </label>
+                      <select
+                        value={config.tutor_questions.frequency}
+                        onChange={(e) => handleConfigChange('tutor_questions', 'frequency', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                      </select>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Question Type
+                      </label>
+                      <select
+                        value={config.tutor_questions.type}
+                        onChange={(e) => handleConfigChange('tutor_questions', 'type', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="scaffolding">Scaffolding</option>
+                        <option value="socratic">Socratic</option>
+                        <option value="analytical">Analytical</option>
+                        <option value="reasoning">Reasoning</option>
+                        <option value="exploratory">Exploratory</option>
+                      </select>
+                    </div>
                   </div>
 
-                  {/* Subject */}
-                  <div>
-                    <label style={labelStyle}>Subject Area</label>
-                    <input
-                      type="text"
-                      value={config.vocabulary.subject}
-                      onChange={(e) => handleConfigChange('vocabulary', 'subject', e.target.value)}
-                      style={inputStyle}
-                      placeholder="e.g., mathematics, science, history"
-                    />
+                  {/* Student Characteristics */}
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-4">Student Characteristics</h3>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Engagement Level
+                      </label>
+                      <select
+                        value={config.student_utterances.engagement}
+                        onChange={(e) => handleConfigChange('student_utterances', 'engagement', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                      </select>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Confusion Level
+                      </label>
+                      <select
+                        value={config.student_utterances.confusion_level}
+                        onChange={(e) => handleConfigChange('student_utterances', 'confusion_level', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                        <option value="realistic">Realistic</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               )}
@@ -989,101 +762,91 @@ const LandingPage = ({ onSubmit, loading, error, progress }) => {
             {/* Generate Button */}
             <button
               type="submit"
-              disabled={loading}
-              style={{
-                ...buttonStyle,
-                ...(loading ? { opacity: 0.6, cursor: 'not-allowed' } : {})
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.backgroundColor = buttonHoverStyle.backgroundColor;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.backgroundColor = buttonStyle.backgroundColor;
-                }
-              }}
+              disabled={isGenerating}
+              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{
-                    animation: 'spin 1s linear infinite',
-                    borderRadius: '50%',
-                    height: '1rem',
-                    width: '1rem',
-                    border: '2px solid transparent',
-                    borderTop: '2px solid white',
-                    marginRight: '0.5rem'
-                  }}></div>
-                  Generating...
-                </div>
-              ) : (
-                'Generate Conversations'
-              )}
+              {isGenerating ? 'Generating...' : 'Generate Conversations'}
             </button>
 
             {/* Progress Display */}
-            {loading && progress && progress.total > 0 && (
-              <div style={{ marginTop: '1rem' }}>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
-                  Progress: {progress.current}/{progress.total}
+            {isGenerating && (
+              <div className="mt-4">
+                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>Progress</span>
+                  <span>{Math.round(progress)}%</span>
                 </div>
-                <div style={{ width: '100%', backgroundColor: '#e5e7eb', borderRadius: '9999px', height: '0.5rem' }}>
+                <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
-                    style={{
-                      backgroundColor: '#2563eb',
-                      height: '0.5rem',
-                      borderRadius: '9999px',
-                      transition: 'all 0.3s',
-                      width: `${(progress.current / progress.total) * 100}%`
-                    }}
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
                   ></div>
                 </div>
+                {currentConversation > 0 && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Generating conversation {currentConversation}...
+                  </p>
+                )}
               </div>
             )}
 
             {/* Error Display */}
             {error && (
-              <div style={{
-                marginTop: '1rem',
-                padding: '0.75rem',
-                backgroundColor: '#fee2e2',
-                border: '1px solid #fca5a5',
-                color: '#991b1b',
-                borderRadius: '0.375rem',
-                fontSize: '0.875rem'
-              }}>
-                {error}
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <h3 className="text-red-800 font-semibold mb-2">Error</h3>
+                <p className="text-red-700 text-sm">{error}</p>
               </div>
             )}
-
           </form>
-
-          {/* Mode Information */}
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
-            <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#111827', marginBottom: '0.75rem' }}>Mode Information</h3>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-              <div style={{ marginBottom: '0.5rem' }}>
-                <strong>Single AI:</strong> Faster generation (10-30s), cost-effective, good for basic scenarios
-              </div>
-              <div>
-                <strong>Dual AI:</strong> More realistic interactions (30-120s), separate tutor/student personalities
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* CSS Animation for spinner */}
-      <style>
-        {`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
+      {/* Results Section */}
+      {conversations.length > 0 && (
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Generated Conversations</h2>
+              <button
+                onClick={onDownload}
+                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Download Results
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {conversations.map((conv, index) => (
+                <div key={index} className="border rounded-lg p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Conversation {conv.id}</h3>
+                    <div className="text-sm text-gray-600">
+                      {conv.metadata.total_turns} turns • {conv.metadata.generation_mode} • {conv.metadata.model}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {conv.conversation.map((turn, turnIndex) => (
+                      <div key={turnIndex} className={`p-3 rounded-lg ${
+                        turn.role === 'tutor' ? 'bg-blue-50 border-l-4 border-blue-400' : 'bg-green-50 border-l-4 border-green-400'
+                      }`}>
+                        <div className="font-semibold text-sm capitalize mb-1">{turn.role}</div>
+                        <div className="text-sm">{turn.content}</div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button
+                    onClick={() => onCopy(JSON.stringify(conv.conversation, null, 2))}
+                    className="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Copy Conversation
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
