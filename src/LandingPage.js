@@ -75,7 +75,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
   // Helper function to check if model is O3-mini
   const isO3Mini = (model) => model === 'o3-mini';
 
-  // Professional preset configurations with O3-mini support
+  // Complete preset configurations with O3-mini support
   const presets = [
     {
       id: 'math_basic',
@@ -175,21 +175,22 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       }
     },
     {
-      id: 'science_basic',
-      title: 'Science Exploration',
-      description: 'Basic physics and chemistry concepts with experiments',
-      mode: 'Single AI',
+      id: 'science_discovery',
+      title: 'Science Discovery Learning',
+      description: 'Inquiry-based science exploration and hypothesis testing',
+      mode: 'Dual AI',
       complexity: 'Intermediate',
-      popular: false,
+      popular: true,
       config: {
-        generationMode: 'single_ai',
+        generationMode: 'dual_ai',
+        conversation_count: 2,
         subject: 'science',
         conversation_structure: {
           turns: 10,
-          starter: 'tutor',
-          purpose: 'Science education focusing on conceptual understanding and experimental thinking',
+          starter: 'student',
+          purpose: 'Science discovery learning with inquiry-based approach and hypothesis testing',
           tutor_student_ratio: "1:1",
-          conversation_starter: 'tutor'
+          conversation_starter: 'student'
         },
         vocabulary: {
           complexity: 'intermediate',
@@ -198,21 +199,21 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         },
         tutor_questions: {
           frequency: 'moderate',
-          type: 'inquiry_based',
+          type: 'socratic',
           purpose_distribution: { assessment: 1, guidance: 2, clarification: 2 }
         },
         student_utterances: {
           engagement: 'high',
-          confusion_level: 'moderate',
+          confusion_level: 'realistic',
           confusion_scores: { mean: 3, std: 1.5, min: 1, max: 5 },
-          correctness_distribution: { correct_independent: 0.3, correct_assisted: 0.5, incorrect: 0.2 }
+          correctness_distribution: { correct_independent: 0.3, correct_assisted: 0.4, incorrect: 0.3 }
         },
         student_purposes: {
-          purpose_weights: { better_understanding: 0.4, clarification: 0.3, practice: 0.15, validation: 0.1, help_with_problem: 0.05 },
+          purpose_weights: { better_understanding: 0.3, clarification: 0.2, practice: 0.3, validation: 0.1, help_with_problem: 0.1 },
           custom_purposes: []
         },
         tutor_purposes: {
-          purpose_weights: { scaffolding: 0.25, explanation: 0.35, assessment: 0.2, encouragement: 0.1, guided_discovery: 0.1 },
+          purpose_weights: { scaffolding: 0.2, explanation: 0.2, assessment: 0.1, encouragement: 0.2, guided_discovery: 0.3 },
           custom_purposes: []
         }
       },
@@ -224,41 +225,90 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       }
     },
     {
-      id: 'dual_debate',
-      title: 'Dual AI Debate Session',
-      description: 'Two AI perspectives engaging in educational debate',
-      mode: 'Dual AI',
-      complexity: 'Advanced',
+      id: 'language_arts',
+      title: 'Language Arts Discussion',
+      description: 'Reading comprehension and literary analysis conversations',
+      mode: 'Single AI',
+      complexity: 'Intermediate',
       popular: false,
       config: {
-        generationMode: 'dual_ai',
-        conversation_count: 2,
-        subject: 'philosophy',
+        generationMode: 'single_ai',
+        subject: 'language arts',
         conversation_structure: {
           turns: 12,
           starter: 'tutor',
-          purpose: 'Dual AI educational debate with contrasting perspectives on philosophical topics',
+          purpose: 'Language arts discussion focusing on reading comprehension and literary analysis',
           tutor_student_ratio: "1:1",
           conversation_starter: 'tutor'
         },
         vocabulary: {
           complexity: 'advanced',
           domain_specific: true,
-          subject: 'philosophy'
+          subject: 'language arts'
         },
         tutor_questions: {
-          frequency: 'high',
-          type: 'socratic',
-          purpose_distribution: { assessment: 2, guidance: 1, clarification: 2 }
+          frequency: 'moderate',
+          type: 'analytical',
+          purpose_distribution: { assessment: 1, guidance: 2, clarification: 1 }
         },
         student_utterances: {
-          engagement: 'very_high',
-          confusion_level: 'challenging',
-          confusion_scores: { mean: 4, std: 1, min: 2, max: 5 },
+          engagement: 'high',
+          confusion_level: 'low',
+          confusion_scores: { mean: 2, std: 1, min: 1, max: 4 },
           correctness_distribution: { correct_independent: 0.4, correct_assisted: 0.4, incorrect: 0.2 }
         },
         student_purposes: {
-          purpose_weights: { better_understanding: 0.3, clarification: 0.2, practice: 0.2, validation: 0.15, help_with_problem: 0.15 },
+          purpose_weights: { better_understanding: 0.4, clarification: 0.2, practice: 0.2, validation: 0.1, help_with_problem: 0.1 },
+          custom_purposes: []
+        },
+        tutor_purposes: {
+          purpose_weights: { scaffolding: 0.2, explanation: 0.3, assessment: 0.3, encouragement: 0.1, guided_discovery: 0.1 },
+          custom_purposes: []
+        }
+      },
+      aiSettings: {
+        model: 'gpt-4o',
+        temperature: 0.7,
+        max_tokens: 2000,
+        reasoning_effort: 'medium'
+      }
+    },
+    {
+      id: 'history_analysis',
+      title: 'Historical Analysis',
+      description: 'Critical thinking about historical events and contexts',
+      mode: 'Dual AI',
+      complexity: 'Advanced',
+      popular: false,
+      config: {
+        generationMode: 'dual_ai',
+        conversation_count: 2,
+        subject: 'history',
+        conversation_structure: {
+          turns: 10,
+          starter: 'tutor',
+          purpose: 'Historical analysis with critical thinking emphasis and contextual understanding',
+          tutor_student_ratio: "1:1",
+          conversation_starter: 'tutor'
+        },
+        vocabulary: {
+          complexity: 'advanced',
+          domain_specific: true,
+          subject: 'history'
+        },
+        tutor_questions: {
+          frequency: 'high',
+          type: 'analytical',
+          purpose_distribution: { assessment: 2, guidance: 1, clarification: 1 }
+        },
+        student_utterances: {
+          engagement: 'high',
+          confusion_level: 'moderate',
+          confusion_scores: { mean: 3, std: 1, min: 2, max: 5 },
+          correctness_distribution: { correct_independent: 0.3, correct_assisted: 0.5, incorrect: 0.2 }
+        },
+        student_purposes: {
+          purpose_weights: { better_understanding: 0.4, clarification: 0.3, practice: 0.1, validation: 0.1, help_with_problem: 0.1 },
           custom_purposes: []
         },
         tutor_purposes: {
@@ -269,56 +319,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'o3-mini',
         reasoning_effort: 'high',
-        max_tokens: 3000
-      }
-    },
-    {
-      id: 'language_learning',
-      title: 'Language Learning Session',
-      description: 'Interactive language practice with pronunciation and grammar',
-      mode: 'Single AI',
-      complexity: 'Intermediate',
-      popular: false,
-      config: {
-        generationMode: 'single_ai',
-        subject: 'language_learning',
-        conversation_structure: {
-          turns: 12,
-          starter: 'tutor',
-          purpose: 'Language learning session focusing on conversational practice and grammar correction',
-          tutor_student_ratio: "1:1",
-          conversation_starter: 'tutor'
-        },
-        vocabulary: {
-          complexity: 'beginner_to_intermediate',
-          domain_specific: false,
-          subject: 'language_learning'
-        },
-        tutor_questions: {
-          frequency: 'high',
-          type: 'conversational',
-          purpose_distribution: { assessment: 1, guidance: 3, clarification: 2 }
-        },
-        student_utterances: {
-          engagement: 'high',
-          confusion_level: 'moderate',
-          confusion_scores: { mean: 3, std: 1.5, min: 1, max: 5 },
-          correctness_distribution: { correct_independent: 0.25, correct_assisted: 0.55, incorrect: 0.2 }
-        },
-        student_purposes: {
-          purpose_weights: { better_understanding: 0.3, clarification: 0.35, practice: 0.25, validation: 0.05, help_with_problem: 0.05 },
-          custom_purposes: []
-        },
-        tutor_purposes: {
-          purpose_weights: { scaffolding: 0.3, explanation: 0.3, assessment: 0.15, encouragement: 0.15, guided_discovery: 0.1 },
-          custom_purposes: []
-        }
-      },
-      aiSettings: {
-        model: 'gpt-4o',
-        temperature: 0.9,
-        max_tokens: 2000,
-        reasoning_effort: 'medium'
+        max_tokens: 2400
       }
     },
     {
@@ -367,6 +368,55 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
         model: 'o3-mini',
         reasoning_effort: 'high',
         max_tokens: 2800
+      }
+    },
+    {
+      id: 'custom_topic',
+      title: 'Custom Topic Exploration',
+      description: 'Flexible conversation generation for any educational topic',
+      mode: 'Single AI',
+      complexity: 'Beginner',
+      popular: false,
+      config: {
+        generationMode: 'single_ai',
+        subject: 'general',
+        conversation_structure: {
+          turns: 8,
+          starter: 'tutor',
+          purpose: 'Custom topic exploration with adaptive approach and flexible learning goals',
+          tutor_student_ratio: "1:1",
+          conversation_starter: 'tutor'
+        },
+        vocabulary: {
+          complexity: 'intermediate',
+          domain_specific: false,
+          subject: 'general'
+        },
+        tutor_questions: {
+          frequency: 'moderate',
+          type: 'exploratory',
+          purpose_distribution: { assessment: 1, guidance: 2, clarification: 1 }
+        },
+        student_utterances: {
+          engagement: 'moderate',
+          confusion_level: 'realistic',
+          confusion_scores: { mean: 3, std: 1, min: 1, max: 5 },
+          correctness_distribution: { correct_independent: 0.3, correct_assisted: 0.5, incorrect: 0.2 }
+        },
+        student_purposes: {
+          purpose_weights: { better_understanding: 0.3, clarification: 0.3, practice: 0.2, validation: 0.1, help_with_problem: 0.1 },
+          custom_purposes: []
+        },
+        tutor_purposes: {
+          purpose_weights: { scaffolding: 0.3, explanation: 0.3, assessment: 0.2, encouragement: 0.1, guided_discovery: 0.1 },
+          custom_purposes: []
+        }
+      },
+      aiSettings: {
+        model: 'gpt-4o',
+        temperature: 0.7,
+        max_tokens: 2000,
+        reasoning_effort: 'medium'
       }
     }
   ];
@@ -559,9 +609,11 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                       <option value="mathematics">Mathematics</option>
                       <option value="science">Science</option>
                       <option value="language_learning">Language Learning</option>
+                      <option value="language arts">Language Arts</option>
                       <option value="computer_science">Computer Science</option>
-                      <option value="philosophy">Philosophy</option>
                       <option value="history">History</option>
+                      <option value="philosophy">Philosophy</option>
+                      <option value="general">General</option>
                     </select>
                   </div>
 
@@ -744,8 +796,38 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                         <option value="scaffolding">Scaffolding</option>
                         <option value="socratic">Socratic</option>
                         <option value="inquiry_based">Inquiry Based</option>
+                        <option value="analytical">Analytical</option>
                         <option value="problem_solving">Problem Solving</option>
                         <option value="conversational">Conversational</option>
+                        <option value="exploratory">Exploratory</option>
+                      </select>
+                    </div>
+
+                    {/* Conversation Starter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Conversation Starter</label>
+                      <select
+                        value={config.conversation_structure.starter}
+                        onChange={(e) => handleConfigChange('conversation_structure.starter', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="tutor">Tutor Starts</option>
+                        <option value="student">Student Starts</option>
+                      </select>
+                    </div>
+
+                    {/* Confusion Level */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Student Confusion Level</label>
+                      <select
+                        value={config.student_utterances.confusion_level}
+                        onChange={(e) => handleConfigChange('student_utterances.confusion_level', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="realistic">Realistic</option>
+                        <option value="challenging">Challenging</option>
                       </select>
                     </div>
                   </div>
