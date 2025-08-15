@@ -72,8 +72,8 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
   const [aiSettings, setAiSettings] = useState({
     model: 'gpt-4o',
     temperature: 0.7,
-    max_tokens: 2000,
-    reasoning_effort: 'medium', // For O3-mini
+    max_completion_tokens: 2000, // O3-mini uses max_completion_tokens instead of max_tokens
+    reasoning_effort: 'medium', // For O3-mini: 'low', 'medium', 'high'
     top_p: 1.0,
     frequency_penalty: 0.0,
     presence_penalty: 0.0
@@ -132,7 +132,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.6,
-        max_tokens: 1800,
+        max_completion_tokens: 1800,
         reasoning_effort: 'medium',
         top_p: 1.0,
         frequency_penalty: 0.0,
@@ -187,7 +187,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'o3-mini',
         reasoning_effort: 'high',
-        max_tokens: 2500,
+        max_completion_tokens: 2500,
         top_p: 1.0,
         frequency_penalty: 0.0,
         presence_penalty: 0.0
@@ -242,7 +242,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.8,
-        max_tokens: 2200,
+        max_completion_tokens: 2200,
         reasoning_effort: 'medium',
         top_p: 1.0,
         frequency_penalty: 0.0,
@@ -297,7 +297,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.7,
-        max_tokens: 2000,
+        max_completion_tokens: 2000,
         reasoning_effort: 'medium',
         top_p: 1.0,
         frequency_penalty: 0.0,
@@ -353,7 +353,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'o3-mini',
         reasoning_effort: 'high',
-        max_tokens: 2400,
+        max_completion_tokens: 2400,
         top_p: 1.0,
         frequency_penalty: 0.0,
         presence_penalty: 0.0
@@ -407,7 +407,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'o3-mini',
         reasoning_effort: 'high',
-        max_tokens: 2800,
+        max_completion_tokens: 2800,
         top_p: 1.0,
         frequency_penalty: 0.0,
         presence_penalty: 0.0
@@ -461,7 +461,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       aiSettings: {
         model: 'gpt-4o',
         temperature: 0.7,
-        max_tokens: 2000,
+        max_completion_tokens: 2000,
         reasoning_effort: 'medium',
         top_p: 1.0,
         frequency_penalty: 0.0,
@@ -499,17 +499,23 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       // Handle model-specific parameter changes
       if (key === 'model') {
         if (isO3Mini(value)) {
-          // Switching to O3-mini: remove temperature, ensure reasoning_effort
-          const { temperature, ...o3Settings } = newSettings;
+          // Switching to O3-mini: remove unsupported parameters, use max_completion_tokens
+          const { temperature, top_p, frequency_penalty, presence_penalty, max_tokens, ...o3Settings } = newSettings;
           return {
             ...o3Settings,
+            max_completion_tokens: o3Settings.max_completion_tokens || o3Settings.max_tokens || 2000,
             reasoning_effort: o3Settings.reasoning_effort || 'medium'
           };
         } else {
-          // Switching from O3-mini: add temperature, keep reasoning_effort for compatibility
+          // Switching from O3-mini: add standard parameters, use max_tokens for compatibility
+          const { max_completion_tokens, ...standardSettings } = newSettings;
           return {
-            ...newSettings,
-            temperature: newSettings.temperature || 0.7
+            ...standardSettings,
+            max_tokens: max_completion_tokens || standardSettings.max_tokens || 2000,
+            temperature: standardSettings.temperature || 0.7,
+            top_p: standardSettings.top_p || 1.0,
+            frequency_penalty: standardSettings.frequency_penalty || 0.0,
+            presence_penalty: standardSettings.presence_penalty || 0.0
           };
         }
       }
@@ -758,7 +764,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                           <div className="ml-3">
                             <h3 className="text-sm font-medium text-blue-800">O3-mini Reasoning Model</h3>
                             <p className="text-sm text-blue-700 mt-1">
-                              This model specializes in complex reasoning tasks. Temperature control is not available as the model uses internal reasoning processes.
+                              O3-mini is optimized for STEM reasoning tasks. It does not support temperature, top_p, frequency_penalty, or presence_penalty parameters as it uses internal reasoning processes instead.
                             </p>
                           </div>
                         </div>
@@ -787,18 +793,21 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                     </div>
                   )}
 
-                  {/* Max Tokens */}
+                  {/* Max Completion Tokens (for O3-mini) or Max Tokens (for other models) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Tokens: {aiSettings.max_tokens}
+                      {isO3Mini(aiSettings.model) ? 'Max Completion Tokens' : 'Max Tokens'}: {aiSettings.max_completion_tokens || aiSettings.max_tokens}
                     </label>
                     <input
                       type="range"
                       min="500"
                       max="4000"
                       step="100"
-                      value={aiSettings.max_tokens}
-                      onChange={(e) => handleAiSettingChange('max_tokens', parseInt(e.target.value))}
+                      value={aiSettings.max_completion_tokens || aiSettings.max_tokens}
+                      onChange={(e) => {
+                        const paramName = isO3Mini(aiSettings.model) ? 'max_completion_tokens' : 'max_tokens';
+                        handleAiSettingChange(paramName, parseInt(e.target.value));
+                      }}
                       className="w-full"
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -806,6 +815,11 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                       <span>Medium</span>
                       <span>Long</span>
                     </div>
+                    {isO3Mini(aiSettings.model) && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Includes both visible output tokens and internal reasoning tokens
+                      </p>
+                    )}
                   </div>
 
                   {/* Additional AI Parameters for Non-O3 models */}
