@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import './App.css';
 
-// Import the improved LandingPage component
-import LandingPage from './components/LandingPage';
+// Fixed import path - LandingPage is in the same directory as App.js
+import LandingPage from './LandingPage';
 
 const LAMBDA_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
 
