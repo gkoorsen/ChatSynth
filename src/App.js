@@ -1,10 +1,53 @@
 import React, { useState } from 'react';
 import './App.css';
-
-// Fixed import path - LandingPage is in the same directory as App.js
 import LandingPage from './LandingPage';
 
-const LAMBDA_ENDPOINT = 'https://3py5676r52.execute-api.us-east-1.amazonaws.com/prod/generate';
+// Configuration object for different environments
+const config = {
+  // Primary endpoint from environment variable
+  LAMBDA_ENDPOINT: process.env.REACT_APP_LAMBDA_ENDPOINT,
+  
+  // Fallback for local development
+  FALLBACK_ENDPOINT: 'http://localhost:3001/api/generate',
+  
+  // Environment detection
+  IS_PRODUCTION: process.env.NODE_ENV === 'production',
+  IS_DEVELOPMENT: process.env.NODE_ENV === 'development',
+  
+  // Optional: Environment-specific settings
+  DEBUG_MODE: process.env.REACT_APP_DEBUG_MODE === 'true',
+  APP_ENV: process.env.REACT_APP_ENV || 'development'
+};
+
+// Validate configuration
+const validateConfig = () => {
+  if (config.IS_PRODUCTION && !config.LAMBDA_ENDPOINT) {
+    console.error('❌ REACT_APP_LAMBDA_ENDPOINT is required in production');
+    throw new Error('Missing required environment variable: REACT_APP_LAMBDA_ENDPOINT');
+  }
+  
+  if (config.DEBUG_MODE) {
+    console.log('🔧 ChatSynth Configuration:', {
+      endpoint: config.LAMBDA_ENDPOINT || config.FALLBACK_ENDPOINT,
+      environment: config.APP_ENV,
+      isProduction: config.IS_PRODUCTION
+    });
+  }
+};
+
+// Get the appropriate endpoint
+const getApiEndpoint = () => {
+  if (config.LAMBDA_ENDPOINT) {
+    return config.LAMBDA_ENDPOINT;
+  }
+  
+  if (config.IS_DEVELOPMENT) {
+    console.warn('⚠️ Using fallback endpoint for development:', config.FALLBACK_ENDPOINT);
+    return config.FALLBACK_ENDPOINT;
+  }
+  
+  throw new Error('No API endpoint configured');
+};
 
 function App() {
   const [conversations, setConversations] = useState([]);
@@ -12,6 +55,15 @@ function App() {
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
   const [currentConversation, setCurrentConversation] = useState(0);
+
+  // Validate configuration on app load
+  React.useEffect(() => {
+    try {
+      validateConfig();
+    } catch (configError) {
+      setError(`Configuration Error: ${configError.message}`);
+    }
+  }, []);
 
   const generateConversations = async (config, aiSettings) => {
     console.log('Starting conversation generation...');
@@ -28,6 +80,9 @@ function App() {
     const generatedConversations = [];
 
     try {
+      // Get the API endpoint
+      const apiEndpoint = getApiEndpoint();
+      
       for (let i = 0; i < conversationCount; i++) {
         setCurrentConversation(i + 1);
         console.log(`Generating conversation ${i + 1}/${conversationCount} using model: ${aiSettings.model}`);
@@ -38,10 +93,10 @@ function App() {
           // Check if this is dual AI mode
           if (config.generationMode === 'dual_ai') {
             // Use async processing for dual AI
-            conversation = await generateDualAIConversation(config, aiSettings);
+            conversation = await generateDualAIConversation(config, aiSettings, apiEndpoint);
           } else {
             // Use direct processing for single AI
-            conversation = await generateSingleAIConversation(config, aiSettings);
+            conversation = await generateSingleAIConversation(config, aiSettings, apiEndpoint);
           }
 
           if (conversation && conversation.length > 0) {
@@ -53,7 +108,8 @@ function App() {
                 total_turns: conversation.length,
                 subject: config.subject,
                 generation_mode: config.generationMode || 'single_ai',
-                model: aiSettings.model
+                model: aiSettings.model,
+                endpoint: apiEndpoint.split('?')[0] // Log endpoint without query params
               }
             });
             console.log(`✅ Conversation ${i + 1} generated successfully with ${conversation.length} turns`);
@@ -83,7 +139,7 @@ function App() {
   };
 
   // Single AI conversation generation (direct endpoint call)
-  const generateSingleAIConversation = async (config, aiSettings) => {
+  const generateSingleAIConversation = async (config, aiSettings, endpoint) => {
     const requestBody = {
       ...config,
       ai_settings: aiSettings
@@ -91,7 +147,7 @@ function App() {
 
     console.log('Making request to Lambda for single AI:', requestBody);
 
-    const response = await fetch(LAMBDA_ENDPOINT, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -118,7 +174,7 @@ function App() {
   };
 
   // Dual AI conversation generation (async with job polling)
-  const generateDualAIConversation = async (config, aiSettings) => {
+  const generateDualAIConversation = async (config, aiSettings, endpoint) => {
     const requestBody = {
       ...config,
       ai_settings: aiSettings
@@ -126,8 +182,8 @@ function App() {
 
     console.log('Starting dual AI async job:', requestBody);
 
-    // Start the async job using the single endpoint with mode=async query parameter
-    const startResponse = await fetch(`${LAMBDA_ENDPOINT}?mode=async`, {
+    // Start the async job using the endpoint with mode=async query parameter
+    const startResponse = await fetch(`${endpoint}?mode=async`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -153,7 +209,7 @@ function App() {
     const jobId = startResult.jobId;
     console.log(`Polling job ${jobId} for completion...`);
 
-    // Poll for completion using the single endpoint with mode=status query parameter
+    // Poll for completion using the endpoint with mode=status query parameter
     const maxAttempts = 60; // 5 minutes max (5 seconds * 60)
     let attempts = 0;
 
@@ -162,7 +218,7 @@ function App() {
       attempts++;
 
       try {
-        const statusResponse = await fetch(`${LAMBDA_ENDPOINT}?mode=status&jobId=${jobId}`);
+        const statusResponse = await fetch(`${endpoint}?mode=status&jobId=${jobId}`);
         
         if (!statusResponse.ok) {
           console.error(`Status check failed: ${statusResponse.status}`);
