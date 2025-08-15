@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+
 const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, conversations, error, onDownload, onCopy }) => {
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
