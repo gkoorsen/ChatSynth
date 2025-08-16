@@ -912,6 +912,39 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
     return [];
   };
 
+  const generateEducationalSummary = (config, purposes) => {
+    const vocabLevel = config.vocabulary?.complexity || 'intermediate';
+    const engagement = config.student_utterances?.engagement || 'high';
+    const questionType = config.tutor_questions?.type || 'scaffolding';
+    const subject = config.subject || 'general';
+    
+    let summary = `This conversation will feature ${vocabLevel}-level ${subject} content with ${engagement} student engagement. `;
+    
+    if (purposes.tutor.includes('scaffolding')) {
+      summary += "The tutor will break down complex concepts into manageable steps. ";
+    }
+    
+    if (purposes.tutor.includes('socratic_questioning')) {
+      summary += "Strategic questioning will guide the student to discover insights independently. ";
+    }
+    
+    if (purposes.student.includes('hypothesis_testing')) {
+      summary += "The student will actively propose and test ideas. ";
+    } else if (purposes.student.includes('validation_seeking')) {
+      summary += "The student will seek confirmation and guidance when uncertain. ";
+    }
+    
+    if (questionType === 'socratic') {
+      summary += "Expect deep, thought-provoking dialogue that promotes critical thinking.";
+    } else if (questionType === 'scaffolding') {
+      summary += "Expect structured, supportive guidance with clear learning progression.";
+    } else {
+      summary += "Expect a balanced approach tailored to student needs.";
+    }
+    
+    return summary;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
