@@ -759,6 +759,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
   const applyTemplate = (template) => {
     setSelectedTutorPurposes(template.tutorPurposes);
     setSelectedStudentPurposes(template.studentPurposes);
+    setSelectedTemplate(template.id); // Add this line
     setPurposeMode('guided');
   };
 
