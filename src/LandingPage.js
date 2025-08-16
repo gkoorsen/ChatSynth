@@ -836,6 +836,16 @@ const [config, setConfig] = useState({
       }
       
       current[keys[keys.length - 1]] = value;
+      
+      // Validate word count settings if they were modified
+      if (path.startsWith('word_count_controls')) {
+        const validation = validateWordCountSettings(newConfig);
+        if (!validation.isValid) {
+          console.warn('Word count validation issues:', validation.issues);
+          // Optionally show user feedback
+        }
+      }
+      
       return newConfig;
     });
   };
