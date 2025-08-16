@@ -1,1092 +1,4 @@
-<button
-                        type="button"
-                        onClick={() => handleConfigChange('generationMode', 'single_ai')}
-                        className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                          config.generationMode === 'single_ai'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        Single AI
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleConfigChange('generationMode', 'dual_ai')}
-                        className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                          config.generationMode === 'dual_ai'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        Dual AI
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Conversation Count */}
-                  {config.generationMode === 'dual_ai' && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Number of Conversations
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={config.conversation_count}
-                        onChange={(e) => handleConfigChange('conversation_count', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  )}
-
-                  {/* Subject */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                    <select
-                      value={config.subject}
-                      onChange={(e) => handleConfigChange('subject', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="mathematics">Mathematics</option>
-                      <option value="science">Science</option>
-                      <option value="language_learning">Language Learning</option>
-                      <option value="language_arts">Language Arts</option>
-                      <option value="computer_science">Computer Science</option>
-                      <option value="history">History</option>
-                      <option value="philosophy">Philosophy</option>
-                      <option value="general">General</option>
-                    </select>
-                  </div>
-
-                  {/* Conversation Turns */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Conversation Turns: {config.conversation_structure.turns}
-                    </label>
-                    <input
-                      type="range"
-                      min="4"
-                      max="20"
-                      value={config.conversation_structure.turns}
-                      onChange={(e) => handleConfigChange('conversation_structure.turns', parseInt(e.target.value))}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Educational Purpose Control */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Educational Purpose Control</h2>
-                
-                {/* Purpose Mode Selection */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Purpose Selection Mode</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPurposeMode('auto')}
-                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                        purposeMode === 'auto'
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Auto-Select
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPurposeMode('guided')}
-                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                        purposeMode === 'guided'
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Templates
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPurposeMode('custom')}
-                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                        purposeMode === 'custom'
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Custom
-                    </button>
-                  </div>
-                </div>
-
-                {/* Auto Mode - Enhanced Explanation */}
-                {purposeMode === 'auto' && (
-                  <div className="space-y-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="ml-3 flex-1">
-                          <h3 className="text-sm font-medium text-blue-800">Smart Purpose Selection</h3>
-                          <p className="text-sm text-blue-700 mt-1">
-                            Based on your configuration, we'll automatically choose the best educational approaches for your conversation.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Selected Purposes Preview */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Tutor Purposes */}
-                      <div className="bg-blue-25 border border-blue-200 rounded-lg p-4">
-                        <h4 className="font-medium text-blue-900 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                          Tutor Will Use ({getAutoSuggestedPurposes().tutor.length} approaches)
-                        </h4>
-                        <div className="space-y-2">
-                          {getAutoSuggestedPurposes().tutor.map(purposeId => {
-                            const purpose = tutorPurposes.find(p => p.id === purposeId);
-                            return purpose ? (
-                              <div key={purposeId} className="flex items-start">
-                                <span className="text-sm mr-2">{purpose.icon}</span>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-gray-900">{purpose.name}</div>
-                                  <div className="text-xs text-gray-600">{purpose.description}</div>
-                                </div>
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Student Purposes */}
-                      <div className="bg-green-25 border border-green-200 rounded-lg p-4">
-                        <h4 className="font-medium text-green-900 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
-                          Student Will Show ({getAutoSuggestedPurposes().student.length} behaviors)
-                        </h4>
-                        <div className="space-y-2">
-                          {getAutoSuggestedPurposes().student.map(purposeId => {
-                            const purpose = studentPurposes.find(p => p.id === purposeId);
-                            return purpose ? (
-                              <div key={purposeId} className="flex items-start">
-                                <span className="text-sm mr-2">{purpose.icon}</span>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium text-gray-900">{purpose.name}</div>
-                                  <div className="text-xs text-gray-600">{purpose.description}</div>
-                                </div>
-                              </div>
-                            ) : null;
-                          })}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Educational Rationale */}
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                      <h4 className="font-medium text-amber-900 mb-2 flex items-center">
-                        <span className="w-2 h-2 bg-amber-600 rounded-full mr-2"></span>
-                        Educational Approach Summary
-                      </h4>
-                      <p className="text-sm text-amber-800">
-                        {generateEducationalSummary(config, getAutoSuggestedPurposes())}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Template Mode - Show Templates */}
-                {purposeMode === 'guided' && (
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600 mb-3">Choose a pre-designed template for common educational scenarios:</p>
-                    {purposeTemplates.map((template) => (
-                      <div
-                        key={template.id}
-                        onClick={() => applyTemplate(template)}
-                        className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                      >
-                        <div className="flex items-start">
-                          <span className="text-2xl mr-3">{template.icon}</span>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900">{template.name}</h4>
-                            <p className="text-sm text-gray-600 mt-1">{template.description}</p>
-                            <div className="mt-2 text-xs text-gray-500">
-                              <div><strong>Tutor:</strong> {template.tutorPurposes.slice(0, 3).join(', ')}</div>
-                              <div><strong>Student:</strong> {template.studentPurposes.slice(0, 3).join(', ')}</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Custom Mode - Purpose Selection */}
-                {purposeMode === 'custom' && (
-                  <div className="space-y-4">
-                    {/* Tutor Purposes */}
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Tutor Teaching Purposes</h4>
-                      <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
-                        {tutorPurposes.concat(customPurposes.tutor).map((purpose) => (
-                          <label key={purpose.id} className="flex items-start p-2 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedTutorPurposes.includes(purpose.id)}
-                              onChange={() => toggleTutorPurpose(purpose.id)}
-                              className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center">
-                                <span className="mr-2">{purpose.icon}</span>
-                                <span className="font-medium text-sm text-gray-900">{purpose.name}</span>
-                                {purpose.isCustom && (
-                                  <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">Custom</span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1">{purpose.description}</p>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Student Purposes */}
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Student Learning Purposes</h4>
-                      <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
-                        {studentPurposes.concat(customPurposes.student).map((purpose) => (
-                          <label key={purpose.id} className="flex items-start p-2 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedStudentPurposes.includes(purpose.id)}
-                              onChange={() => toggleStudentPurpose(purpose.id)}
-                              className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center">
-                                <span className="mr-2">{purpose.icon}</span>
-                                <span className="font-medium text-sm text-gray-900">{purpose.name}</span>
-                                {purpose.isCustom && (
-                                  <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">Custom</span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1">{purpose.description}</p>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Add Custom Purpose */}
-                    <div className="border-t border-gray-200 pt-4">
-                      <button
-                        type="button"
-                        onClick={() => setShowCustomPurposeDialog(true)}
-                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        + Add Custom Purpose
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* AI Settings */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">AI Settings</h2>
-                
-                <div className="space-y-4">
-                  {/* Model Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">AI Model</label>
-                    <select
-                      value={aiSettings.model}
-                      onChange={(e) => handleAiSettingChange('model', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="gpt-4o">GPT-4o (Balanced)</option>
-                      <option value="o3-mini">O3-mini (Advanced Reasoning)</option>
-                    </select>
-                  </div>
-
-                  {/* Model-specific parameters */}
-                  {isO3Mini(aiSettings.model) ? (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Reasoning Effort
-                        </label>
-                        <select
-                          value={aiSettings.reasoning_effort}
-                          onChange={(e) => handleAiSettingChange('reasoning_effort', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                          <option value="low">Low (Faster, Less Reasoning)</option>
-                          <option value="medium">Medium (Balanced)</option>
-                          <option value="high">High (Slower, More Reasoning)</option>
-                        </select>
-                      </div>
-                      
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <div className="flex items-start">
-                          <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm font-medium text-blue-800">O3-mini Reasoning Model</h3>
-                            <p className="text-sm text-blue-700 mt-1">
-                              O3-mini is optimized for STEM reasoning tasks. It does not support temperature, top_p, frequency_penalty, or presence_penalty parameters.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Temperature: {aiSettings.temperature}
-                      </label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="2"
-                        step="0.1"
-                        value={aiSettings.temperature}
-                        onChange={(e) => handleAiSettingChange('temperature', parseFloat(e.target.value))}
-                        className="w-full"
-                      />
-                    </div>
-                  )}
-
-                  {/* Max Completion Tokens */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Tokens: {aiSettings.max_completion_tokens || aiSettings.max_tokens}
-                    </label>
-                    <input
-                      type="range"
-                      min="500"
-                      max="4000"
-                      step="100"
-                      value={aiSettings.max_completion_tokens || aiSettings.max_tokens}
-                      onChange={(e) => {
-                        const paramName = isO3Mini(aiSettings.model) ? 'max_completion_tokens' : 'max_tokens';
-                        handleAiSettingChange(paramName, parseInt(e.target.value));
-                      }}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Advanced Settings */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="flex items-center justify-between w-full text-left"
-                >
-                  <h2 className="text-xl font-semibold text-gray-900">Advanced Settings</h2>
-                  <svg
-                    className={`w-5 h-5 text-gray-500 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {showAdvanced && (
-                  <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
-                    {/* Vocabulary Complexity */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Vocabulary Complexity</label>
-                      <select
-                        value={config.vocabulary.complexity}
-                        onChange={(e) => handleConfigChange('vocabulary.complexity', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="beginner">Beginner</option>
-                        <option value="intermediate">Intermediate</option>
-                        <option value="advanced">Advanced</option>
-                      </select>
-                    </div>
-
-                    {/* Student Engagement */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Student Engagement</label>
-                      <select
-                        value={config.student_utterances.engagement}
-                        onChange={(e) => handleConfigChange('student_utterances.engagement', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="low">Low</option>
-                        <option value="moderate">Moderate</option>
-                        <option value="high">High</option>
-                        <option value="very_high">Very High</option>
-                      </select>
-                    </div>
-
-                    {/* Question Type */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Tutor Question Type</label>
-                      <select
-                        value={config.tutor_questions.type}
-                        onChange={(e) => handleConfigChange('tutor_questions.type', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="scaffolding">Scaffolding</option>
-                        <option value="socratic">Socratic</option>
-                        <option value="inquiry_based">Inquiry Based</option>
-                        <option value="analytical">Analytical</option>
-                        <option value="problem_solving">Problem Solving</option>
-                        <option value="conversational">Conversational</option>
-                        <option value="exploratory">Exploratory</option>
-                      </select>
-                    </div>
-
-                    {/* Word Count Controls */}
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">Word Count Controls</h3>
-                      
-                      {/* Enable Word Count Control */}
-                      <div className="flex items-center mb-4">
-                        <input
-                          type="checkbox"
-                          id="enforce_word_limits"
-                          checked={config.word_count_controls?.enforce_limits !== false}
-                          onChange={(e) => handleConfigChange('word_count_controls.enforce_limits', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="enforce_word_limits" className="ml-2 block text-sm text-gray-700">
-                          Control utterance length (recommended for consistent conversations)
-                        </label>
-                      </div>
-                    
-                      {config.word_count_controls?.enforce_limits !== false && (
-                        <div className="space-y-6 border border-gray-200 rounded-lg p-4">
-                          
-                          {/* Tutor Word Count Controls */}
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 className="font-medium text-blue-900 mb-3">Tutor Utterance Length</h4>
-                            
-                            <div className="grid grid-cols-3 gap-4 mb-3">
-                              <div>
-                                <label className="block text-xs font-medium text-blue-700 mb-1">Min Words</label>
-                                <input
-                                  type="number"
-                                  min="5"
-                                  max="100"
-                                  value={config.word_count_controls?.tutor_utterances?.min_words || 15}
-                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.min_words', parseInt(e.target.value))}
-                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-blue-700 mb-1">Target Words</label>
-                                <input
-                                  type="number"
-                                  min="10"
-                                  max="150"
-                                  value={config.word_count_controls?.tutor_utterances?.target_words || 30}
-                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.target_words', parseInt(e.target.value))}
-                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-blue-700 mb-1">Max Words</label>
-                                <input
-                                  type="number"
-                                  min="20"
-                                  max="200"
-                                  value={config.word_count_controls?.tutor_utterances?.max_words || 50}
-                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.max_words', parseInt(e.target.value))}
-                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                    
-                          {/* Student Word Count Controls */}
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 className="font-medium text-green-900 mb-3">Student Utterance Length</h4>
-                            
-                            <div className="grid grid-cols-3 gap-4 mb-3">
-                              <div>
-                                <label className="block text-xs font-medium text-green-700 mb-1">Min Words</label>
-                                <input
-                                  type="number"
-                                  min="3"
-                                  max="50"
-                                  value={config.word_count_controls?.student_utterances?.min_words || 8}
-                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.min_words', parseInt(e.target.value))}
-                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-green-700 mb-1">Target Words</label>
-                                <input
-                                  type="number"
-                                  min="5"
-                                  max="75"
-                                  value={config.word_count_controls?.student_utterances?.target_words || 15}
-                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.target_words', parseInt(e.target.value))}
-                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-xs font-medium text-green-700 mb-1">Max Words</label>
-                                <input
-                                  type="number"
-                                  min="10"
-                                  max="100"
-                                  value={config.word_count_controls?.student_utterances?.max_words || 25}
-                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.max_words', parseInt(e.target.value))}
-                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                    
-                          {/* Quick Presets */}
-                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <h4 className="font-medium text-gray-900 mb-3">Quick Presets</h4>
-                            <div className="grid grid-cols-3 gap-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 10, target_words: 20, max_words: 30, style: 'concise' });
-                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 5, target_words: 10, max_words: 15, style: 'brief' });
-                                }}
-                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                              >
-                                Short & Sweet
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 15, target_words: 30, max_words: 50, style: 'balanced' });
-                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 8, target_words: 15, max_words: 25, style: 'natural' });
-                                }}
-                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                              >
-                                Balanced
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 25, target_words: 50, max_words: 80, style: 'detailed' });
-                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 12, target_words: 25, max_words: 40, style: 'elaborate' });
-                                }}
-                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                              >
-                                Detailed
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Generate Button */}
-              <button
-                type="submit"
-                disabled={isGenerating || !apiKey.trim()}
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-200 ${
-                  isGenerating || !apiKey.trim()
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] active:scale-[0.98]'
-                }`}
-              >
-                {!apiKey.trim() ? (
-                  'Please provide API key first'
-                ) : isGenerating ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Generating with {purposeMode} purposes... {progress}%</span>
-                  </div>
-                ) : (
-                  `Generate with ${purposeMode === 'auto' ? 'Auto-Selected' : purposeMode === 'guided' ? 'Template' : 'Custom'} Purposes`
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Right Column - Results */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Generated Conversations</h2>
-                {getConversationsArray().length > 0 && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={downloadConversationsWithWordCount}
-                      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                    >
-                      Download
-                    </button>
-                    <button
-                      onClick={() => copyToClipboardWithWordCount(getConversationsArray())}
-                      className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Error Display */}
-              {error && (
-                <ErrorDisplayWithWordCount error={error} config={config} />
-              )}
-
-              {/* Progress Bar */}
-              {isGenerating && (
-                <div className="mb-4">
-                  <div className="flex justify-between text-sm text-gray-600 mb-2">
-                    <span>
-                      Generating conversation {currentConversation}
-                      {config.word_count_controls?.enforce_limits && (
-                        <span className="ml-2 text-blue-600">
-                          (with word count limits)
-                        </span>
-                      )}
-                    </span>
-                    <span>{progress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    ></div>
-                  </div>
-                  
-                  {config.word_count_controls?.enforce_limits && (
-                    <div className="mt-2 text-xs text-gray-500">
-                      Target: Tutor {config.word_count_controls.tutor_utterances?.target_words || 30} words, 
-                      Student {config.word_count_controls.student_utterances?.target_words || 15} words per response
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Conversations Display */}
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {getConversationsArray().length === 0 && !isGenerating && (
-                  <div className="text-center py-8 text-gray-500">
-                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <p>No conversations generated yet.</p>
-                    <p className="text-sm">Select a preset and configure purposes to start.</p>
-                  </div>
-                )}
-
-                {getConversationsArray().map((conversationData, index) => {
-                  const conversationContent = getConversationContent(conversationData);
-                  const metadata = conversationData.metadata;
-                  
-                  return (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-gray-900">
-                          Conversation {conversationData.id || index + 1}
-                        </h3>
-                        <div className="flex items-center space-x-2 text-xs text-gray-500">
-                          <span>{metadata?.total_turns || conversationContent.length} turns</span>
-                          {metadata?.word_count_enabled && (
-                            <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                              Word Count Controlled
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Enhanced Metadata display with word count information */}
-                      {metadata && (
-                        <div className="mb-3 p-3 bg-gray-50 rounded text-xs">
-                          <div className="grid grid-cols-2 gap-2 mb-2">
-                            <span><strong>Subject:</strong> {metadata.subject}</span>
-                            <span><strong>Mode:</strong> {metadata.generation_mode}</span>
-                            <span><strong>Model:</strong> {metadata.model}</span>
-                            <span><strong>Generated:</strong> {new Date(metadata.generated_at).toLocaleDateString()}</span>
-                          </div>
-                          
-                          {/* Purpose Control Information */}
-                          {metadata.purpose_control_mode && (
-                            <div className="border-t border-gray-200 pt-2 mt-2">
-                              <div className="grid grid-cols-1 gap-1">
-                                <span><strong>Purpose Mode:</strong> {metadata.purpose_control_mode}</span>
-                                {metadata.purpose_compliance !== undefined && (
-                                  <span>
-                                    <strong>Purpose Compliance:</strong> 
-                                    <span className={`ml-1 ${metadata.purpose_compliance ? 'text-green-600' : 'text-red-600'}`}>
-                                      {metadata.purpose_compliance ? '✅ Passed' : '❌ Issues Found'}
-                                    </span>
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {/* Word Count Information */}
-                          {metadata.word_count_enabled && metadata.word_count_statistics && (
-                            <div className="border-t border-gray-200 pt-2 mt-2">
-                              <div className="mb-2">
-                                <strong>Word Count Analysis:</strong>
-                                <span className={`ml-2 ${metadata.word_count_compliance ? 'text-green-600' : 'text-amber-600'}`}>
-                                  {metadata.word_count_compliance ? '✅ All within limits' : '⚠️ Some violations'}
-                                </span>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-4">
-                                {/* Tutor Word Count Stats */}
-                                <div className="bg-blue-50 border border-blue-200 rounded p-2">
-                                  <div className="font-medium text-blue-900 text-xs mb-1">Tutor Stats</div>
-                                  <div className="space-y-1 text-xs">
-                                    <div>Average: {metadata.word_count_statistics.tutor?.average || 'N/A'} words</div>
-                                    <div>Responses: {metadata.word_count_statistics.tutor?.count || 0}</div>
-                                    {metadata.word_count_statistics.tutor?.violations > 0 && (
-                                      <div className="text-red-600">
-                                        Violations: {metadata.word_count_statistics.tutor.violations}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                {/* Student Word Count Stats */}
-                                <div className="bg-green-50 border border-green-200 rounded p-2">
-                                  <div className="font-medium text-green-900 text-xs mb-1">Student Stats</div>
-                                  <div className="space-y-1 text-xs">
-                                    <div>Average: {metadata.word_count_statistics.student?.average || 'N/A'} words</div>
-                                    <div>Responses: {metadata.word_count_statistics.student?.count || 0}</div>
-                                    {metadata.word_count_statistics.student?.violations > 0 && (
-                                      <div className="text-red-600">
-                                        Violations: {metadata.word_count_statistics.student.violations}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Word Count Settings Display */}
-                              {metadata.word_count_settings && (
-                                <div className="mt-2 pt-2 border-t border-gray-200">
-                                  <div className="text-xs text-gray-600">
-                                    <strong>Target Settings:</strong>
-                                    <div className="grid grid-cols-2 gap-2 mt-1">
-                                      <div>
-                                        Tutor: {metadata.word_count_settings.tutor_utterances?.min_words}-{metadata.word_count_settings.tutor_utterances?.max_words} 
-                                        (target: {metadata.word_count_settings.tutor_utterances?.target_words})
-                                      </div>
-                                      <div>
-                                        Student: {metadata.word_count_settings.student_utterances?.min_words}-{metadata.word_count_settings.student_utterances?.max_words} 
-                                        (target: {metadata.word_count_settings.student_utterances?.target_words})
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          
-                          {/* Existing metadata */}
-                          {metadata.techniques_used && (
-                            <div className="border-t border-gray-200 pt-2 mt-2">
-                              <span><strong>Techniques:</strong> {metadata.techniques_used.join(', ')}</span>
-                            </div>
-                          )}
-                          
-                          {metadata.prompt_version && (
-                            <div className="mt-1">
-                              <span><strong>Engine:</strong> {metadata.prompt_version}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Enhanced conversation turns display with word count */}
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {conversationContent.length > 0 ? (
-                          conversationContent.map((turn, turnIndex) => (
-                            <div
-                              key={turnIndex}
-                              className={`p-3 rounded-lg ${
-                                turn.role === 'tutor'
-                                  ? 'bg-blue-50 border-l-4 border-blue-400'
-                                  : 'bg-green-50 border-l-4 border-green-400'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center space-x-2">
-                                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                    turn.role === 'tutor'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-green-100 text-green-800'
-                                  }`}>
-                                    {turn.role === 'tutor' ? 'Tutor' : 'Student'}
-                                  </span>
-                                  
-                                  {/* Word count display */}
-                                  {turn.word_count && metadata?.word_count_enabled && (
-                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                      {turn.word_count} words
-                                    </span>
-                                  )}
-                                  
-                                  {/* Purpose display */}
-                                  {turn.purpose && (
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                      {turn.purpose.replace(/_/g, ' ')}
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                {/* Word count compliance indicator */}
-                                {turn.word_count && metadata?.word_count_enabled && metadata?.word_count_settings && (
-                                  <WordCountComplianceIndicator 
-                                    turn={turn} 
-                                    settings={metadata.word_count_settings} 
-                                    allowVariation={metadata.word_count_settings.allow_variation}
-                                  />
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-700">{turn.content}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-center py-4 text-gray-500 text-sm">
-                            No conversation content available
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Conversation Summary */}
-              {getConversationsArray().length > 0 && (
-                <ConversationSummary conversations={getConversationsArray()} config={config} />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Custom Purpose Dialog */}
-        {showCustomPurposeDialog && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Custom Purpose</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                  <select
-                    value={newCustomPurpose.role}
-                    onChange={(e) => setNewCustomPurpose(prev => ({ ...prev, role: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="tutor">Tutor</option>
-                    <option value="student">Student</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Purpose Name</label>
-                  <input
-                    type="text"
-                    value={newCustomPurpose.name}
-                    onChange={(e) => setNewCustomPurpose(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="e.g., Creative Inspiration"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                  <textarea
-                    value={newCustomPurpose.description}
-                    onChange={(e) => setNewCustomPurpose(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Describe what this purpose should achieve..."
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setShowCustomPurposeDialog(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={addCustomPurpose}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Add Purpose
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default LandingPage;  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">CS</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">ChatSynth</h1>
-                <p className="text-sm text-gray-600">AI-Powered Educational Conversations</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-600">
-                {isGenerating ? `Generating... ${progress}%` : 'Ready'}
-              </div>
-              {!showApiKeyInput && (
-                <button
-                  onClick={handleApiKeyToggle}
-                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m0 0a2 2 0 01-2 2m2-2a2 2 0 002-2m0 0a2 2 0 00-2-2m-4 6V9a2 2 0 00-2-2V5a2 2 0 10-4 0v2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2z" />
-                  </svg>
-                  <span>API Key</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* API Key Input Section */}
-        {showApiKeyInput && (
-          <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3 flex-1">
-                <h3 className="text-sm font-medium text-yellow-800">OpenAI API Key Required</h3>
-                <p className="text-sm text-yellow-700 mt-1 mb-4">
-                  Please enter your OpenAI API key to generate conversations. Your key will be stored securely in your browser and never shared.
-                </p>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="password"
-                    placeholder="sk-..."
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                  />
-                  <button
-                    onClick={() => handleApiKeyChange(apiKey)}
-                    disabled={!apiKey.trim()}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      apiKey.trim()
-                        ? 'bg-yellow-600 text-white hover:bg-yellow-700'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                  >
-                    Save Key
-                  </button>
-                  {apiKey && (
-                    <button
-                      onClick={() => setShowApiKeyInput(false)}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-                <p className="text-xs text-yellow-600 mt-2">
-                  Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-800">OpenAI Platform</a>
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Column - Presets */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Choose a Preset</h2>
-              <div className="space-y-3">
-                {presets.map((preset) => (
-                  <div
-                    key={preset.id}
-                    onClick={() => handlePresetSelect(preset)}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      selectedPreset === preset.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-medium text-gray-900">{preset.title}</h3>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">{preset.description}</p>
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          <span className="flex items-center">
-                            <span className="w-2 h-2 bg-blue-400 rounded-full mr-1"></span>
-                            {preset.mode}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Middle Column - Configuration */}
-          <div className="lg:col-span-1">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Basic Configuration */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Configuration</h2>
-                
-                <div className="space-y-4">
-                  {/* Generation Mode */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Generation Mode</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>import React, { useState } from 'react';
+import React, { useState } from 'react';
 
 const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, conversations, error, onDownload, onCopy }) => {
   const [selectedPreset, setSelectedPreset] = useState(null);
@@ -2347,3 +1259,1091 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       console.error('Failed to copy: ', err);
     });
   };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">CS</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">ChatSynth</h1>
+                <p className="text-sm text-gray-600">AI-Powered Educational Conversations</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-600">
+                {isGenerating ? `Generating... ${progress}%` : 'Ready'}
+              </div>
+              {!showApiKeyInput && (
+                <button
+                  onClick={handleApiKeyToggle}
+                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2a2 2 0 00-2 2m0 0a2 2 0 01-2 2m2-2a2 2 0 002-2m0 0a2 2 0 00-2-2m-4 6V9a2 2 0 00-2-2V5a2 2 0 10-4 0v2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2z" />
+                  </svg>
+                  <span>API Key</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* API Key Input Section */}
+        {showApiKeyInput && (
+          <div className="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-yellow-800">OpenAI API Key Required</h3>
+                <p className="text-sm text-yellow-700 mt-1 mb-4">
+                  Please enter your OpenAI API key to generate conversations. Your key will be stored securely in your browser and never shared.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="password"
+                    placeholder="sk-..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => handleApiKeyChange(apiKey)}
+                    disabled={!apiKey.trim()}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      apiKey.trim()
+                        ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Save Key
+                  </button>
+                  {apiKey && (
+                    <button
+                      onClick={() => setShowApiKeyInput(false)}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-yellow-600 mt-2">
+                  Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-800">OpenAI Platform</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column - Presets */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Choose a Preset</h2>
+              <div className="space-y-3">
+                {presets.map((preset) => (
+                  <div
+                    key={preset.id}
+                    onClick={() => handlePresetSelect(preset)}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      selectedPreset === preset.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="font-medium text-gray-900">{preset.title}</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{preset.description}</p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <span className="flex items-center">
+                            <span className="w-2 h-2 bg-blue-400 rounded-full mr-1"></span>
+                            {preset.mode}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Middle Column - Configuration */}
+          <div className="lg:col-span-1">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {/* Basic Configuration */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Configuration</h2>
+                
+                <div className="space-y-4">
+                  {/* Generation Mode */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Generation Mode</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleConfigChange('generationMode', 'single_ai')}
+                        className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                          config.generationMode === 'single_ai'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Single AI
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleConfigChange('generationMode', 'dual_ai')}
+                        className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                          config.generationMode === 'dual_ai'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Dual AI
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Conversation Count */}
+                  {config.generationMode === 'dual_ai' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Conversations
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={config.conversation_count}
+                        onChange={(e) => handleConfigChange('conversation_count', parseInt(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  )}
+
+                  {/* Subject */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                    <select
+                      value={config.subject}
+                      onChange={(e) => handleConfigChange('subject', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="mathematics">Mathematics</option>
+                      <option value="science">Science</option>
+                      <option value="language_learning">Language Learning</option>
+                      <option value="language_arts">Language Arts</option>
+                      <option value="computer_science">Computer Science</option>
+                      <option value="history">History</option>
+                      <option value="philosophy">Philosophy</option>
+                      <option value="general">General</option>
+                    </select>
+                  </div>
+
+                  {/* Conversation Turns */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Conversation Turns: {config.conversation_structure.turns}
+                    </label>
+                    <input
+                      type="range"
+                      min="4"
+                      max="20"
+                      value={config.conversation_structure.turns}
+                      onChange={(e) => handleConfigChange('conversation_structure.turns', parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Educational Purpose Control */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Educational Purpose Control</h2>
+                
+                {/* Purpose Mode Selection */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Purpose Selection Mode</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPurposeMode('auto')}
+                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                        purposeMode === 'auto'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Auto-Select
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPurposeMode('guided')}
+                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                        purposeMode === 'guided'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Templates
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPurposeMode('custom')}
+                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                        purposeMode === 'custom'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      Custom
+                    </button>
+                  </div>
+                </div>
+
+                {/* Auto Mode - Enhanced Explanation */}
+                {purposeMode === 'auto' && (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3 flex-1">
+                          <h3 className="text-sm font-medium text-blue-800">Smart Purpose Selection</h3>
+                          <p className="text-sm text-blue-700 mt-1">
+                            Based on your configuration, we'll automatically choose the best educational approaches for your conversation.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Selected Purposes Preview */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Tutor Purposes */}
+                      <div className="bg-blue-25 border border-blue-200 rounded-lg p-4">
+                        <h4 className="font-medium text-blue-900 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
+                          Tutor Will Use ({getAutoSuggestedPurposes().tutor.length} approaches)
+                        </h4>
+                        <div className="space-y-2">
+                          {getAutoSuggestedPurposes().tutor.map(purposeId => {
+                            const purpose = tutorPurposes.find(p => p.id === purposeId);
+                            return purpose ? (
+                              <div key={purposeId} className="flex items-start">
+                                <span className="text-sm mr-2">{purpose.icon}</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-gray-900">{purpose.name}</div>
+                                  <div className="text-xs text-gray-600">{purpose.description}</div>
+                                </div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Student Purposes */}
+                      <div className="bg-green-25 border border-green-200 rounded-lg p-4">
+                        <h4 className="font-medium text-green-900 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                          Student Will Show ({getAutoSuggestedPurposes().student.length} behaviors)
+                        </h4>
+                        <div className="space-y-2">
+                          {getAutoSuggestedPurposes().student.map(purposeId => {
+                            const purpose = studentPurposes.find(p => p.id === purposeId);
+                            return purpose ? (
+                              <div key={purposeId} className="flex items-start">
+                                <span className="text-sm mr-2">{purpose.icon}</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-gray-900">{purpose.name}</div>
+                                  <div className="text-xs text-gray-600">{purpose.description}</div>
+                                </div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Educational Rationale */}
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <h4 className="font-medium text-amber-900 mb-2 flex items-center">
+                        <span className="w-2 h-2 bg-amber-600 rounded-full mr-2"></span>
+                        Educational Approach Summary
+                      </h4>
+                      <p className="text-sm text-amber-800">
+                        {generateEducationalSummary(config, getAutoSuggestedPurposes())}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Template Mode - Show Templates */}
+                {purposeMode === 'guided' && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600 mb-3">Choose a pre-designed template for common educational scenarios:</p>
+                    {purposeTemplates.map((template) => (
+                      <div
+                        key={template.id}
+                        onClick={() => applyTemplate(template)}
+                        className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                      >
+                        <div className="flex items-start">
+                          <span className="text-2xl mr-3">{template.icon}</span>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{template.name}</h4>
+                            <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                            <div className="mt-2 text-xs text-gray-500">
+                              <div><strong>Tutor:</strong> {template.tutorPurposes.slice(0, 3).join(', ')}</div>
+                              <div><strong>Student:</strong> {template.studentPurposes.slice(0, 3).join(', ')}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Custom Mode - Purpose Selection */}
+                {purposeMode === 'custom' && (
+                  <div className="space-y-4">
+                    {/* Tutor Purposes */}
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">Tutor Teaching Purposes</h4>
+                      <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                        {tutorPurposes.concat(customPurposes.tutor).map((purpose) => (
+                          <label key={purpose.id} className="flex items-start p-2 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedTutorPurposes.includes(purpose.id)}
+                              onChange={() => toggleTutorPurpose(purpose.id)}
+                              className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center">
+                                <span className="mr-2">{purpose.icon}</span>
+                                <span className="font-medium text-sm text-gray-900">{purpose.name}</span>
+                                {purpose.isCustom && (
+                                  <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">Custom</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">{purpose.description}</p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Student Purposes */}
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">Student Learning Purposes</h4>
+                      <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                        {studentPurposes.concat(customPurposes.student).map((purpose) => (
+                          <label key={purpose.id} className="flex items-start p-2 border border-gray-100 rounded hover:bg-gray-50 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedStudentPurposes.includes(purpose.id)}
+                              onChange={() => toggleStudentPurpose(purpose.id)}
+                              className="mt-1 mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center">
+                                <span className="mr-2">{purpose.icon}</span>
+                                <span className="font-medium text-sm text-gray-900">{purpose.name}</span>
+                                {purpose.isCustom && (
+                                  <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded">Custom</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">{purpose.description}</p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Add Custom Purpose */}
+                    <div className="border-t border-gray-200 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomPurposeDialog(true)}
+                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        + Add Custom Purpose
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* AI Settings */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">AI Settings</h2>
+                
+                <div className="space-y-4">
+                  {/* Model Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">AI Model</label>
+                    <select
+                      value={aiSettings.model}
+                      onChange={(e) => handleAiSettingChange('model', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="gpt-4o">GPT-4o (Balanced)</option>
+                      <option value="o3-mini">O3-mini (Advanced Reasoning)</option>
+                    </select>
+                  </div>
+
+                  {/* Model-specific parameters */}
+                  {isO3Mini(aiSettings.model) ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Reasoning Effort
+                        </label>
+                        <select
+                          value={aiSettings.reasoning_effort}
+                          onChange={(e) => handleAiSettingChange('reasoning_effort', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="low">Low (Faster, Less Reasoning)</option>
+                          <option value="medium">Medium (Balanced)</option>
+                          <option value="high">High (Slower, More Reasoning)</option>
+                        </select>
+                      </div>
+                      
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0">
+                            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-blue-800">O3-mini Reasoning Model</h3>
+                            <p className="text-sm text-blue-700 mt-1">
+                              O3-mini is optimized for STEM reasoning tasks. It does not support temperature, top_p, frequency_penalty, or presence_penalty parameters.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Temperature: {aiSettings.temperature}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="0.1"
+                        value={aiSettings.temperature}
+                        onChange={(e) => handleAiSettingChange('temperature', parseFloat(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+
+                  {/* Max Completion Tokens */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Max Tokens: {aiSettings.max_completion_tokens || aiSettings.max_tokens}
+                    </label>
+                    <input
+                      type="range"
+                      min="500"
+                      max="4000"
+                      step="100"
+                      value={aiSettings.max_completion_tokens || aiSettings.max_tokens}
+                      onChange={(e) => {
+                        const paramName = isO3Mini(aiSettings.model) ? 'max_completion_tokens' : 'max_tokens';
+                        handleAiSettingChange(paramName, parseInt(e.target.value));
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Advanced Settings */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <h2 className="text-xl font-semibold text-gray-900">Advanced Settings</h2>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {showAdvanced && (
+                  <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
+                    {/* Vocabulary Complexity */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Vocabulary Complexity</label>
+                      <select
+                        value={config.vocabulary.complexity}
+                        onChange={(e) => handleConfigChange('vocabulary.complexity', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                      </select>
+                    </div>
+
+                    {/* Student Engagement */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Student Engagement</label>
+                      <select
+                        value={config.student_utterances.engagement}
+                        onChange={(e) => handleConfigChange('student_utterances.engagement', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="low">Low</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="high">High</option>
+                        <option value="very_high">Very High</option>
+                      </select>
+                    </div>
+
+                    {/* Question Type */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tutor Question Type</label>
+                      <select
+                        value={config.tutor_questions.type}
+                        onChange={(e) => handleConfigChange('tutor_questions.type', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="scaffolding">Scaffolding</option>
+                        <option value="socratic">Socratic</option>
+                        <option value="inquiry_based">Inquiry Based</option>
+                        <option value="analytical">Analytical</option>
+                        <option value="problem_solving">Problem Solving</option>
+                        <option value="conversational">Conversational</option>
+                        <option value="exploratory">Exploratory</option>
+                      </select>
+                    </div>
+
+                    {/* Word Count Controls */}
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-3">Word Count Controls</h3>
+                      
+                      {/* Enable Word Count Control */}
+                      <div className="flex items-center mb-4">
+                        <input
+                          type="checkbox"
+                          id="enforce_word_limits"
+                          checked={config.word_count_controls?.enforce_limits !== false}
+                          onChange={(e) => handleConfigChange('word_count_controls.enforce_limits', e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="enforce_word_limits" className="ml-2 block text-sm text-gray-700">
+                          Control utterance length (recommended for consistent conversations)
+                        </label>
+                      </div>
+                    
+                      {config.word_count_controls?.enforce_limits !== false && (
+                        <div className="space-y-6 border border-gray-200 rounded-lg p-4">
+                          
+                          {/* Tutor Word Count Controls */}
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 className="font-medium text-blue-900 mb-3">Tutor Utterance Length</h4>
+                            
+                            <div className="grid grid-cols-3 gap-4 mb-3">
+                              <div>
+                                <label className="block text-xs font-medium text-blue-700 mb-1">Min Words</label>
+                                <input
+                                  type="number"
+                                  min="5"
+                                  max="100"
+                                  value={config.word_count_controls?.tutor_utterances?.min_words || 15}
+                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.min_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-blue-700 mb-1">Target Words</label>
+                                <input
+                                  type="number"
+                                  min="10"
+                                  max="150"
+                                  value={config.word_count_controls?.tutor_utterances?.target_words || 30}
+                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.target_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-blue-700 mb-1">Max Words</label>
+                                <input
+                                  type="number"
+                                  min="20"
+                                  max="200"
+                                  value={config.word_count_controls?.tutor_utterances?.max_words || 50}
+                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.max_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                    
+                          {/* Student Word Count Controls */}
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 className="font-medium text-green-900 mb-3">Student Utterance Length</h4>
+                            
+                            <div className="grid grid-cols-3 gap-4 mb-3">
+                              <div>
+                                <label className="block text-xs font-medium text-green-700 mb-1">Min Words</label>
+                                <input
+                                  type="number"
+                                  min="3"
+                                  max="50"
+                                  value={config.word_count_controls?.student_utterances?.min_words || 8}
+                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.min_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-green-700 mb-1">Target Words</label>
+                                <input
+                                  type="number"
+                                  min="5"
+                                  max="75"
+                                  value={config.word_count_controls?.student_utterances?.target_words || 15}
+                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.target_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-green-700 mb-1">Max Words</label>
+                                <input
+                                  type="number"
+                                  min="10"
+                                  max="100"
+                                  value={config.word_count_controls?.student_utterances?.max_words || 25}
+                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.max_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                    
+                          {/* Quick Presets */}
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h4 className="font-medium text-gray-900 mb-3">Quick Presets</h4>
+                            <div className="grid grid-cols-3 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 10, target_words: 20, max_words: 30, style: 'concise' });
+                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 5, target_words: 10, max_words: 15, style: 'brief' });
+                                }}
+                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                              >
+                                Short & Sweet
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 15, target_words: 30, max_words: 50, style: 'balanced' });
+                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 8, target_words: 15, max_words: 25, style: 'natural' });
+                                }}
+                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                              >
+                                Balanced
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 25, target_words: 50, max_words: 80, style: 'detailed' });
+                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 12, target_words: 25, max_words: 40, style: 'elaborate' });
+                                }}
+                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                              >
+                                Detailed
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Generate Button */}
+              <button
+                type="submit"
+                disabled={isGenerating || !apiKey.trim()}
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-200 ${
+                  isGenerating || !apiKey.trim()
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] active:scale-[0.98]'
+                }`}
+              >
+                {!apiKey.trim() ? (
+                  'Please provide API key first'
+                ) : isGenerating ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Generating with {purposeMode} purposes... {progress}%</span>
+                  </div>
+                ) : (
+                  `Generate with ${purposeMode === 'auto' ? 'Auto-Selected' : purposeMode === 'guided' ? 'Template' : 'Custom'} Purposes`
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Right Column - Results */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Generated Conversations</h2>
+                {getConversationsArray().length > 0 && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={downloadConversationsWithWordCount}
+                      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                    >
+                      Download
+                    </button>
+                    <button
+                      onClick={() => copyToClipboardWithWordCount(getConversationsArray())}
+                      className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Error Display */}
+              {error && (
+                <ErrorDisplayWithWordCount error={error} config={config} />
+              )}
+
+              {/* Progress Bar */}
+              {isGenerating && (
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>
+                      Generating conversation {currentConversation}
+                      {config.word_count_controls?.enforce_limits && (
+                        <span className="ml-2 text-blue-600">
+                          (with word count limits)
+                        </span>
+                      )}
+                    </span>
+                    <span>{progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                  
+                  {config.word_count_controls?.enforce_limits && (
+                    <div className="mt-2 text-xs text-gray-500">
+                      Target: Tutor {config.word_count_controls.tutor_utterances?.target_words || 30} words, 
+                      Student {config.word_count_controls.student_utterances?.target_words || 15} words per response
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Conversations Display */}
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {getConversationsArray().length === 0 && !isGenerating && (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <p>No conversations generated yet.</p>
+                    <p className="text-sm">Select a preset and configure purposes to start.</p>
+                  </div>
+                )}
+
+                {getConversationsArray().map((conversationData, index) => {
+                  const conversationContent = getConversationContent(conversationData);
+                  const metadata = conversationData.metadata;
+                  
+                  return (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-medium text-gray-900">
+                          Conversation {conversationData.id || index + 1}
+                        </h3>
+                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                          <span>{metadata?.total_turns || conversationContent.length} turns</span>
+                          {metadata?.word_count_enabled && (
+                            <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                              Word Count Controlled
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Enhanced Metadata display with word count information */}
+                      {metadata && (
+                        <div className="mb-3 p-3 bg-gray-50 rounded text-xs">
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            <span><strong>Subject:</strong> {metadata.subject}</span>
+                            <span><strong>Mode:</strong> {metadata.generation_mode}</span>
+                            <span><strong>Model:</strong> {metadata.model}</span>
+                            <span><strong>Generated:</strong> {new Date(metadata.generated_at).toLocaleDateString()}</span>
+                          </div>
+                          
+                          {/* Purpose Control Information */}
+                          {metadata.purpose_control_mode && (
+                            <div className="border-t border-gray-200 pt-2 mt-2">
+                              <div className="grid grid-cols-1 gap-1">
+                                <span><strong>Purpose Mode:</strong> {metadata.purpose_control_mode}</span>
+                                {metadata.purpose_compliance !== undefined && (
+                                  <span>
+                                    <strong>Purpose Compliance:</strong> 
+                                    <span className={`ml-1 ${metadata.purpose_compliance ? 'text-green-600' : 'text-red-600'}`}>
+                                      {metadata.purpose_compliance ? '✅ Passed' : '❌ Issues Found'}
+                                    </span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Word Count Information */}
+                          {metadata.word_count_enabled && metadata.word_count_statistics && (
+                            <div className="border-t border-gray-200 pt-2 mt-2">
+                              <div className="mb-2">
+                                <strong>Word Count Analysis:</strong>
+                                <span className={`ml-2 ${metadata.word_count_compliance ? 'text-green-600' : 'text-amber-600'}`}>
+                                  {metadata.word_count_compliance ? '✅ All within limits' : '⚠️ Some violations'}
+                                </span>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-4">
+                                {/* Tutor Word Count Stats */}
+                                <div className="bg-blue-50 border border-blue-200 rounded p-2">
+                                  <div className="font-medium text-blue-900 text-xs mb-1">Tutor Stats</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div>Average: {metadata.word_count_statistics.tutor?.average || 'N/A'} words</div>
+                                    <div>Responses: {metadata.word_count_statistics.tutor?.count || 0}</div>
+                                    {metadata.word_count_statistics.tutor?.violations > 0 && (
+                                      <div className="text-red-600">
+                                        Violations: {metadata.word_count_statistics.tutor.violations}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Student Word Count Stats */}
+                                <div className="bg-green-50 border border-green-200 rounded p-2">
+                                  <div className="font-medium text-green-900 text-xs mb-1">Student Stats</div>
+                                  <div className="space-y-1 text-xs">
+                                    <div>Average: {metadata.word_count_statistics.student?.average || 'N/A'} words</div>
+                                    <div>Responses: {metadata.word_count_statistics.student?.count || 0}</div>
+                                    {metadata.word_count_statistics.student?.violations > 0 && (
+                                      <div className="text-red-600">
+                                        Violations: {metadata.word_count_statistics.student.violations}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Word Count Settings Display */}
+                              {metadata.word_count_settings && (
+                                <div className="mt-2 pt-2 border-t border-gray-200">
+                                  <div className="text-xs text-gray-600">
+                                    <strong>Target Settings:</strong>
+                                    <div className="grid grid-cols-2 gap-2 mt-1">
+                                      <div>
+                                        Tutor: {metadata.word_count_settings.tutor_utterances?.min_words}-{metadata.word_count_settings.tutor_utterances?.max_words} 
+                                        (target: {metadata.word_count_settings.tutor_utterances?.target_words})
+                                      </div>
+                                      <div>
+                                        Student: {metadata.word_count_settings.student_utterances?.min_words}-{metadata.word_count_settings.student_utterances?.max_words} 
+                                        (target: {metadata.word_count_settings.student_utterances?.target_words})
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Existing metadata */}
+                          {metadata.techniques_used && (
+                            <div className="border-t border-gray-200 pt-2 mt-2">
+                              <span><strong>Techniques:</strong> {metadata.techniques_used.join(', ')}</span>
+                            </div>
+                          )}
+                          
+                          {metadata.prompt_version && (
+                            <div className="mt-1">
+                              <span><strong>Engine:</strong> {metadata.prompt_version}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Enhanced conversation turns display with word count */}
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {conversationContent.length > 0 ? (
+                          conversationContent.map((turn, turnIndex) => (
+                            <div
+                              key={turnIndex}
+                              className={`p-3 rounded-lg ${
+                                turn.role === 'tutor'
+                                  ? 'bg-blue-50 border-l-4 border-blue-400'
+                                  : 'bg-green-50 border-l-4 border-green-400'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center space-x-2">
+                                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                    turn.role === 'tutor'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : 'bg-green-100 text-green-800'
+                                  }`}>
+                                    {turn.role === 'tutor' ? 'Tutor' : 'Student'}
+                                  </span>
+                                  
+                                  {/* Word count display */}
+                                  {turn.word_count && metadata?.word_count_enabled && (
+                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                      {turn.word_count} words
+                                    </span>
+                                  )}
+                                  
+                                  {/* Purpose display */}
+                                  {turn.purpose && (
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                      {turn.purpose.replace(/_/g, ' ')}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                {/* Word count compliance indicator */}
+                                {turn.word_count && metadata?.word_count_enabled && metadata?.word_count_settings && (
+                                  <WordCountComplianceIndicator 
+                                    turn={turn} 
+                                    settings={metadata.word_count_settings} 
+                                    allowVariation={metadata.word_count_settings.allow_variation}
+                                  />
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-700">{turn.content}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-4 text-gray-500 text-sm">
+                            No conversation content available
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Conversation Summary */}
+              {getConversationsArray().length > 0 && (
+                <ConversationSummary conversations={getConversationsArray()} config={config} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Custom Purpose Dialog */}
+        {showCustomPurposeDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Custom Purpose</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                  <select
+                    value={newCustomPurpose.role}
+                    onChange={(e) => setNewCustomPurpose(prev => ({ ...prev, role: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="tutor">Tutor</option>
+                    <option value="student">Student</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Purpose Name</label>
+                  <input
+                    type="text"
+                    value={newCustomPurpose.name}
+                    onChange={(e) => setNewCustomPurpose(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Creative Inspiration"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    value={newCustomPurpose.description}
+                    onChange={(e) => setNewCustomPurpose(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Describe what this purpose should achieve..."
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setShowCustomPurposeDialog(false)}
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addCustomPurpose}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add Purpose
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default LandingPage;
