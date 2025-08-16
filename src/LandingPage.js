@@ -12,40 +12,57 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
   const [showCustomPurposeDialog, setShowCustomPurposeDialog] = useState(false);
   const [newCustomPurpose, setNewCustomPurpose] = useState({ role: 'tutor', name: '', description: '' });
 
-  const [config, setConfig] = useState({
-    generationMode: 'single_ai',
-    conversation_count: 1,
-    subject: 'mathematics',
-    conversation_structure: {
-      turns: 8,
-      starter: 'tutor',
-      purpose: 'Educational tutoring session focusing on student understanding and skill development',
-      tutor_student_ratio: "1:1",
-      conversation_starter: 'tutor'
-    },
-    vocabulary: {
-      complexity: 'intermediate',
-      domain_specific: true,
-      subject: 'general'
-    },
-    tutor_questions: {
-      frequency: 'moderate',
-      type: 'scaffolding',
-      purpose_distribution: {
-        assessment: 1,
-        guidance: 1,
-        clarification: 1
-      }
+const [config, setConfig] = useState({
+  generationMode: 'single_ai',
+  conversation_count: 1,
+  subject: 'mathematics',
+  conversation_structure: {
+    turns: 8,
+    starter: 'tutor',
+    purpose: 'Educational tutoring session focusing on student understanding and skill development',
+    tutor_student_ratio: "1:1",
+    conversation_starter: 'tutor'
+  },
+  vocabulary: {
+    complexity: 'intermediate',
+    domain_specific: true,
+    subject: 'general'
+  },
+  // NEW: Word count controls
+  word_count_controls: {
+    tutor_utterances: {
+      min_words: 15,
+      max_words: 50,
+      target_words: 30,
+      style: 'balanced' // 'concise', 'balanced', 'detailed'
     },
     student_utterances: {
-      engagement: 'high',
-      confusion_level: 'realistic',
-      confusion_scores: {
-        mean: 3,
-        std: 1,
-        min: 1,
-        max: 5
-      },
+      min_words: 8,
+      max_words: 25,
+      target_words: 15,
+      style: 'natural' // 'brief', 'natural', 'elaborate'
+    },
+    enforce_limits: true, // Whether to strictly enforce word limits
+    allow_variation: true // Allow some natural variation in length
+  },
+  tutor_questions: {
+    frequency: 'moderate',
+    type: 'scaffolding',
+    purpose_distribution: {
+      assessment: 1,
+      guidance: 1,
+      clarification: 1
+    }
+  },
+  student_utterances: {
+    engagement: 'high',
+    confusion_level: 'realistic',
+    confusion_scores: {
+      mean: 3,
+      std: 1,
+      min: 1,
+      max: 5
+    },
       correctness_distribution: {
         correct_independent: 0.3,
         correct_assisted: 0.5,
