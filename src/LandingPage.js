@@ -1481,44 +1481,53 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Educational Purpose Control</h2>
                 
                 {/* Purpose Mode Selection */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Purpose Selection Mode</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPurposeMode('auto')}
-                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                        purposeMode === 'auto'
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Auto-Select
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPurposeMode('guided')}
-                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                        purposeMode === 'guided'
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Templates
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPurposeMode('custom')}
-                      className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
-                        purposeMode === 'custom'
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      Custom
-                    </button>
-                  </div>
-                </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Purpose Selection Mode</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPurposeMode('auto');
+                          setSelectedTemplate(null);
+                        }}
+                        className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                          purposeMode === 'auto'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Auto-Select
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPurposeMode('guided');
+                          setSelectedTemplate(null);
+                        }}
+                        className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                          purposeMode === 'guided'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Templates
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPurposeMode('custom');
+                          setSelectedTemplate(null);
+                        }}
+                        className={`p-3 text-sm font-medium rounded-lg border-2 transition-colors ${
+                          purposeMode === 'custom'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Custom
+                      </button>
+                    </div>
+</div>
 
                 {/* Auto Mode - Enhanced Explanation */}
                 {purposeMode === 'auto' && (
