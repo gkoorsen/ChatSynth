@@ -1170,32 +1170,190 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                   </div>
                 </div>
 
-                {/* Auto Mode - Show Suggestions */}
+                {/* Auto Mode - Enhanced Explanation */}
                 {purposeMode === 'auto' && (
-                  <div className="space-y-3">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-start">
                         <div className="flex-shrink-0">
                           <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <div className="ml-3">
-                          <h3 className="text-sm font-medium text-blue-800">Automatic Purpose Selection</h3>
+                        <div className="ml-3 flex-1">
+                          <h3 className="text-sm font-medium text-blue-800">Smart Purpose Selection</h3>
                           <p className="text-sm text-blue-700 mt-1">
-                            The system will automatically select appropriate educational purposes based on your configuration settings.
+                            Based on your configuration, we'll automatically choose the best educational approaches for your conversation.
                           </p>
-                          <div className="mt-2 text-xs">
-                            <strong>Preview Tutor:</strong> {getAutoSuggestedPurposes().tutor.join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                
+                    {/* Configuration Impact Explanation */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        Why These Purposes Were Selected
+                      </h4>
+                      
+                      <div className="space-y-3 text-sm">
+                        {/* Vocabulary Impact */}
+                        <div className="flex items-start">
+                          <div className="w-20 text-gray-500 font-medium">Vocabulary:</div>
+                          <div className="flex-1">
+                            <span className="text-gray-900">
+                              {config.vocabulary?.complexity === 'beginner' && 'Beginner level → Extra scaffolding and encouragement'}
+                              {config.vocabulary?.complexity === 'intermediate' && 'Intermediate level → Balanced support and challenge'}
+                              {config.vocabulary?.complexity === 'advanced' && 'Advanced level → Socratic questioning and reflection'}
+                            </span>
                           </div>
-                          <div className="mt-1 text-xs">
-                            <strong>Preview Student:</strong> {getAutoSuggestedPurposes().student.join(', ')}
+                        </div>
+                
+                        {/* Engagement Impact */}
+                        <div className="flex items-start">
+                          <div className="w-20 text-gray-500 font-medium">Engagement:</div>
+                          <div className="flex-1">
+                            <span className="text-gray-900">
+                              {config.student_utterances?.engagement === 'low' && 'Low engagement → More encouragement and real-world connections'}
+                              {config.student_utterances?.engagement === 'moderate' && 'Moderate engagement → Balanced approach with variety'}
+                              {config.student_utterances?.engagement === 'high' && 'High engagement → Advanced questioning and exploration'}
+                              {config.student_utterances?.engagement === 'very_high' && 'Very high engagement → Independent discovery and hypothesis testing'}
+                            </span>
                           </div>
+                        </div>
+                
+                        {/* Question Type Impact */}
+                        <div className="flex items-start">
+                          <div className="w-20 text-gray-500 font-medium">Questions:</div>
+                          <div className="flex-1">
+                            <span className="text-gray-900">
+                              {config.tutor_questions?.type === 'scaffolding' && 'Scaffolding questions → Step-by-step guidance and assessment'}
+                              {config.tutor_questions?.type === 'socratic' && 'Socratic questions → Discovery through strategic questioning'}
+                              {config.tutor_questions?.type === 'analytical' && 'Analytical questions → Critical thinking and real-world connections'}
+                              {config.tutor_questions?.type === 'inquiry_based' && 'Inquiry-based → Student-led discovery and exploration'}
+                              {config.tutor_questions?.type === 'problem_solving' && 'Problem-solving → Error analysis and systematic approaches'}
+                              {config.tutor_questions?.type === 'conversational' && 'Conversational → Natural dialogue and clarification'}
+                              {config.tutor_questions?.type === 'exploratory' && 'Exploratory → Open-ended discovery and curiosity'}
+                            </span>
+                          </div>
+                        </div>
+                
+                        {/* Subject Impact */}
+                        <div className="flex items-start">
+                          <div className="w-20 text-gray-500 font-medium">Subject:</div>
+                          <div className="flex-1">
+                            <span className="text-gray-900">
+                              {(config.subject === 'mathematics' || config.subject === 'computer_science') && 'STEM subject → Error recovery and systematic thinking'}
+                              {config.subject === 'science' && 'Science → Hypothesis testing and guided discovery'}
+                              {(config.subject === 'language_arts' || config.subject === 'history') && 'Humanities → Real-world connections and reflection'}
+                              {config.subject === 'general' && 'General education → Flexible, adaptable approaches'}
+                            </span>
+                          </div>
+                        </div>
+                
+                        {/* Confusion Level Impact */}
+                        <div className="flex items-start">
+                          <div className="w-20 text-gray-500 font-medium">Support:</div>
+                          <div className="flex-1">
+                            <span className="text-gray-900">
+                              {config.student_utterances?.confusion_level === 'challenging' && 'High confusion → Extra scaffolding and error recovery'}
+                              {config.student_utterances?.confusion_level === 'realistic' && 'Realistic confusion → Balanced support and challenge'}
+                              {config.student_utterances?.confusion_level === 'low' && 'Low confusion → More independence and application'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                
+                    {/* Selected Purposes Preview with Explanations */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Tutor Purposes */}
+                      <div className="bg-blue-25 border border-blue-200 rounded-lg p-4">
+                        <h4 className="font-medium text-blue-900 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
+                          Tutor Will Use ({getAutoSuggestedPurposes().tutor.length} approaches)
+                        </h4>
+                        <div className="space-y-2">
+                          {getAutoSuggestedPurposes().tutor.map(purposeId => {
+                            const purpose = tutorPurposes.find(p => p.id === purposeId);
+                            return purpose ? (
+                              <div key={purposeId} className="flex items-start">
+                                <span className="text-sm mr-2">{purpose.icon}</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-gray-900">{purpose.name}</div>
+                                  <div className="text-xs text-gray-600">{purpose.description}</div>
+                                </div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                
+                      {/* Student Purposes */}
+                      <div className="bg-green-25 border border-green-200 rounded-lg p-4">
+                        <h4 className="font-medium text-green-900 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                          Student Will Show ({getAutoSuggestedPurposes().student.length} behaviors)
+                        </h4>
+                        <div className="space-y-2">
+                          {getAutoSuggestedPurposes().student.map(purposeId => {
+                            const purpose = studentPurposes.find(p => p.id === purposeId);
+                            return purpose ? (
+                              <div key={purposeId} className="flex items-start">
+                                <span className="text-sm mr-2">{purpose.icon}</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-gray-900">{purpose.name}</div>
+                                  <div className="text-xs text-gray-600">{purpose.description}</div>
+                                </div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                
+                    {/* Educational Rationale */}
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <h4 className="font-medium text-amber-900 mb-2 flex items-center">
+                        <span className="w-2 h-2 bg-amber-600 rounded-full mr-2"></span>
+                        Educational Approach Summary
+                      </h4>
+                      <p className="text-sm text-amber-800">
+                        {generateEducationalSummary(config, getAutoSuggestedPurposes())}
+                      </p>
+                      <div className="mt-3 flex items-center text-xs text-amber-700">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Change any configuration above to see how it affects purpose selection
+                      </div>
+                    </div>
+                
+                    {/* Quick Adjustment Suggestions */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-2">Quick Adjustments</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <strong>For more support:</strong>
+                          <ul className="text-gray-600 ml-4 list-disc">
+                            <li>Set vocabulary to "Beginner"</li>
+                            <li>Increase confusion level</li>
+                            <li>Use "Scaffolding" questions</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <strong>For more challenge:</strong>
+                          <ul className="text-gray-600 ml-4 list-disc">
+                            <li>Set vocabulary to "Advanced"</li>
+                            <li>Use "Socratic" questions</li>
+                            <li>Increase engagement level</li>
+                          </ul>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
+
 
                 {/* Template Mode - Show Templates */}
                 {purposeMode === 'guided' && (
