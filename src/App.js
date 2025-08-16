@@ -54,6 +54,7 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [progressMessage, setProgressMessage] = useState(''); // For better user feedback
   const [currentConversation, setCurrentConversation] = useState(0);
 
   // Validate configuration on app load
@@ -65,89 +66,138 @@ function App() {
     }
   }, []);
 
+  // Main function to generate conversations using the async pattern
   const generateConversations = async (config, aiSettings) => {
-  console.log('Starting conversation generation...');
-  console.log('Config:', config);
-  console.log('AI Settings:', aiSettings);
+    setIsGenerating(true);
+    setError(null);
+    setProgress(0);
+    setProgressMessage('Initializing...');
+    setCurrentConversation(0);
+    setConversations([]);
 
-  setIsGenerating(true);
-  setError(null);
-  setProgress(0);
-  setCurrentConversation(0);
-  setConversations([]);
+    const conversationCount = config.conversation_count || 1;
+    const generatedConversations = [];
 
-  const conversationCount = config.conversation_count || 1;
-  const generatedConversations = [];
+    try {
+      const apiEndpoint = getApiEndpoint();
 
-  try {
-    const apiEndpoint = getApiEndpoint();
-    
-    // Determine if this is a complex job that needs async processing
-    const isComplexJob = (
-      aiSettings.model === 'o3-mini' ||
-      aiSettings.reasoning_effort === 'high' ||
-      config.conversation_structure?.turns > 6 ||
-      config.generationMode === 'dual_ai' ||
-      aiSettings.max_completion_tokens > 1500
-    );
+      for (let i = 0; i < conversationCount; i++) {
+        setCurrentConversation(i + 1);
+        setProgressMessage(`Starting conversation ${i + 1}/${conversationCount}...`);
+        console.log(`Generating conversation ${i + 1}/${conversationCount}`);
 
-    console.log(`📊 Job complexity: ${isComplexJob ? 'COMPLEX (using async)' : 'SIMPLE (using direct)'}`);
-    
-    for (let i = 0; i < conversationCount; i++) {
-      setCurrentConversation(i + 1);
-      console.log(`Generating conversation ${i + 1}/${conversationCount} using model: ${aiSettings.model}`);
+        const requestBody = {
+          ...config,
+          ai_settings: aiSettings,
+          // Ensure generationMode is set for the Lambda
+          generationMode: config.generationMode || 'single_ai'
+        };
 
-      try {
-        let conversation;
+        // 1. Start the async job
+        const startResponse = await fetch(`${apiEndpoint}?mode=async`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!startResponse.ok) {
+          const errorText = await startResponse.text();
+          throw new Error(`Failed to start job: ${startResponse.status} - ${errorText}`);
+        }
+
+        const startResult = await startResponse.json();
+        const { jobId } = startResult;
+
+        if (!jobId) {
+          throw new Error('No Job ID received from the server.');
+        }
+
+        console.log(`🚀 Job ${jobId} started. Polling for results...`);
+
+        // 2. Poll for the result
+        const conversationResult = await pollForJobCompletion(jobId, apiEndpoint);
         
-        if (isComplexJob) {
-          // Use async processing for complex jobs
-          console.log('🔄 Using async processing due to job complexity');
-          conversation = await generateAsyncConversation(config, aiSettings, apiEndpoint);
-        } else {
-          // Use direct processing for simple jobs only
-          console.log('⚡ Using direct processing for simple job');
-          conversation = await generateDirectConversation(config, aiSettings, apiEndpoint);
-        }
+        generatedConversations.push({
+          id: i + 1,
+          conversation: conversationResult.conversation,
+          metadata: {
+            ...conversationResult.enhancedMetadata,
+            generated_at: new Date().toISOString(),
+            total_turns: conversationResult.conversation.length,
+            subject: config.subject,
+            model: aiSettings.model,
+            processing_mode: 'async',
+          }
+        });
 
-        if (conversation && conversation.length > 0) {
-          generatedConversations.push({
-            id: i + 1,
-            conversation: conversation,
-            metadata: {
-              generated_at: new Date().toISOString(),
-              total_turns: conversation.length,
-              subject: config.subject,
-              generation_mode: config.generationMode || 'single_ai',
-              model: aiSettings.model,
-              processing_mode: isComplexJob ? 'async' : 'direct',
-              endpoint: apiEndpoint.split('?')[0]
-            }
-          });
-          console.log(`✅ Conversation ${i + 1} generated successfully with ${conversation.length} turns`);
-        } else {
-          throw new Error(`Conversation ${i + 1} failed: No conversation data received`);
-        }
-      } catch (conversationError) {
-        console.error(`❌ Error generating conversation ${i + 1}:`, conversationError);
-        throw new Error(`Failed at conversation ${i + 1}: ${conversationError.message}`);
+        setConversations([...generatedConversations]);
+        const progressPercent = ((i + 1) / conversationCount) * 100;
+        setProgress(progressPercent);
       }
 
-      const progressPercent = ((i + 1) / conversationCount) * 100;
-      setProgress(progressPercent);
-      setConversations([...generatedConversations]);
+      console.log(`✅ All ${conversationCount} conversations generated!`);
+      setProgress(100);
+      setProgressMessage('Completed!');
+
+    } catch (err) {
+      console.error('❌ Conversation generation failed:', err);
+      setError(err.message);
+      setProgressMessage('Error!');
+    } finally {
+      setIsGenerating(false);
     }
+  };
 
-    console.log(`✅ All ${conversationCount} conversations generated successfully!`);
-    setProgress(100);
+  // Helper function to poll the job status endpoint
+  const pollForJobCompletion = (jobId, endpoint) => {
+    return new Promise((resolve, reject) => {
+      const maxAttempts = 200; // ~10 minutes
+      let attempts = 0;
 
-  } catch (error) {
-    console.error('❌ Error generating conversations:', error);
-    setError(error.message);
-  } finally {
-    setIsGenerating(false);
-  }
-};
+      const interval = setInterval(async () => {
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          reject(new Error(`Job ${jobId} timed out after 10 minutes.`));
+          return;
+        }
+        attempts++;
+
+        try {
+          const statusResponse = await fetch(`${endpoint}?mode=status&jobId=${jobId}`);
+          
+          if (!statusResponse.ok) {
+            // Don't stop polling for server errors, just log and continue
+            console.error(`Status check for ${jobId} failed with status: ${statusResponse.status}`);
+            return;
+          }
+
+          const result = await statusResponse.json();
+          
+          setProgress(result.progress || 0);
+          setProgressMessage(result.message || result.status);
+          console.log(`Job ${jobId} status (${result.progress}%): ${result.message}`);
+
+          if (result.status === 'completed') {
+            clearInterval(interval);
+            if (result.conversation && result.conversation.length > 0) {
+              resolve(result);
+            } else {
+              reject(new Error('Job completed but returned no conversation data.'));
+            }
+          } else if (result.status === 'failed') {
+            clearInterval(interval);
+            reject(new Error(result.error || 'The generation job failed.'));
+          }
+          // If 'queued' or 'processing', the loop will continue naturally
+
+        } catch (error) {
+          console.error(`Error while polling job ${jobId}:`, error);
+          // Don't reject on a single failed poll, to be resilient to network issues
+        }
+      }, 3000); // Poll every 3 seconds
+    });
+  };
+
 
   // Direct conversation generation (for simple jobs under 25 seconds)
   const generateDirectConversation = async (config, aiSettings, endpoint) => {
