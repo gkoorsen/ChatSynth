@@ -819,6 +819,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
     setPurposeMode('auto');
     setSelectedTutorPurposes([]);
     setSelectedStudentPurposes([]);
+    setSelectedTemplate(null); // Add this line
   };
 
   const handleConfigChange = (path, value) => {
