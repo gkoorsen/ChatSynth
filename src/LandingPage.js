@@ -11,7 +11,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
   const [customPurposes, setCustomPurposes] = useState({ tutor: [], student: [] });
   const [showCustomPurposeDialog, setShowCustomPurposeDialog] = useState(false);
   const [newCustomPurpose, setNewCustomPurpose] = useState({ role: 'tutor', name: '', description: '' });
-
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [config, setConfig] = useState({
     generationMode: 'single_ai',
     conversation_count: 1,
