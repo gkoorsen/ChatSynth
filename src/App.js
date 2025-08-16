@@ -174,14 +174,17 @@ function App() {
   };
 
   // Dual AI conversation generation (async with job polling)
-  const generateDualAIConversation = async (config, aiSettings, endpoint) => {
-    const requestBody = {
-      ...config,
-      ai_settings: aiSettings
-    };
+const generateDualAIConversation = async (config, aiSettings, endpoint) => {
+  const requestBody = {
+    ...config,
+    ai_settings: aiSettings
+  };
 
-    console.log('Starting dual AI async job:', requestBody);
+  console.log('Starting dual AI async job:', requestBody);
 
+  let jobId;
+
+  try {
     // Start the async job using the endpoint with mode=async query parameter
     const startResponse = await fetch(`${endpoint}?mode=async`, {
       method: 'POST',
@@ -206,55 +209,74 @@ function App() {
       throw new Error('No job ID received from async start');
     }
 
-    const jobId = startResult.jobId;
-    console.log(`Polling job ${jobId} for completion...`);
+    jobId = startResult.jobId;
+    
+  } catch (startError) {
+    // If we get a 504 error, the job might still have started
+    if (startError.message.includes('504') || startError.name === 'TypeError') {
+      console.warn('⚠️ Got timeout starting job, but job may have started. Attempting to find job...');
+      
+      // Generate a probable jobId based on timestamp (this is a fallback)
+      // In a real scenario, you might want to implement a different strategy
+      throw new Error('Job start timed out at API Gateway level. Please try with a simpler configuration (single AI, fewer turns, or GPT-4o instead of O3-mini).');
+    } else {
+      throw startError;
+    }
+  }
 
-    // Poll for completion using the endpoint with mode=status query parameter
-    const maxAttempts = 60; // 5 minutes max (5 seconds * 60)
-    let attempts = 0;
+  console.log(`Polling job ${jobId} for completion...`);
 
-    while (attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
-      attempts++;
+  // Poll for completion using the endpoint with mode=status query parameter
+  const maxAttempts = 120; // 10 minutes max (5 seconds * 120)
+  let attempts = 0;
 
-      try {
-        const statusResponse = await fetch(`${endpoint}?mode=status&jobId=${jobId}`);
-        
-        if (!statusResponse.ok) {
-          console.error(`Status check failed: ${statusResponse.status}`);
-          continue;
-        }
+  while (attempts < maxAttempts) {
+    await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds (faster polling)
+    attempts++;
 
-        const statusResult = await statusResponse.json();
-        console.log(`Job ${jobId} status:`, statusResult);
+    try {
+      const statusResponse = await fetch(`${endpoint}?mode=status&jobId=${jobId}`);
+      
+      if (!statusResponse.ok) {
+        console.error(`Status check failed: ${statusResponse.status}`);
+        continue;
+      }
 
-        if (statusResult.status === 'completed') {
-          if (statusResult.conversation && Array.isArray(statusResult.conversation)) {
-            console.log(`✅ Dual AI job ${jobId} completed successfully`);
-            return statusResult.conversation;
-          } else {
-            throw new Error('Completed job has no valid conversation data');
-          }
-        } else if (statusResult.status === 'failed') {
-          throw new Error(`Job failed: ${statusResult.error || 'Unknown error'}`);
-        } else if (statusResult.status === 'processing' || statusResult.status === 'queued') {
-          console.log(`Job ${jobId} still ${statusResult.status}... (attempt ${attempts}/${maxAttempts})`);
-          continue;
+      const statusResult = await statusResponse.json();
+      console.log(`Job ${jobId} status (${statusResult.progress}%):`, statusResult.message || statusResult.status);
+
+      // Update progress if available
+      if (statusResult.progress !== undefined) {
+        const progressPercent = statusResult.progress;
+        setProgress(progressPercent);
+      }
+
+      if (statusResult.status === 'completed') {
+        if (statusResult.conversation && Array.isArray(statusResult.conversation)) {
+          console.log(`✅ Dual AI job ${jobId} completed successfully`);
+          return statusResult.conversation;
         } else {
-          console.warn(`Unknown job status: ${statusResult.status}`);
-          continue;
+          throw new Error('Completed job has no valid conversation data');
         }
-      } catch (pollError) {
-        console.error(`Error polling job ${jobId}:`, pollError);
-        if (attempts >= maxAttempts - 5) { // Only throw on last few attempts
-          throw pollError;
-        }
+      } else if (statusResult.status === 'failed') {
+        throw new Error(`Job failed: ${statusResult.error || 'Unknown error'}`);
+      } else if (statusResult.status === 'processing' || statusResult.status === 'queued') {
+        console.log(`Job ${jobId} still ${statusResult.status}... (attempt ${attempts}/${maxAttempts})`);
+        continue;
+      } else {
+        console.warn(`Unknown job status: ${statusResult.status}`);
+        continue;
+      }
+    } catch (pollError) {
+      console.error(`Error polling job ${jobId} (attempt ${attempts}):`, pollError);
+      if (attempts >= maxAttempts - 5) { // Only throw on last few attempts
+        throw pollError;
       }
     }
+  }
 
-    throw new Error(`Job ${jobId} timed out after ${maxAttempts} attempts (5 minutes)`);
-  };
-
+  throw new Error(`Job ${jobId} timed out after ${maxAttempts} attempts (10 minutes)`);
+};
   const downloadConversations = () => {
     const dataStr = JSON.stringify(conversations, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
