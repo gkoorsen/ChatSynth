@@ -906,6 +906,36 @@ const [config, setConfig] = useState({
     onGenerate(enhancedConfig, { ...aiSettings, api_key: apiKey.trim() });
   };
 
+  const validateWordCountSettings = (config) => {
+  const tutorSettings = config.word_count_controls?.tutor_utterances;
+  const studentSettings = config.word_count_controls?.student_utterances;
+  
+  const issues = [];
+  
+  if (tutorSettings) {
+    if (tutorSettings.min_words >= tutorSettings.max_words) {
+      issues.push('Tutor minimum words must be less than maximum words');
+    }
+    if (tutorSettings.target_words < tutorSettings.min_words || tutorSettings.target_words > tutorSettings.max_words) {
+      issues.push('Tutor target words must be between minimum and maximum');
+    }
+  }
+  
+  if (studentSettings) {
+    if (studentSettings.min_words >= studentSettings.max_words) {
+      issues.push('Student minimum words must be less than maximum words');
+    }
+    if (studentSettings.target_words < studentSettings.min_words || studentSettings.target_words > studentSettings.max_words) {
+      issues.push('Student target words must be between minimum and maximum');
+    }
+  }
+  
+  return {
+    isValid: issues.length === 0,
+    issues
+  };
+};
+
   // Safe function to get conversations array
   const getConversationsArray = () => {
     if (!conversations || !Array.isArray(conversations)) {
