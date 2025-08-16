@@ -1869,6 +1869,204 @@ const [config, setConfig] = useState({
                       />
                     </div>
 
+                    {/* Word Count Controls */}
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-3">Word Count Controls</h3>
+                      
+                      {/* Enable Word Count Control */}
+                      <div className="flex items-center mb-4">
+                        <input
+                          type="checkbox"
+                          id="enforce_word_limits"
+                          checked={config.word_count_controls?.enforce_limits !== false}
+                          onChange={(e) => handleConfigChange('word_count_controls.enforce_limits', e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="enforce_word_limits" className="ml-2 block text-sm text-gray-700">
+                          Control utterance length (recommended for consistent conversations)
+                        </label>
+                      </div>
+                    
+                      {config.word_count_controls?.enforce_limits !== false && (
+                        <div className="space-y-6 border border-gray-200 rounded-lg p-4">
+                          
+                          {/* Tutor Word Count Controls */}
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 className="font-medium text-blue-900 mb-3 flex items-center">
+                              <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
+                              Tutor Utterance Length
+                            </h4>
+                            
+                            <div className="grid grid-cols-3 gap-4 mb-3">
+                              <div>
+                                <label className="block text-xs font-medium text-blue-700 mb-1">Min Words</label>
+                                <input
+                                  type="number"
+                                  min="5"
+                                  max="100"
+                                  value={config.word_count_controls?.tutor_utterances?.min_words || 15}
+                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.min_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-blue-700 mb-1">Target Words</label>
+                                <input
+                                  type="number"
+                                  min="10"
+                                  max="150"
+                                  value={config.word_count_controls?.tutor_utterances?.target_words || 30}
+                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.target_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-blue-700 mb-1">Max Words</label>
+                                <input
+                                  type="number"
+                                  min="20"
+                                  max="200"
+                                  value={config.word_count_controls?.tutor_utterances?.max_words || 50}
+                                  onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.max_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium text-blue-700 mb-1">Tutor Style</label>
+                              <select
+                                value={config.word_count_controls?.tutor_utterances?.style || 'balanced'}
+                                onChange={(e) => handleConfigChange('word_count_controls.tutor_utterances.style', e.target.value)}
+                                className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                              >
+                                <option value="concise">Concise (brief, to-the-point responses)</option>
+                                <option value="balanced">Balanced (moderate detail and explanation)</option>
+                                <option value="detailed">Detailed (thorough explanations and examples)</option>
+                              </select>
+                            </div>
+                            
+                            <div className="mt-2 text-xs text-blue-600">
+                              Current range: {config.word_count_controls?.tutor_utterances?.min_words || 15}-{config.word_count_controls?.tutor_utterances?.max_words || 50} words per response
+                            </div>
+                          </div>
+                    
+                          {/* Student Word Count Controls */}
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 className="font-medium text-green-900 mb-3 flex items-center">
+                              <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                              Student Utterance Length
+                            </h4>
+                            
+                            <div className="grid grid-cols-3 gap-4 mb-3">
+                              <div>
+                                <label className="block text-xs font-medium text-green-700 mb-1">Min Words</label>
+                                <input
+                                  type="number"
+                                  min="3"
+                                  max="50"
+                                  value={config.word_count_controls?.student_utterances?.min_words || 8}
+                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.min_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-green-700 mb-1">Target Words</label>
+                                <input
+                                  type="number"
+                                  min="5"
+                                  max="75"
+                                  value={config.word_count_controls?.student_utterances?.target_words || 15}
+                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.target_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-green-700 mb-1">Max Words</label>
+                                <input
+                                  type="number"
+                                  min="10"
+                                  max="100"
+                                  value={config.word_count_controls?.student_utterances?.max_words || 25}
+                                  onChange={(e) => handleConfigChange('word_count_controls.student_utterances.max_words', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium text-green-700 mb-1">Student Style</label>
+                              <select
+                                value={config.word_count_controls?.student_utterances?.style || 'natural'}
+                                onChange={(e) => handleConfigChange('word_count_controls.student_utterances.style', e.target.value)}
+                                className="w-full px-2 py-1 text-sm border border-green-300 rounded focus:ring-1 focus:ring-green-500 focus:border-transparent"
+                              >
+                                <option value="brief">Brief (short, hesitant responses)</option>
+                                <option value="natural">Natural (authentic student responses)</option>
+                                <option value="elaborate">Elaborate (detailed thinking aloud)</option>
+                              </select>
+                            </div>
+                            
+                            <div className="mt-2 text-xs text-green-600">
+                              Current range: {config.word_count_controls?.student_utterances?.min_words || 8}-{config.word_count_controls?.student_utterances?.max_words || 25} words per response
+                            </div>
+                          </div>
+                    
+                          {/* Allow Natural Variation */}
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id="allow_variation"
+                              checked={config.word_count_controls?.allow_variation !== false}
+                              onChange={(e) => handleConfigChange('word_count_controls.allow_variation', e.target.checked)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="allow_variation" className="ml-2 block text-sm text-gray-700">
+                              Allow natural variation (±20% of target for more realistic conversations)
+                            </label>
+                          </div>
+                    
+                          {/* Preset Word Count Templates */}
+                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h4 className="font-medium text-gray-900 mb-3">Quick Presets</h4>
+                            <div className="grid grid-cols-3 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 10, target_words: 20, max_words: 30, style: 'concise' });
+                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 5, target_words: 10, max_words: 15, style: 'brief' });
+                                }}
+                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                              >
+                                Short & Sweet
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 15, target_words: 30, max_words: 50, style: 'balanced' });
+                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 8, target_words: 15, max_words: 25, style: 'natural' });
+                                }}
+                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                              >
+                                Balanced
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleConfigChange('word_count_controls.tutor_utterances', { min_words: 25, target_words: 50, max_words: 80, style: 'detailed' });
+                                  handleConfigChange('word_count_controls.student_utterances', { min_words: 12, target_words: 25, max_words: 40, style: 'elaborate' });
+                                }}
+                                className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                              >
+                                Detailed
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+
                     {/* Tutor Student Ratio */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Tutor-Student Ratio</label>
