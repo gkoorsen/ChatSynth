@@ -484,6 +484,7 @@ const generateDualAIConversation = async (config, aiSettings, endpoint) => {
         onGenerate={generateConversations}
         isGenerating={isGenerating}
         progress={progress}
+        progressMessage={progressMessage}
         currentConversation={currentConversation}
         conversations={conversations}
         error={error}
@@ -491,7 +492,7 @@ const generateDualAIConversation = async (config, aiSettings, endpoint) => {
         onCopy={copyToClipboard}
       />
     </div>
-  );
+  ); 
 }
 
 export default App;
