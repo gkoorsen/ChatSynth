@@ -268,22 +268,26 @@ export default ConversationGenerator;
 ### File Organization
 
 ```
-src/
-├── components/          # Reusable UI components
-│   ├── common/         # Generic components
-│   ├── forms/          # Form-specific components
-│   └── educational/    # Education-specific components
-├── hooks/              # Custom React hooks
-├── utils/              # Utility functions
-├── constants/          # Application constants
-├── types/              # TypeScript type definitions
-└── styles/             # Global styles and themes
-
-lambda/
-├── index.js            # Main Lambda handler
-├── prompt-engineering.js  # Educational prompt logic
-├── package.json        # Lambda dependencies
-└── tests/              # Lambda function tests
+chatsynth/
+├── public/             # Static assets
+│   ├── index.html     # Main HTML template
+│   └── manifest.json  # PWA manifest
+├── src/               # React application source
+│   ├── App.js         # Main application component
+│   ├── App.css        # Global styles and Tailwind imports
+│   ├── LandingPage.js # Main page component with configuration
+│   └── index.js       # React entry point
+├── lambda/            # AWS Lambda backend
+│   ├── index.js       # Main Lambda handler
+│   └── prompt-engineering.js # Educational prompt logic
+├── .env.example       # Environment variables template
+├── .gitignore        # Git ignore rules
+├── amplify.yml       # AWS Amplify build configuration
+├── package.json      # Frontend dependencies and scripts
+├── package-lock.json # Locked dependency versions (should be committed)
+├── README.md         # Project documentation
+├── CONTRIBUTE.md     # Contribution guidelines
+└── LICENCE.md        # MIT license
 ```
 
 ## Testing Guidelines
