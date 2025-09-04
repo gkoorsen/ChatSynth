@@ -340,7 +340,7 @@ Generate your next response that maintains conversation coherence and educationa
 /**
  * Main function to generate coherent dual AI conversations
  */
-async function generateCoherentDualAIConversation(config, callOpenAI) {
+async function generateCoherentDualAIConversation(config, callOpenAI = null) {
     console.log('🚀 Starting enhanced coherent dual AI conversation generation...');
     console.log('🎯 Config:', {
         subject: config.subject,
@@ -349,19 +349,15 @@ async function generateCoherentDualAIConversation(config, callOpenAI) {
         language: config.language
     });
     
-    // If callOpenAI is not provided, try to require it (fallback)
+    // Import callOpenAI if not provided (for standalone usage)
     if (!callOpenAI) {
         try {
-            // This is a workaround for the circular import issue
-            const indexModule = require('./index');
-            if (indexModule.callOpenAI) {
-                callOpenAI = indexModule.callOpenAI;
-            } else {
-                throw new Error('callOpenAI not available');
-            }
+            const { callOpenAI: importedCallOpenAI } = require('./index');
+            callOpenAI = importedCallOpenAI;
+            console.log('📥 Imported callOpenAI from index.js');
         } catch (error) {
             console.error('💥 Could not import callOpenAI:', error);
-            throw new Error('callOpenAI function not available');
+            throw new Error('callOpenAI function is required but not provided and could not be imported');
         }
     }
     

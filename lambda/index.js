@@ -990,3 +990,8 @@ function callOpenAI(messages, aiSettings) {
         req.end();
     });
 }
+
+// Export callOpenAI function for use by enhanced-dual-ai module
+module.exports = {
+    callOpenAI
+};
