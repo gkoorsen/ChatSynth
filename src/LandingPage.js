@@ -2299,6 +2299,87 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                             </div>
                           )}
                           
+                          {/* Enhanced Coherence Metrics for Dual AI */}
+                          {metadata.coherence_score && (
+                            <div className="border-t border-gray-200 pt-2 mt-2">
+                              <div className="mb-2">
+                                <strong>Conversation Quality Metrics:</strong>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 mb-2">
+                                <div className="bg-purple-50 border border-purple-200 rounded p-2">
+                                  <div className="font-medium text-purple-900 text-xs mb-1">Coherence</div>
+                                  <div className="text-lg font-bold text-purple-600">
+                                    {metadata.coherence_score}%
+                                  </div>
+                                  <div className="text-xs text-purple-600">
+                                    {metadata.coherence_score >= 80 ? '🎉 Excellent' : 
+                                     metadata.coherence_score >= 60 ? '✅ Good' : '⚠️ Needs Work'}
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-indigo-50 border border-indigo-200 rounded p-2">
+                                  <div className="font-medium text-indigo-900 text-xs mb-1">Question Response</div>
+                                  <div className="text-lg font-bold text-indigo-600">
+                                    {metadata.question_response_rate}%
+                                  </div>
+                                  <div className="text-xs text-indigo-600">
+                                    {metadata.questions_answered_count || 0}/{metadata.questions_asked || 0} answered
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Purpose Fulfillment */}
+                              {metadata.purpose_fulfillment && (
+                                <div className="grid grid-cols-1 gap-2 mb-2">
+                                  <div className="bg-amber-50 border border-amber-200 rounded p-2">
+                                    <div className="font-medium text-amber-900 text-xs mb-1">Purpose Fulfillment</div>
+                                    <div className="text-sm">
+                                      <div className="flex justify-between">
+                                        <span>Variety:</span>
+                                        <span className="font-medium">{metadata.purpose_fulfillment.variety_score}%</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span>Balance:</span>
+                                        <span className="font-medium">{metadata.purpose_fulfillment.balance_score}%</span>
+                                      </div>
+                                      <div className="flex justify-between border-t border-amber-200 pt-1 mt-1">
+                                        <span className="font-medium">Overall:</span>
+                                        <span className="font-bold text-amber-600">{metadata.purpose_fulfillment.overall_score}%</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Topic Progression */}
+                              {metadata.topic_progression && metadata.topic_progression.length > 0 && (
+                                <div className="bg-gray-50 border border-gray-200 rounded p-2">
+                                  <div className="font-medium text-gray-900 text-xs mb-2">Topic Flow</div>
+                                  <div className="text-xs text-gray-600">
+                                    {metadata.topic_progression.map((transition, idx) => (
+                                      <span key={idx}>
+                                        {transition.topic}
+                                        {idx < metadata.topic_progression.length - 1 && ' → '}
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {metadata.topic_progression.length} topic transition{metadata.topic_progression.length !== 1 ? 's' : ''}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Generation Mode Badge */}
+                              {metadata.generation_mode === 'coherent_dual_ai' && (
+                                <div className="mt-2 pt-2 border-t border-gray-200">
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    ✨ Enhanced Coherent AI
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
                           {/* Existing metadata */}
                           {metadata.techniques_used && (
                             <div className="border-t border-gray-200 pt-2 mt-2">

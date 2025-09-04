@@ -1054,6 +1054,26 @@ function buildDualAIPrompts(config, aiSettings) {
 }
 
 /**
+ * Helper function for enhanced dual AI to build contextual prompts
+ * This is used by the new context-aware agents
+ */
+function buildCoherentDualAIPrompts(config, conversationHistory = []) {
+    console.log('🎯 Building coherent contextual dual AI prompts...');
+    
+    const purposeConfig = getPurposeConfiguration(config);
+    
+    return {
+        purposeConfig,
+        wordCountInstructions: buildWordCountInstructions(config),
+        supportingData: {
+            techniques: getRecommendedTechniques(config),
+            subjectGuidance: getSubjectSpecificGuidance(config.subject),
+            languageName: getLanguageName(config.language || 'english')
+        }
+    };
+}
+
+/**
  * Builds tutor persona for dual AI WITH PURPOSE AND WORD COUNT CONTROL
  */
 function buildTutorPersonaPromptWithPurposes(config, purposeConfig) {
@@ -1286,6 +1306,7 @@ module.exports = {
     // Existing functions (maintained for compatibility)
     getRecommendedTechniques,
     buildDualAIPrompts,
+    buildCoherentDualAIPrompts, // NEW: For enhanced dual AI system
     buildTechniqueInstructions,
     getSubjectSpecificGuidance,
     buildDetailedUserPrompt,

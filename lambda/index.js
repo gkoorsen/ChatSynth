@@ -256,12 +256,54 @@ async function generateConversation(config) {
     }
 }
 
-// Enhanced dual AI conversation generation with word count controls
+// Enhanced dual AI conversation generation with coherence and word count controls
 async function generateDualAIConversation(config) {
-    console.log('🤝 Starting PURPOSE AND WORD COUNT CONTROLLED dual AI conversation generation...');
+    console.log('🤝 Starting enhanced coherent dual AI conversation generation...');
     console.log('🎯 Purpose control config for dual AI:', config.purpose_control);
     console.log('📏 Word count control config for dual AI:', config.word_count_controls);
     
+    const USE_ENHANCED_DUAL_AI = process.env.USE_ENHANCED_DUAL_AI !== 'false'; // Default to true
+    
+    if (USE_ENHANCED_DUAL_AI) {
+        console.log('🚀 Using enhanced coherent dual AI system...');
+        try {
+            const { generateCoherentDualAIConversation } = require('./enhanced-dual-ai');
+            const result = await generateCoherentDualAIConversation(config, callOpenAI);
+            
+            // Validate and enhance the conversation
+            const qualityCheck = validateEducationalQualityWithPurposes(result.conversation, config);
+            
+            return {
+                conversation: result.conversation,
+                enhancedMetadata: {
+                    generation_mode: 'coherent_dual_ai',
+                    coherence_score: result.metadata.coherence_score,
+                    question_response_rate: result.metadata.questions_answered,
+                    topic_progression: result.metadata.topic_progression,
+                    purpose_fulfillment: result.metadata.purpose_fulfillment,
+                    purpose_control_mode: config.purpose_control?.mode || 'auto',
+                    purpose_distribution: qualityCheck.purposeDistribution,
+                    purpose_compliance: qualityCheck.passed,
+                    word_count_enabled: config.word_count_controls?.enforce_limits || false,
+                    word_count_statistics: qualityCheck.wordCountStats,
+                    word_count_compliance: qualityCheck.wordCountStats ? 
+                        (qualityCheck.wordCountStats.tutor.violations === 0 && 
+                         qualityCheck.wordCountStats.student.violations === 0) : null,
+                    prompt_version: '3.0_coherent_dual_ai',
+                    total_turns: result.conversation.length,
+                    questions_asked: result.metadata.total_questions_asked,
+                    questions_answered_count: result.metadata.total_questions_answered
+                }
+            };
+            
+        } catch (error) {
+            console.error('💥 Enhanced coherent dual AI failed, falling back to legacy system:', error);
+            // Fall through to legacy system
+        }
+    }
+    
+    // Legacy dual AI system (fallback)
+    console.log('🔄 Using legacy dual AI system...');
     const aiSettings = config.ai_settings;
     
     // Build separate prompts for tutor and student AI with PURPOSE AND WORD COUNT CONTROL
@@ -293,14 +335,14 @@ async function generateDualAIConversation(config) {
         // Validate purpose compliance and word count for the woven conversation
         const qualityCheck = validateEducationalQualityWithPurposes(weavedConversation, config);
         
-        console.log(`✅ Enhanced dual AI conversation generated with ${weavedConversation.length} turns`);
+        console.log(`✅ Legacy dual AI conversation generated with ${weavedConversation.length} turns`);
         console.log('📊 Purpose distribution in dual AI:', qualityCheck.purposeDistribution);
         console.log('📏 Word count statistics in dual AI:', qualityCheck.wordCountStats);
         
         return {
             conversation: weavedConversation,
             enhancedMetadata: {
-                generation_mode: 'dual_ai_purpose_and_word_controlled',
+                generation_mode: 'legacy_dual_ai_purpose_and_word_controlled',
                 purpose_control_mode: config.purpose_control?.mode || 'auto',
                 purpose_distribution: qualityCheck.purposeDistribution,
                 purpose_compliance: qualityCheck.passed,
