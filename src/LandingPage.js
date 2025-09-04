@@ -12,6 +12,7 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
   const [showCustomPurposeDialog, setShowCustomPurposeDialog] = useState(false);
   const [newCustomPurpose, setNewCustomPurpose] = useState({ role: 'tutor', name: '', description: '' });
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [customTopic, setCustomTopic] = useState('');
   const [config, setConfig] = useState({
     generationMode: 'single_ai',
     conversation_count: 1,
@@ -897,9 +898,18 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
       return;
     }
     
-    // Build enhanced config with purpose control
+    // Validate custom topic if selected
+    if (config.subject === 'custom' && !customTopic.trim()) {
+      alert('Please enter a custom topic for your conversation.');
+      return;
+    }
+    
+    // Build enhanced config with purpose control and custom topic handling
     const enhancedConfig = {
       ...config,
+      // Use custom topic if selected, otherwise use the selected subject
+      subject: config.subject === 'custom' ? customTopic.trim() : config.subject,
+      custom_topic: config.subject === 'custom' ? customTopic.trim() : null,
       purpose_control: {
         mode: purposeMode,
         selected_tutor_purposes: purposeMode === 'auto' ? getAutoSuggestedPurposes().tutor : selectedTutorPurposes,
@@ -1456,8 +1466,30 @@ const LandingPage = ({ onGenerate, isGenerating, progress, currentConversation, 
                       <option value="history">History</option>
                       <option value="philosophy">Philosophy</option>
                       <option value="general">General</option>
+                      <option value="custom">Custom Topic</option>
                     </select>
                   </div>
+
+                  {/* Custom Topic Input */}
+                  {config.subject === 'custom' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Custom Topic
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Quantum Physics, Medieval Literature, Data Structures..."
+                        value={customTopic}
+                        onChange={(e) => setCustomTopic(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Enter the specific topic or subject area for your conversation
+                      </p>
+                    </div>
+                  )}
 
                   {/* Conversation Turns */}
                   <div>

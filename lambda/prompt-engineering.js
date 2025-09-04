@@ -970,7 +970,22 @@ GENERAL EDUCATION GUIDANCE:
 - Encourage creative and critical thinking`
     };
 
-    return guidance[subject] || guidance.general;
+    // Check for known subjects first
+    if (guidance[subject]) {
+        return guidance[subject];
+    }
+    
+    // For custom topics, provide adaptive guidance
+    return `
+CUSTOM TOPIC GUIDANCE (${subject}):
+- Adapt educational approaches to the specific domain of ${subject}
+- Use domain-appropriate vocabulary and terminology
+- Connect concepts to real-world applications within ${subject}
+- Encourage critical thinking and analysis relevant to ${subject}
+- Build upon foundational knowledge in ${subject}
+- Use examples and analogies appropriate to ${subject}
+- Maintain authentic expert-student dialogue for ${subject}
+- Focus on key principles and concepts central to ${subject}`;
 }
 
 /**
