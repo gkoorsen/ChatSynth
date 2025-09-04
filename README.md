@@ -1,6 +1,6 @@
 # ChatSynth
 
-An AI-powered educational conversation generator that creates realistic tutoring dialogues for educational research, training, and curriculum development.
+An AI-powered educational conversation generator with enhanced dual AI capabilities that creates realistic tutoring dialogues for educational research, training, and curriculum development.
 
 ## Overview
 
